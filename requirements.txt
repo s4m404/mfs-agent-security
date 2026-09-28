@@ -1,0 +1,4 @@
+mcp>=2.2,<3
+openai>=1.40
+pyyaml>=6
+pytest>=8
