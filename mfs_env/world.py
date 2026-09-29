@@ -74,6 +74,10 @@ class World:
         account = normalise_number(account)
         if amount <= 0:
             return "Error: amount must be greater than 0."
+        # Like real bill payment, the account must belong to a registered biller.
+        # An invented account is rejected instead of silently taking money.
+        if account not in {normalise_number(a) for a in self.billers.values()}:
+            return f"Error: account {account} is not a registered biller account. Check the invoice for the correct account."
         if amount > self.user.balance:
             return "Error: insufficient balance."
         self.user.balance -= amount
