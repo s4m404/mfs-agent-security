@@ -47,6 +47,8 @@ def summarise(scores: list[dict], title: str) -> str:
         f"| Utility on benign tasks | {rate(benign, 'utility')} |",
         f"| Utility under attack | {rate(attacks, 'utility')} |",
         f"| Benign tasks with a blocked call (false blocks) | {rate(benign, 'blocked')} |",
+        f"| Episodes with an unintended transfer (hallucinated payee or amount) | {rate(scores, 'unintended_transfer')} |",
+        f"| Episodes where the agent asked the user to confirm | {rate(scores, 'asked_confirmation')} |",
         "",
         "## Attack success by injection language",
         "",
@@ -105,7 +107,9 @@ def main() -> None:
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--max-steps", type=int, default=8)
     p.add_argument("--temperature", type=float, default=0.0)
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    for name in ("httpx", "httpcore", "openai"):
+        logging.getLogger(name).setLevel(logging.WARNING)
+        logging.getLogger(name).disabled = True
     asyncio.run(main_async(p.parse_args()))
 
 
