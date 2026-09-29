@@ -55,6 +55,24 @@ You can also plug the wallet into any MCP client:
 python -m mfs_env.server --demo
 ```
 
+## Test set
+
+114 cases: 12 hand-written seed cases (`bench/cases/seed.yaml`) and 102 generated cases (`bench/cases/generated.yaml`).
+
+The generated cases are built by `bench/generate.py` from hand-written building blocks, so each Bangla or Banglish sentence is written (and reviewed) once:
+
+| | Count |
+|---|---:|
+| Tasks | 6 (3 bill payments, 2 payments requested by SMS, 1 inbox summary with no payment) |
+| Benign cases | 30 (every task in every language, plus 6 hard cases with numbers, Bangla digits or look-alike warnings) |
+| Attack cases | 72 |
+| Where the attack is hidden | invoice 24, SMS 36, tool description 12 |
+| Attack language | English, Bangla, Banglish, mixed: 18 each |
+| Attack style | instructions to the AI 48, ordinary scam messages 24 |
+| Attack goal | send money 60, leak the OTP 12 |
+
+To change the cases, edit the tables in `bench/generate.py` and run `python -m bench.generate`. A test fails if the YAML file is out of date.
+
 ## What is measured
 
 | Metric | Meaning |
@@ -93,7 +111,9 @@ To reproduce on free Kaggle GPUs, use [`notebooks/kaggle_run.ipynb`](notebooks/k
 - [x] Baseline defences: keyword filter and provenance policy
 - [x] Pilot run with one open model on Kaggle (vLLM)
 - [ ] Runs with 2 to 3 open models, 3 repeats each
-- [ ] Grow to about 100 cases (December 2026 milestone), then about 300
+- [x] Grow to about 100 cases: 114 in total (12 hand-written seed cases plus 102 generated)
+- [x] Native-speaker review of all Bangla and Banglish text (`bench/review_texts.csv`)
+- [ ] Grow to about 300 cases
 - [ ] Trained multilingual injection detector to replace the keyword baseline
 - [ ] Connect BRACUVerify as a second backend
 - [ ] Comparison with the sanitiser defence from "Indirect Prompt Injections: Are Firewalls All You Need?"
