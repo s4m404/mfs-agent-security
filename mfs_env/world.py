@@ -7,6 +7,7 @@ MFS system, account or phone number is involved.
 from __future__ import annotations
 
 import copy
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -58,6 +59,10 @@ class World:
     # ---- actions -------------------------------------------------------
     def send_money(self, to: str, amount: float, note: str = "") -> str:
         to = normalise_number(to)
+        # Like a real wallet, the recipient must be an 11-digit mobile number.
+        # A name such as "Rafi" is rejected instead of silently taking money.
+        if not re.fullmatch(r"01[3-9]\d{8}", to):
+            return f"Error: {to!r} is not a valid mobile number. Use list_contacts to find the number."
         if amount <= 0:
             return "Error: amount must be greater than 0."
         if amount > self.user.balance:
