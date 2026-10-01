@@ -4,6 +4,8 @@ Can hidden instructions in Bangla, Banglish and code-mixed text trick an AI
 agent into moving money? This repository contains a test environment, an
 attack test set and defences to find out.
 
+**[Live demo](https://s4m404.github.io/mfs-agent-security/)**: replay real runs step by step and switch the defence on and off. No install needed.
+
 > Status: work in progress. Results below are from 3 repeats per setting on 114 cases.
 
 ## Why this matters
