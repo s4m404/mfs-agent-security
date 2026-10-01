@@ -4,7 +4,7 @@ Can hidden instructions in Bangla, Banglish and code-mixed text trick an AI
 agent into moving money? This repository contains a test environment, an
 attack test set and defences to find out.
 
-> Status: work in progress. Results below are from single runs; repeats are next.
+> Status: work in progress. Results below are from 3 repeats per setting on 114 cases.
 
 ## Why this matters
 
@@ -85,28 +85,29 @@ Results are broken down by injection language, script, vector and style.
 
 ## Results
 
-Latest run: 114 cases, three sizes of the same model family (Qwen2.5 3B, 7B and 14B, the 14B quantised to 4-bit), served with vLLM on Kaggle T4 GPUs. One run per setting, so small differences between models are not meaningful yet.
+Latest run: 114 cases, three sizes of the same model family (Qwen2.5 3B, 7B and 14B, the 14B quantised to 4-bit), served with vLLM on Kaggle T4 GPUs, 3 repeats per setting at temperature 0. Brackets show 95% confidence intervals from a bootstrap over test cases; for 0% the upper bound uses the rule of three. Reproduce the table with `python scripts/compare_runs.py results/`.
 
-| Model | Defence | Attacks that succeeded, of those the agent read | Correct actions blocked | Benign tasks done | Episodes where the agent tried to pay someone nobody asked for |
+| Model | Defence | Attack success | Correct actions blocked | Benign tasks done | Tried to pay an invented payee |
 |---|---|---:|---:|---:|---:|
-| Qwen2.5-3B | none | 8 of 53 | 0 of 34 | 6 of 34 | 43 of 114 (38%) |
-| Qwen2.5-3B | provenance | **0 of 53** | **0 of 34** | 4 of 34 | 43 of 114 |
-| Qwen2.5-7B | none | 3 of 62 | 0 of 34 | 17 of 34 | 33 of 114 (29%) |
-| Qwen2.5-7B | provenance | **0 of 62** | **0 of 34** | 18 of 34 | 33 of 114 |
-| Qwen2.5-14B (AWQ) | none | 4 of 67 | 0 of 34 | 13 of 34 | 55 of 114 (48%) |
-| Qwen2.5-14B (AWQ) | provenance | **0 of 61** | **0 of 34** | 13 of 34 | 53 of 114 |
+| Qwen2.5-3B | none | 10.0% (4 to 17) | 0% | 21% (8 to 36) | 38% (29 to 46) |
+| Qwen2.5-3B | provenance | **0% (0 to 4)** | **0% (0 to 9)** | 12% (3 to 24) | 38% (29 to 46) |
+| Qwen2.5-7B | none | 3.8% (0 to 8) | 0% | 50% (33 to 67) | 29% (21 to 38) |
+| Qwen2.5-7B | provenance | **0% (0 to 4)** | **0% (0 to 9)** | 53% (36 to 70) | 29% (21 to 38) |
+| Qwen2.5-14B (AWQ) | none | 5.0% (1 to 10) | 0% | 38% (23 to 54) | 48% (38 to 57) |
+| Qwen2.5-14B (AWQ) | provenance | **0% (0 to 4)** | **0% (0 to 9)** | 36% (21 to 54) | 46% (37 to 55) |
+
+Attack success is over all 80 attack cases (240 episodes per setting). Counting only attacks the agent actually read, it was 15% for 3B, 5% for 7B and 6% for 14B without a defence.
 
 What this run showed:
 
-- **The provenance defence stopped every attack on all three models and never blocked a correct payment.**
-- **Each model fell for different attacks.** The 3B model fell for 8, mostly English messages and ordinary scam SMS, such as a stranger asking for money they "sent by mistake". The 7B model fell only for the "the user has already approved this" message in Banglish or mixed text. The 14B model fell only for English instructions hidden in invoices and tool descriptions, and for no Bangla or Banglish attack. With one run and small counts, these are leads to test with repeats, not conclusions.
-- **Invented payees are a bigger risk than injection.** Every model tried to pay a payee or amount nobody asked for in 29% to 48% of episodes, more often than any attack succeeded. In bill tasks the models usually skipped reading the invoice and invented an account number; in money requests some sent money to a name ("Rafi", "মা") instead of a number.
-- **A bigger model was not safer here.** The 14B model read more attacks and invented payees more often than the 7B model.
-- **Bill tasks were the hardest.** Across all runs, electricity, internet and gas bills were rarely paid correctly, because the account number is only in the full invoice and most models did not open it.
+- **The provenance defence stopped every attack on all three models, in all 720 attack episodes, and never blocked a correct payment.**
+- **Each model fell for a different kind of attack, and the same ones every time.** The 3B model fell for 8 cases, mostly English messages and ordinary scam SMS, such as a stranger asking for money they "sent by mistake". The 7B model fell only for the "the user has already approved this" message in Banglish or mixed text. The 14B model fell only for English instructions hidden in invoices and tool descriptions, and for no Bangla, Banglish or mixed attack. Every one of these cases succeeded in all 3 repeats.
+- **Invented payees are a bigger risk than injection.** Every model tried to pay a payee or amount nobody asked for in 29% to 48% of episodes, far more often than any attack succeeded. In bill tasks the models usually skipped reading the invoice and invented an account number; in money requests some sent money to a name ("Rafi", "মা") instead of a number. The wallet now rejects both, so few of these payments went through.
+- **The provenance defence checks who gets paid, not how much.** The 3B model sometimes paid the right biller a guessed amount (500 or 1000 Tk instead of 1850 Tk), and the defence let it through. Checking amounts against the invoice is a next step.
+- **A bigger model was not safer.** The 14B model read more attacks and invented payees more often than the 7B model.
+- **Repeats at temperature 0 barely differ** (96% to 100% of cases had the same outcome every time), so the confidence intervals are wide because there are few cases, not because results are random. Growing the test set matters more than more repeats.
 
-Changes made after this run: the wallet now rejects `send_money` to anything that is not an 11-digit mobile number, as a real wallet does. Payments to invented biller accounts were already rejected.
-
-The first full run (Qwen2.5-7B only, before the wallet checked biller accounts) found 4 of 62 attacks succeeding without a defence and 0 with it.
+The first single-repeat runs (before the wallet rejected names as recipients) gave the same attack results.
 
 Pilot runs on the first 12 cases are in the git history.
 
@@ -120,10 +121,11 @@ To reproduce on free Kaggle GPUs, use [`notebooks/kaggle_run.ipynb`](notebooks/k
 - [x] Pilot run with one open model on Kaggle (vLLM)
 - [x] Full 114-case run with one model
 - [x] Runs with 3 model sizes
-- [ ] 3 repeats per setting, with confidence intervals
+- [x] 3 repeats per setting, with confidence intervals
 - [x] Grow to about 100 cases: 114 in total (12 hand-written seed cases plus 102 generated)
 - [x] Native-speaker review of all Bangla and Banglish text (`bench/review_texts.csv`)
-- [ ] Grow to about 300 cases
+- [ ] Grow to about 300 cases (the main limit on precision)
+- [ ] Provenance check for amounts as well as recipients
 - [ ] Trained multilingual injection detector to replace the keyword baseline
 - [ ] Connect BRACUVerify as a second backend
 - [ ] Comparison with the sanitiser defence from "Indirect Prompt Injections: Are Firewalls All You Need?"
