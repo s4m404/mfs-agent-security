@@ -30,7 +30,8 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   codes must not come only from untrusted text), `provenance-amount`
   (also: amount must come from the user or from the payee itself).
 - `bench/`: `cases/seed.yaml` (12 hand-written) and `cases/generated.yaml`
-  (102, built by `bench/generate.py` from tables; regenerate with
+  (290, built by `bench/generate.py` from tables; the first 102 are the
+  original set and must stay unchanged; regenerate with
   `python -m bench.generate`, which also writes `bench/review_texts.csv`
   for native-speaker review). `score.py` has all metrics.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
