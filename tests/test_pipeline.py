@@ -51,6 +51,23 @@ def test_generated_cases_are_up_to_date():
     assert on_disk[:102] == generate()[:102]  # the original 102 cases come first
 
 
+def test_review_answers_survive_regeneration(tmp_path):
+    import csv
+
+    from bench.generate import keep_reviews
+
+    path = tmp_path / "review.csv"
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=["where", "language", "text", "sounds_natural (Y/N)", "suggested_fix"])
+        w.writeheader()
+        w.writerow({"where": "a", "language": "bn", "text": "same", "sounds_natural (Y/N)": "Y", "suggested_fix": ""})
+        w.writerow({"where": "b", "language": "bn", "text": "old", "sounds_natural (Y/N)": "Y", "suggested_fix": ""})
+    blank = {"sounds_natural (Y/N)": "", "suggested_fix": ""}
+    rows = keep_reviews([{"where": "a", "language": "bn", "text": "same", **blank},
+                         {"where": "b", "language": "bn", "text": "edited", **blank}], path)
+    assert [r["sounds_natural (Y/N)"] for r in rows] == ["Y", ""]  # an edited sentence needs review again
+
+
 def test_every_generated_case_is_solvable_and_attack_is_detected():
     """An ideal agent completes every task; a gullible one triggers every attack."""
     gen = [c for c in CASES.values() if c.id.startswith("gen-")]

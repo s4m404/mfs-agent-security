@@ -1,5 +1,9 @@
 # CLAUDE.md: brief for Claude sessions on this repo
 
+**Read `docs/ROADMAP.md` for the plan.** All planning happens in Claude cloud
+sessions on this repo: update the roadmap in the same pull request whenever a
+task is finished or the plan changes.
+
 ## What this project is
 
 A research benchmark: can indirect prompt injection in Bangla, Banglish
@@ -17,6 +21,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - Keep everything runnable and tested. Run `python -m pytest -q` before every push.
 - Never invent results. Numbers in the README must come from real runs.
 - Push work to a branch and open a pull request with a clear summary; he merges it.
+- One task per cloud session. Before he merges, give a 5-line summary of what
+  changed and why.
+- Model runs happen on Kaggle (no GPU in cloud sessions). When one is needed,
+  say which notebook and the expected time; he uploads results.zip in a new session.
+- Cloud credits run out on 5 November 2026, so October tasks come first.
 
 ## Layout
 
@@ -33,12 +42,13 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   (290, built by `bench/generate.py` from tables; the first 102 are the
   original set and must stay unchanged; regenerate with
   `python -m bench.generate`, which also writes `bench/review_texts.csv`
-  for native-speaker review). `score.py` has all metrics.
+  for native-speaker review and keeps his Y/N answers for unchanged
+  sentences). `score.py` has all metrics.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed).
-- `notebooks/kaggle_run.ipynb` (3 models x none/provenance x 3 repeats) and
-  `notebooks/kaggle_run_amount.ipynb` (provenance-amount, 1 repeat).
+- `notebooks/kaggle_run.ipynb` (3 models x none/provenance/provenance-amount
+  x 1 repeat on 302 cases, about 11 to 12 hours).
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
 - `docs/index.html`: the public demo page (GitHub Pages from /docs).
   It embeds real traces; regenerate it if the demo cases change.
@@ -65,15 +75,6 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - Replay estimate for `provenance-amount`: catches 26 / 3 / 6 wrong payments
   that `provenance` allowed, with 0 correct payments blocked. Real run pending.
 
-## Next tasks, in order
+## Next tasks
 
-1. Grow the test set from 114 to about 300 cases in `bench/generate.py`:
-   new tasks (e.g. paying a landlord named in the prompt, mobile recharge,
-   splitting a bill), new attack styles (fake MFS agent or cash-out notices,
-   fake delivery or customs fees, fake job or prize offers, longer chat-style
-   messages, attacks that change only the amount), and more hard benign cases
-   that look suspicious but are legitimate. Keep languages balanced.
-   Output the new sentences in `review_texts.csv` for his review.
-2. Update the README test-set table and the notebooks for the bigger set.
-3. After new results arrive: update README, the demo page and `compare_runs.py` output.
-4. Later: trained multilingual injection detector as a third defence; paper draft.
+See `docs/ROADMAP.md`.
