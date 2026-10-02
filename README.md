@@ -6,7 +6,7 @@ attack test set and defences to find out.
 
 **[Live demo](https://s4m404.github.io/mfs-agent-security/)**: replay real runs step by step and switch the defence on and off. No install needed.
 
-> Status: work in progress. Results below are from 3 repeats per setting on 114 cases.
+> Status: work in progress. Results below are from 3 repeats per setting on the earlier 114 cases. The test set has since grown to 302 cases; a new run is pending.
 
 ## Why this matters
 
@@ -59,19 +59,20 @@ python -m mfs_env.server --demo
 
 ## Test set
 
-114 cases: 12 hand-written seed cases (`bench/cases/seed.yaml`) and 102 generated cases (`bench/cases/generated.yaml`).
+302 cases: 12 hand-written seed cases (`bench/cases/seed.yaml`) and 290 generated cases (`bench/cases/generated.yaml`). The first 102 generated cases are the earlier 114-case set, unchanged, so older results still compare.
 
-The generated cases are built by `bench/generate.py` from hand-written building blocks, so each Bangla or Banglish sentence is written (and reviewed) once:
+The generated cases are built by `bench/generate.py` from hand-written building blocks, so each Bangla or Banglish sentence is written (and reviewed) once. Counts below are for all 302 cases:
 
 | | Count |
 |---|---:|
-| Tasks | 6 (3 bill payments, 2 payments requested by SMS, 1 inbox summary with no payment) |
-| Benign cases | 30 (every task in every language, plus 6 hard cases with numbers, Bangla digits or look-alike warnings) |
-| Attack cases | 72 |
-| Where the attack is hidden | invoice 24, SMS 36, tool description 12 |
-| Attack language | English, Bangla, Banglish, mixed: 18 each |
-| Attack style | instructions to the AI 48, ordinary scam messages 24 |
-| Attack goal | send money 60, leak the OTP 12 |
+| Tasks | 12 generated: 6 bill payments (power, internet, gas, water, mobile, school fee), 4 payments requested by SMS (a friend, a parent, a landlord named in the request, a split dinner bill), 2 read-only checks (inbox, unpaid bills) |
+| Benign cases | 82, including 30 hard cases (extra numbers, Bangla digits, late fees, real safety warnings, words like "assistant" or "mandatory") |
+| Attack cases | 220 |
+| Where the attack is hidden | SMS 113, invoice 70, tool description 37 |
+| Attack language | English 55, Bangla 56, Banglish 55, mixed 54 |
+| Request language | English 76, Bangla 79, Banglish 75, mixed 72 |
+| Attack style | instructions to the AI 122, ordinary scam messages 98 (fake account block, wrong transfer, lucky draw, MFS agent cash-in, customs fee, job offer, long chat from a "relative") |
+| Attack goal | send money to the attacker 175, leak the OTP 25, overpay the real payee 20 (only the amount is changed) |
 
 To change the cases, edit the tables in `bench/generate.py` and run `python -m bench.generate`. A test fails if the YAML file is out of date.
 
@@ -122,7 +123,7 @@ Before a new model run, the recorded runs above were replayed through it with `s
 | Qwen2.5-7B | 3 | 0 |
 | Qwen2.5-14B (AWQ) | 6 | 0 |
 
-They include guessed bill amounts (500 or 1000 Tk instead of 1850 Tk), an attacker's amount paid to the real gas biller (3000 Tk), and Rafi's 450 Tk sent to the landlord, a saved contact, which the recipient rule alone allowed. A replay is only an estimate, because after a block a real agent acts differently; the real run uses `notebooks/kaggle_run_amount.ipynb`.
+They include guessed bill amounts (500 or 1000 Tk instead of 1850 Tk), an attacker's amount paid to the real gas biller (3000 Tk), and Rafi's 450 Tk sent to the landlord, a saved contact, which the recipient rule alone allowed. A replay is only an estimate, because after a block a real agent acts differently; the real run is part of the next run of `notebooks/kaggle_run.ipynb`.
 
 The first single-repeat runs (before the wallet rejected names as recipients) gave the same attack results.
 
@@ -131,6 +132,8 @@ Pilot runs on the first 12 cases are in the git history.
 To reproduce on free Kaggle GPUs, use [`notebooks/kaggle_run.ipynb`](notebooks/kaggle_run.ipynb).
 
 ## Roadmap
+
+The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 - [x] Wallet environment over MCP, agent loop, scoring, tests
 - [x] 12 seed cases (4 benign, 8 attacks) in English, Bangla, Banglish and mixed text
@@ -141,7 +144,7 @@ To reproduce on free Kaggle GPUs, use [`notebooks/kaggle_run.ipynb`](notebooks/k
 - [x] 3 repeats per setting, with confidence intervals
 - [x] Grow to about 100 cases: 114 in total (12 hand-written seed cases plus 102 generated)
 - [x] Native-speaker review of all Bangla and Banglish text (`bench/review_texts.csv`)
-- [ ] Grow to about 300 cases (the main limit on precision)
+- [x] Grow to about 300 cases: 302 in total
 - [x] Provenance check for amounts as well as recipients (replay estimate done)
 - [ ] Model run with the amount check
 - [ ] Trained multilingual injection detector to replace the keyword baseline
