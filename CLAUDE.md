@@ -48,7 +48,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   (table with bootstrap CIs), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed).
 - `notebooks/kaggle_run.ipynb` (3 models x none/provenance/provenance-amount
-  x 1 repeat on 302 cases, about 11 to 12 hours).
+  x 1 repeat on 302 cases, 8 cases at a time with `--workers 8`, about 3 to 4 hours).
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
 - `docs/index.html`: the public demo page (GitHub Pages from /docs).
   It embeds real traces; regenerate it if the demo cases change.
