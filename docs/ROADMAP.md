@@ -19,13 +19,16 @@ Last updated: October 2026.
   Banglish sentences are native-speaker reviewed (PR #1).
 - `notebooks/kaggle_run.ipynb` set up for 302 cases x 3 models x
   none / provenance / provenance-amount, 1 repeat (PR #1).
+- `scripts/run_bench.py --workers` runs several cases at once, so the
+  Kaggle run fits well inside the 12-hour limit (PR #2).
 
 ## October 2026
 
 - [ ] Merge PR #1.
 - [ ] One Kaggle run on 302 cases (3 models x none / provenance /
       provenance-amount, 1 repeat) with `notebooks/kaggle_run.ipynb`.
-      Expected time: about 11 to 12 hours, close to Kaggle's 12-hour limit.
+      Expected time: about 3 to 4 hours (estimate), now that cases run
+      8 at a time.
 - [ ] Update the README, demo page and results from that run.
 - [ ] Add a second model family (for example Llama 3.1 8B or Gemma 2 9B, if
       tool calling works on vLLM) so the results are not only Qwen.

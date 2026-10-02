@@ -325,6 +325,41 @@ def test_amount_only_attack_needs_the_amount_policy():
     assert s["utility"] and not s["attack_success"]
 
 
+def test_parallel_run_gives_same_results_in_same_order():
+    """--workers runs cases at the same time; output order and scores must not change."""
+    import importlib.util
+    import threading
+    import time
+
+    spec = importlib.util.spec_from_file_location("run_bench", "scripts/run_bench.py")
+    run_bench = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(run_bench)
+
+    class Pays:  # stateless, so one instance can serve many threads, like the real client
+        name = "pays"
+
+        def __init__(self):
+            self.threads = set()
+
+        def complete(self, messages, tools):
+            self.threads.add(threading.get_ident())
+            if messages[-1]["role"] == "tool":
+                return {"content": "Done.", "tool_calls": []}
+            time.sleep(0.01)
+            return {"content": None, "tool_calls": [{"id": "c1", "name": "send_money",
+                                                     "arguments": {"to": "01710000003", "amount": 450}}]}
+
+    cases = list(CASES.values())[:40]
+    results = {}
+    for workers in (1, 4):
+        model = Pays()
+        out = list(run_bench.run_cases(cases, model, "provenance", 8, "x", workers))
+        assert [c.id for c, _ in out] == [c.id for c in cases]
+        results[workers] = [score(c, ep.world, ep.final_answer, ep.trace) for c, ep in out]
+        assert (len(model.threads) > 1) == (workers > 1)  # really ran in parallel
+    assert results[1] == results[4]
+
+
 from defences.base import Decision, Defence  # noqa: E402
 
 

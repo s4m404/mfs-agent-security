@@ -7,6 +7,9 @@ Examples
     # University HPC, vLLM (see docs/HPC.md)
     python scripts/run_bench.py --model Qwen/Qwen2.5-32B-Instruct --base-url http://NODE:8000/v1 --defence provenance
 
+    # Kaggle, vLLM: 8 cases at a time (vLLM answers them in one batch, much faster)
+    python scripts/run_bench.py --model Qwen/Qwen2.5-7B-Instruct --base-url http://localhost:8000/v1 --workers 8
+
 Outputs go to results/<run name>/: traces.jsonl, scores.jsonl, summary.md
 """
 
@@ -18,6 +21,7 @@ import json
 import logging
 import sys
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -71,7 +75,25 @@ def summarise(scores: list[dict], title: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-async def main_async(args: argparse.Namespace) -> None:
+def run_cases(cases: list, model, defence: str, max_steps: int, system_prompt: str, workers: int = 1):
+    """Run every case and yield (case, episode) in the same order as `cases`.
+
+    With workers > 1, several episodes run at once, each in its own thread with
+    its own wallet and defence, so they cannot affect each other. The model
+    client is shared; the OpenAI client is safe to use from several threads.
+    """
+
+    def one(case):
+        return case, asyncio.run(run_episode(case, model, make_defence(defence), max_steps, system_prompt))
+
+    if workers <= 1:
+        yield from map(one, cases)
+        return
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        yield from pool.map(one, cases)
+
+
+def main_run(args: argparse.Namespace) -> None:
     cases = load_cases(args.cases)
     model = OpenAICompatModel(args.model, args.base_url, args.api_key_env, args.temperature)
     run_name = args.run_name or f"{args.model.replace('/', '_').replace(':', '_')}__{args.defence}__{args.prompt}"
@@ -81,8 +103,7 @@ async def main_async(args: argparse.Namespace) -> None:
     all_scores = []
     with open(out / "traces.jsonl", "w", encoding="utf-8") as ft, open(out / "scores.jsonl", "w", encoding="utf-8") as fs:
         for rep in range(args.repeats):
-            for case in cases:
-                ep = await run_episode(case, model, make_defence(args.defence), args.max_steps, PROMPTS[args.prompt])
+            for case, ep in run_cases(cases, model, args.defence, args.max_steps, PROMPTS[args.prompt], args.workers):
                 s = {**score(case, ep.world, ep.final_answer, ep.trace), "repeat": rep, "model": args.model,
                      "defence": args.defence, "prompt": args.prompt}
                 all_scores.append(s)
@@ -90,7 +111,7 @@ async def main_async(args: argparse.Namespace) -> None:
                     ft.write(json.dumps({**e, "repeat": rep}, ensure_ascii=False) + "\n")
                 fs.write(json.dumps(s, ensure_ascii=False) + "\n")
                 flag = "ATTACK SUCCEEDED" if s["attack_success"] else ("ok" if s["utility"] else "task failed")
-                print(f"[{rep}] {case.id:45s} {flag}")
+                print(f"[{rep}] {case.id:45s} {flag}", flush=True)
 
     summary = summarise(all_scores, f"{args.model} | defence={args.defence} | prompt={args.prompt}")
     (out / "summary.md").write_text(summary, encoding="utf-8")
@@ -111,10 +132,11 @@ def main() -> None:
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--max-steps", type=int, default=8)
     p.add_argument("--temperature", type=float, default=0.0)
+    p.add_argument("--workers", type=int, default=1, help="cases to run at the same time (8 suits vLLM on Kaggle)")
     for name in ("httpx", "httpcore", "openai"):
         logging.getLogger(name).setLevel(logging.WARNING)
         logging.getLogger(name).disabled = True
-    asyncio.run(main_async(p.parse_args()))
+    main_run(p.parse_args())
 
 
 if __name__ == "__main__":
