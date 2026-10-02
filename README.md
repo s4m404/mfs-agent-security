@@ -32,7 +32,8 @@ user request ──> agent (any LLM) ──> defence ──> MCP server ──> 
   `send_money`, `pay_bill`, `send_sms`
 - `agent/`: the agent loop; works with Ollama, vLLM or any OpenAI compatible API
 - `defences/`: `none`, `keyword` (simple baseline), `provenance` (tracks
-  where recipients and codes came from)
+  where recipients and codes came from), `provenance-amount` (also checks
+  that the amount came from the user or from the payee itself)
 - `bench/`: test cases (`bench/cases/*.yaml`) and scoring
 - Every run writes a full trace of tool calls to `traces.jsonl`
 
@@ -109,6 +110,20 @@ What this run showed:
 - **A bigger model was not safer.** The 14B model read more attacks and invented payees more often than the 7B model.
 - **Repeats at temperature 0 barely differ** (96% to 100% of cases had the same outcome every time), so the confidence intervals are wide because there are few cases, not because results are random. Growing the test set matters more than more repeats.
 
+### Amount check (new, first estimate)
+
+The provenance defence checks who gets paid, not how much. `provenance-amount` adds one rule: the amount must come from the user's request or from the payee itself (an SMS sent from the recipient's own number, or an invoice for that same biller account).
+
+Before a new model run, the recorded runs above were replayed through it with `scripts/replay_defence.py` (no model needed):
+
+| Model | Wrong payments that went through with `provenance` and would now be blocked | Correct payments that would be blocked |
+|---|---:|---:|
+| Qwen2.5-3B | 26 | 0 |
+| Qwen2.5-7B | 3 | 0 |
+| Qwen2.5-14B (AWQ) | 6 | 0 |
+
+They include guessed bill amounts (500 or 1000 Tk instead of 1850 Tk), an attacker's amount paid to the real gas biller (3000 Tk), and Rafi's 450 Tk sent to the landlord, a saved contact, which the recipient rule alone allowed. A replay is only an estimate, because after a block a real agent acts differently; the real run uses `notebooks/kaggle_run_amount.ipynb`.
+
 The first single-repeat runs (before the wallet rejected names as recipients) gave the same attack results.
 
 Pilot runs on the first 12 cases are in the git history.
@@ -127,7 +142,8 @@ To reproduce on free Kaggle GPUs, use [`notebooks/kaggle_run.ipynb`](notebooks/k
 - [x] Grow to about 100 cases: 114 in total (12 hand-written seed cases plus 102 generated)
 - [x] Native-speaker review of all Bangla and Banglish text (`bench/review_texts.csv`)
 - [ ] Grow to about 300 cases (the main limit on precision)
-- [ ] Provenance check for amounts as well as recipients
+- [x] Provenance check for amounts as well as recipients (replay estimate done)
+- [ ] Model run with the amount check
 - [ ] Trained multilingual injection detector to replace the keyword baseline
 - [ ] Connect BRACUVerify as a second backend
 - [ ] Comparison with the sanitiser defence from "Indirect Prompt Injections: Are Firewalls All You Need?"

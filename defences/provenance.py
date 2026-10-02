@@ -15,6 +15,7 @@ belongs in the results table.
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -57,3 +58,74 @@ class ProvenancePolicy(Defence):
             if codes & self.untrusted_codes:
                 return Decision(False, "SMS text contains a code read from untrusted content")
         return Decision(True)
+
+
+_AMOUNT_RE = re.compile(r"\d[\d,]*(?:\.\d+)?")
+
+
+def _amounts(text: str) -> set[float]:
+    out = set()
+    for m in _AMOUNT_RE.findall(normalise_text(text)):
+        try:
+            out.add(round(float(m.replace(",", "")), 2))
+        except ValueError:
+            pass
+    return out
+
+
+class ProvenanceAmountPolicy(ProvenancePolicy):
+    """Provenance for amounts as well as recipients (version 1).
+
+    Extra rule on top of version 0: a payment amount must come from the user
+    or from the payee itself.
+      - send_money: the amount is in the user's request, or in an SMS sent
+        from the recipient's own number ("Rafi asked for 450").
+      - pay_bill: the amount is in the user's request, or on an invoice for
+        that same registered biller account.
+    This catches guessed amounts (paying the right biller 500 instead of 1850)
+    and attacks that change only the amount.
+    """
+
+    name = "provenance-amount"
+
+    def reset(self, user_prompt: str, world: World) -> None:
+        super().reset(user_prompt, world)
+        self.user_amounts = _amounts(user_prompt)
+        self.biller_by_name = {normalise_text(n): normalise_number(a) for n, a in world.billers.items()}
+        self.amounts_from: dict[str, set[float]] = {}
+
+    def _add(self, key: str, value: Any) -> None:
+        if key:
+            self.amounts_from.setdefault(key, set()).update(_amounts(str(value)))
+
+    def filter_tool_result(self, tool: str, args: dict[str, Any], result: str) -> str:
+        result = super().filter_tool_result(tool, args, result)
+        try:
+            data = json.loads(result)
+        except (TypeError, ValueError):
+            return result
+        items = data if isinstance(data, list) else [data]
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            if tool == "read_sms":
+                self._add(normalise_number(str(item.get("from", ""))), item.get("text", ""))
+            elif tool in ("list_invoices", "read_invoice"):
+                account = normalise_number(str(item.get("account", ""))) or self.biller_by_name.get(
+                    normalise_text(str(item.get("biller", ""))), ""
+                )
+                self._add(account, item.get("amount", ""))
+        return result
+
+    def check_tool_call(self, tool: str, args: dict[str, Any]) -> Decision:
+        decision = super().check_tool_call(tool, args)
+        if not decision.allow or tool not in ("send_money", "pay_bill"):
+            return decision
+        payee = normalise_number(str(args.get("to") if tool == "send_money" else args.get("account", "")))
+        try:
+            amount = round(float(args.get("amount", 0)), 2)
+        except (TypeError, ValueError):
+            return Decision(False, "amount is not a number")
+        if amount in self.user_amounts or amount in self.amounts_from.get(payee, set()):
+            return Decision(True)
+        return Decision(False, f"amount {amount:g} Tk was not given by the user or by the payee {payee}")
