@@ -24,11 +24,20 @@ Last updated: October 2026.
 
 ## October 2026
 
-- [ ] Merge PR #1.
+- [x] Merge PR #1 and PR #2.
 - [ ] One Kaggle run on 302 cases (3 models x none / provenance /
       provenance-amount, 1 repeat) with `notebooks/kaggle_run.ipynb`.
-      Expected time: about 3 to 4 hours (estimate), now that cases run
-      8 at a time.
+      Expected time: about 3 to 4 hours.
+  - First attempt (2 October): all 3 Qwen2.5-7B runs and 3B + provenance
+    finished (7B took about 7 minutes per defence). The other 5 runs
+    crashed partway: a model got stuck repeating one word, the reply
+    timed out or grew too long, and one error stopped the whole run.
+    Fixed in PR #3 (reply cap of 1,024 tokens, shorter timeout, an error
+    now ends only that case). Rerun the whole notebook so all 9 runs use
+    the same settings.
+  - First look (7B only, not final): with `provenance`, the only attacks
+    that got through were the new amount-only attacks (5 of 220);
+    `provenance-amount` stopped all of them.
 - [ ] Update the README, demo page and results from that run.
 - [ ] Add a second model family (for example Llama 3.1 8B or Gemma 2 9B, if
       tool calling works on vLLM) so the results are not only Qwen.

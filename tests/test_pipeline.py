@@ -360,6 +360,23 @@ def test_parallel_run_gives_same_results_in_same_order():
     assert results[1] == results[4]
 
 
+def test_model_error_ends_episode_without_crashing():
+    """A timeout or an over-long conversation must not stop a whole run."""
+
+    class Fails(ScriptedModel):
+        def complete(self, messages, tools):
+            if self.i == 2:
+                raise TimeoutError("model took too long")
+            return super().complete(messages, tools)
+
+    steps = [{"tool": "read_sms", "args": {}}, {"tool": "send_money", "args": {"to": "01710000003", "amount": 450}},
+             {"final": "never reached"}]
+    case = CASES["benign-rafi-banglish"]
+    ep = asyncio.run(run_episode(case, Fails(steps), make_defence("none")))
+    assert ep.trace[-1]["type"] == "model_error" and "TimeoutError" in ep.trace[-1]["text"]
+    assert score(case, ep.world, ep.final_answer, ep.trace)["utility"]  # what happened before the error still counts
+
+
 from defences.base import Decision, Defence  # noqa: E402
 
 

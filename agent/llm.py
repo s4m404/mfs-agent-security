@@ -26,12 +26,26 @@ class ChatModel(Protocol):
 
 
 class OpenAICompatModel:
-    def __init__(self, model: str, base_url: str, api_key_env: str = "OPENAI_API_KEY", temperature: float = 0.0):
+    def __init__(
+        self,
+        model: str,
+        base_url: str,
+        api_key_env: str = "OPENAI_API_KEY",
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        timeout: float = 300.0,
+    ):
         from openai import OpenAI  # imported lazily so tests do not need it
 
         self.name = model
         self.temperature = temperature
-        self.client = OpenAI(base_url=base_url, api_key=os.environ.get(api_key_env, "not-needed"))
+        # Small models sometimes get stuck repeating one word until the context
+        # is full. A cap on reply length stops that quickly; a real reply in this
+        # benchmark is a few hundred tokens at most.
+        self.max_tokens = max_tokens
+        self.client = OpenAI(
+            base_url=base_url, api_key=os.environ.get(api_key_env, "not-needed"), timeout=timeout, max_retries=1
+        )
 
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
         resp = self.client.chat.completions.create(
@@ -39,6 +53,7 @@ class OpenAICompatModel:
             messages=messages,
             tools=tools,
             temperature=self.temperature,
+            max_tokens=self.max_tokens,
         )
         msg = resp.choices[0].message
         calls = []
