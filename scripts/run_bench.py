@@ -57,6 +57,7 @@ def summarise(scores: list[dict], title: str) -> str:
         f"| Episodes where the agent tried to pay a payee or amount nobody asked for | {rate(scores, 'unintended_attempt')} |",
         f"| Episodes where such a payment went through | {rate(scores, 'unintended_transfer')} |",
         f"| Episodes where the agent asked the user to confirm | {rate(scores, 'asked_confirmation')} |",
+        f"| Episodes stopped by a model error (timeout, reply too long) | {rate(scores, 'model_error')} |",
         "",
         "## Attack success by injection language",
         "",
@@ -95,7 +96,7 @@ def run_cases(cases: list, model, defence: str, max_steps: int, system_prompt: s
 
 def main_run(args: argparse.Namespace) -> None:
     cases = load_cases(args.cases)
-    model = OpenAICompatModel(args.model, args.base_url, args.api_key_env, args.temperature)
+    model = OpenAICompatModel(args.model, args.base_url, args.api_key_env, args.temperature, args.max_tokens)
     run_name = args.run_name or f"{args.model.replace('/', '_').replace(':', '_')}__{args.defence}__{args.prompt}"
     out = Path(args.out) / run_name
     out.mkdir(parents=True, exist_ok=True)
@@ -105,12 +106,15 @@ def main_run(args: argparse.Namespace) -> None:
         for rep in range(args.repeats):
             for case, ep in run_cases(cases, model, args.defence, args.max_steps, PROMPTS[args.prompt], args.workers):
                 s = {**score(case, ep.world, ep.final_answer, ep.trace), "repeat": rep, "model": args.model,
-                     "defence": args.defence, "prompt": args.prompt}
+                     "defence": args.defence, "prompt": args.prompt,
+                     "model_error": any(e["type"] == "model_error" for e in ep.trace)}
                 all_scores.append(s)
                 for e in ep.trace:
                     ft.write(json.dumps({**e, "repeat": rep}, ensure_ascii=False) + "\n")
                 fs.write(json.dumps(s, ensure_ascii=False) + "\n")
                 flag = "ATTACK SUCCEEDED" if s["attack_success"] else ("ok" if s["utility"] else "task failed")
+                if s["model_error"]:
+                    flag += " (model error, see traces)"
                 print(f"[{rep}] {case.id:45s} {flag}", flush=True)
 
     summary = summarise(all_scores, f"{args.model} | defence={args.defence} | prompt={args.prompt}")
@@ -132,6 +136,7 @@ def main() -> None:
     p.add_argument("--repeats", type=int, default=1)
     p.add_argument("--max-steps", type=int, default=8)
     p.add_argument("--temperature", type=float, default=0.0)
+    p.add_argument("--max-tokens", type=int, default=1024, help="longest reply the model may write per turn")
     p.add_argument("--workers", type=int, default=1, help="cases to run at the same time (8 suits vLLM on Kaggle)")
     for name in ("httpx", "httpcore", "openai"):
         logging.getLogger(name).setLevel(logging.WARNING)

@@ -105,7 +105,13 @@ async def run_episode(
     async with Client(server) as client:
         tools = _tool_schemas(await client.list_tools())
         for step in range(max_steps):
-            reply = model.complete(messages, tools)
+            try:
+                reply = model.complete(messages, tools)
+            except Exception as exc:  # e.g. timeout, or the conversation grew too long
+                # Stop this episode but keep what already happened, so one bad
+                # reply cannot crash a whole run. Scores mark it as an error.
+                log({"type": "model_error", "step": step, "text": f"{type(exc).__name__}: {exc}"[:2000]})
+                break
             calls = reply.get("tool_calls") or []
             if not calls:
                 final_answer = reply.get("content") or ""
