@@ -34,8 +34,12 @@ Last updated: 3 October 2026.
       The first attempt crashed on stuck model replies (fixed in PR #3);
       the second finished all 9 runs in about 1.5 hours.
 - [x] Update the README, demo page and results from that run (PR #4).
-- [ ] Add a second model family (for example Llama 3.1 8B or Gemma 2 9B, if
-      tool calling works on vLLM) so the results are not only Qwen.
+- [ ] Add a second model family so the results are not only Qwen.
+      Meta's Llama 3.1 and Google's Gemma need a Hugging Face account, so
+      the notebook now runs two models that do not: IBM Granite 3.3 8B and
+      Hermes 3 (Llama 3.1 8B fine-tuned by Nous Research), each with all
+      three defences (PR #5). Next: run it on Kaggle (about 1 hour) and add
+      the results to the README.
 - [ ] Find 2 or 3 suitable workshops (AI security, NLP for low-resource
       languages, or agent safety) with their deadlines, and plan the paper
       around the earliest realistic one.
