@@ -67,15 +67,17 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - A test checks that an ideal agent solves every case and a gullible agent
   triggers every attack. Keep it passing.
 
-## Results so far (Qwen2.5 3B, 7B, 14B-AWQ; 114 cases; 3 repeats; temperature 0)
+## Results so far (Qwen2.5 3B, 7B, 14B-AWQ; 302 cases; 1 repeat; temperature 0)
 
-- Attack success without defence: 10.0%, 3.8%, 5.0% of 240 attack episodes.
-  With `provenance`: 0 of 720. Correct payments blocked: 0.
-- Agents tried to pay invented payees in 29% to 48% of episodes.
-- Repeats are nearly identical (96% to 100% agreement), so more cases matter
-  more than more repeats.
-- Replay estimate for `provenance-amount`: catches 26 / 3 / 6 wrong payments
-  that `provenance` allowed, with 0 correct payments blocked. Real run pending.
+- Attack success without defence: 7.3%, 5.9%, 7.7% of 220 attack cases.
+  With `provenance`: 1, 5, 5 (all amount-only attacks). With
+  `provenance-amount`: 0 of 660. Correct payments blocked: 0.
+- Wrong payments that went through: 30 / 6 / 27 with `provenance`, 0 with
+  `provenance-amount`.
+- Agents tried to pay invented payees in 29% to 52% of episodes.
+- The original 114 cases reproduce the earlier 3-repeat run
+  (10.0% / 3.8% / 6.2% vs 10.0% / 3.8% / 5.0%).
+- Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks
 
