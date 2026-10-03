@@ -38,8 +38,12 @@ Last updated: 3 October 2026.
       Meta's Llama 3.1 and Google's Gemma need a Hugging Face account, so
       the notebook now runs two models that do not: IBM Granite 3.3 8B and
       Hermes 3 (Llama 3.1 8B fine-tuned by Nous Research), each with all
-      three defences (PR #5). Next: run it on Kaggle (about 1 hour) and add
-      the results to the README.
+      three defences (PR #5). First attempt (3 October): vLLM crashed
+      at startup because Kaggle's pre-installed torchaudio did not match
+      vLLM's PyTorch (CUDA 12.8 vs 13.0); no model ran. Fixed in PR #6
+      (remove torchaudio, check vLLM loads, keep server logs in
+      results.zip). Next: import the updated notebook on Kaggle, run it
+      (about 1 hour) and add the results to the README.
 - [ ] Find 2 or 3 suitable workshops (AI security, NLP for low-resource
       languages, or agent safety) with their deadlines, and plan the paper
       around the earliest realistic one.
