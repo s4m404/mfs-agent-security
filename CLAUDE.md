@@ -47,8 +47,12 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed).
-- `notebooks/kaggle_run.ipynb` (3 models x none/provenance/provenance-amount
-  x 1 repeat on 302 cases, 8 cases at a time with `--workers 8`, about 3 to 4 hours).
+- `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
+  parser. Currently Granite 3.3 8B (`granite`) and Hermes-3-Llama-3.1-8B
+  (`hermes`); the three Qwen2.5 models of the main run are commented out.
+  Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
+  8 cases at a time (`--workers 8`). No Hugging Face account is available,
+  so use only models that download without one.
   Model replies are capped at 1,024 tokens; a model error ends only that case
   and is counted as `model_error` in scores.jsonl and summary.md.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
