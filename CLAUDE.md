@@ -48,8 +48,10 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   (table with bootstrap CIs), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
-  parser. Currently Granite 3.3 8B (`granite`) and Hermes-3-Llama-3.1-8B
-  (`hermes`); the three Qwen2.5 models of the main run are commented out.
+  parser. Done so far: three Qwen2.5 models and Hermes-3-Llama-3.1-8B
+  (`hermes`). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  is left out of the results. Kaggle keeps its own copy of the notebook:
+  after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
   8 cases at a time (`--workers 8`). No Hugging Face account is available,
   so use only models that download without one.
@@ -81,6 +83,8 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - Agents tried to pay invented payees in 29% to 52% of episodes.
 - The original 114 cases reproduce the earlier 3-repeat run
   (10.0% / 3.8% / 6.2% vs 10.0% / 3.8% / 5.0%).
+- Hermes-3-Llama-3.1-8B (second family): 2.3% without defence, 1 with
+  `provenance` (amount-only), 0 with `provenance-amount`, 0 correct payments blocked.
 - Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks

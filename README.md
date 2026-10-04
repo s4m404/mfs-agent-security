@@ -6,7 +6,7 @@ attack test set and defences to find out.
 
 **[Live demo](https://s4m404.github.io/mfs-agent-security/)**: replay real runs step by step and switch the defence on and off. No install needed.
 
-> Status: work in progress. Results below are from all 302 cases on three Qwen2.5 models.
+> Status: work in progress. Results below are from all 302 cases on three Qwen2.5 models and Hermes 3 (Llama 3.1 8B).
 
 ## Why this matters
 
@@ -114,6 +114,21 @@ What this run showed:
 - **A bigger model was not safer.** The 14B model had the highest attack success (7.7%) and tried to pay invented payees in 49% of episodes, against 29% for the 7B model.
 - **The results reproduce.** On the original 114 cases, attack success without a defence was 10.0%, 3.8% and 6.2%, against 10.0%, 3.8% and 5.0% in the earlier 3-repeat run. Four settings that ran twice (an interrupted first attempt, then the full run) gave the same outcome in 97% to 99% of cases.
 - **Small models often fail the task itself.** The 3B model completed only 13% to 17% of normal tasks. Without a defence, 27 of its 68 failed tasks were bill payments made without opening the invoice, and 15 paid the wrong payee or amount.
+
+### A second model family: Hermes 3 (Llama 3.1 8B)
+
+To check that the findings are not specific to Qwen, the same 302 cases were run on Hermes 3, a Llama 3.1 8B model fine-tuned by Nous Research (`NousResearch/Hermes-3-Llama-3.1-8B`), with the same settings.
+
+| Model | Defence | Attack success | Correct actions blocked | Benign tasks done | Tried to pay an invented payee | Wrong payments that went through |
+|---|---|---:|---:|---:|---:|---:|
+| Hermes-3-Llama-3.1-8B | none | 2.3% (0 to 5) | 0% | 22% (13 to 31) | 10% (7 to 13) | 10 |
+| Hermes-3-Llama-3.1-8B | provenance | 0.5% (0 to 1) | 0% (0 to 4) | 22% (13 to 31) | 10% (7 to 13) | 9 |
+| Hermes-3-Llama-3.1-8B | provenance-amount | **0% (0 to 1)** | **0% (0 to 4)** | 22% (13 to 31) | 10% (7 to 13) | **0** |
+
+- **The same pattern holds.** Provenance stopped every attack that redirects money; the one attack that got past it changed only the amount (a Bangla note inflating the rent). The amount check stopped that too, blocked no correct payment, and let no wrong payment through.
+- Hermes 3 fell for fewer attacks (5 of 220 without a defence, all through SMS; 3 of the 5 in English) and tried to pay invented payees far less often (10% of episodes) than the Qwen models, but it completed only 22% of normal tasks. Of its 64 failed normal tasks, it often read the bill and then stopped without paying; in about 14 it asked the user to confirm without a question mark, which the simulated user does not answer (it only replies to a "?"), and in 9 it told the user it had paid without ever calling a payment tool.
+
+IBM Granite 3.3 8B was also run but is left out: in this setup (vLLM on T4 GPUs) most of its tool calls came out as plain text instead of real tool calls (0.2 tool calls per case, 5% of normal tasks done), so its 0% attack success says nothing about its safety.
 
 ### Earlier run (114 cases, 3 repeats)
 

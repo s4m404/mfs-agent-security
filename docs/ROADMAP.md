@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 3 October 2026.
+Last updated: 4 October 2026.
 
 ## Done
 
@@ -34,16 +34,13 @@ Last updated: 3 October 2026.
       The first attempt crashed on stuck model replies (fixed in PR #3);
       the second finished all 9 runs in about 1.5 hours.
 - [x] Update the README, demo page and results from that run (PR #4).
-- [ ] Add a second model family so the results are not only Qwen.
-      Meta's Llama 3.1 and Google's Gemma need a Hugging Face account, so
-      the notebook now runs two models that do not: IBM Granite 3.3 8B and
-      Hermes 3 (Llama 3.1 8B fine-tuned by Nous Research), each with all
-      three defences (PR #5). First attempt (3 October): vLLM crashed
-      at startup because Kaggle's pre-installed torchaudio did not match
-      vLLM's PyTorch (CUDA 12.8 vs 13.0); no model ran. Fixed in PR #6
-      (remove torchaudio, check vLLM loads, keep server logs in
-      results.zip). Next: import the updated notebook on Kaggle, run it
-      (about 1 hour) and add the results to the README.
+- [x] Add a second model family so the results are not only Qwen.
+      Llama 3.1 and Gemma need a Hugging Face account, so we used models
+      that do not (PR #5, crash fix in PR #6). Hermes 3 (Llama 3.1 8B,
+      fine-tuned by Nous Research) shows the same pattern as Qwen:
+      provenance-amount 0 of 220 attacks, 0 correct payments blocked
+      (README, PR #7). IBM Granite 3.3 8B is left out: its tool calls came
+      out as plain text in this setup (0.2 tool calls per case).
 - [ ] Find 2 or 3 suitable workshops (AI security, NLP for low-resource
       languages, or agent safety) with their deadlines, and plan the paper
       around the earliest realistic one.
@@ -54,7 +51,11 @@ Last updated: 3 October 2026.
 - [ ] A trained multilingual injection detector (small model; Bangla,
       Banglish and English) as a third defence, compared with provenance on
       attack success and false blocks.
-- [ ] Error analysis of the cases where models fail.
+- [ ] Error analysis of the cases where models fail. Start with: the
+      simulated user answers only replies with a "?", so a model that asks
+      "Please confirm ..." gets no answer (about 14 of Hermes 3's 64 failed
+      normal tasks; 1 to 2 per Qwen model); and Hermes 3 sometimes says it
+      paid without calling a payment tool (9 tasks).
 
 ## December 2026
 
@@ -99,6 +100,9 @@ against the earlier 114-case run with 3 repeats.
 - Each model falls for attacks in different languages (3B and 14B mostly
   English; 7B mostly mixed text).
 - A bigger model was not safer (14B: highest attack success, 7.7%).
+- The pattern holds for a second model family: Hermes 3 (Llama 3.1 8B)
+  2.3% attack success without a defence, 1 amount-only attack past
+  provenance, 0 with provenance-amount, no correct payment blocked.
 - Results reproduce: the original 114 cases gave 10.0% / 3.8% / 6.2%
   attack success, against 10.0% / 3.8% / 5.0% before. Repeats at
   temperature 0 are nearly identical, so more cases matter more than more
