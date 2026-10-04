@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 4 October 2026.
+Last updated: 4 October 2026 (paper target added).
 
 ## Done
 
@@ -41,37 +41,69 @@ Last updated: 4 October 2026.
       provenance-amount 0 of 220 attacks, 0 correct payments blocked
       (README, PR #7). IBM Granite 3.3 8B is left out: its tool calls came
       out as plain text in this setup (0.2 tool calls per case).
-- [ ] Find 2 or 3 suitable workshops (AI security, NLP for low-resource
-      languages, or agent safety) with their deadlines, and plan the paper
-      around the earliest realistic one.
+- [x] Find 2 or 3 suitable workshops and plan the paper around the
+      earliest realistic one (see "Paper target" below; PR #8).
+- [ ] Paper outline and figures script (`scripts/make_figures.py`), so the
+      draft can start before cloud credits run out on 5 November.
 - [ ] Add a short GIF of the demo to the top of the README.
+
+## Paper target
+
+Checked on 4 October 2026. Open each call for papers before writing: page
+limit, template and whether papers are archival could not be checked from a
+cloud session, and deadlines can move.
+
+| Workshop | Fit | Paper deadline | Notification | Where and when |
+|---|---|---|---|---|
+| **STALA 2027**: Security Testing and Assurance for LLMs and Agents, at NDSS ([site](https://stala-workshop.github.io/)) | Best: prompt-injection testing of LLM agents is a listed topic | **11 Dec 2026** | 1 Feb 2027 | Seoul, 22 Mar 2027 |
+| ICLR 2027 workshops ([call](https://iclr.cc/Conferences/2027/CallForWorkshops)), e.g. agent safety or security workshops | Good, if an agent-security workshop is accepted (list due 29 Nov 2026) | about 1 Feb 2027 | by 26 Feb 2027 | with ICLR, April 2027 |
+| ACL 2027 workshops ([call](https://www.aclweb.org/portal/content/joint-call-workshops-proposals-2027)), e.g. a low-resource or multilingual workshop | Good for the Bangla / Banglish angle; list not out yet | about 5 Feb 2027 | later | with ACL, summer 2027 |
+
+EACL 2027 workshops (papers about 15 Dec 2026, Athens, March 2027) are a
+fallback if one on low-resource or multilingual safety is announced.
+
+**Plan:** submit to STALA on 11 December 2026. If it is not accepted
+(1 February), improve the paper with the reviews and the injection detector
+and submit to an ICLR 2027 or ACL 2027 workshop in early February.
+
+## October 2026 (rest of the month)
+
+- [ ] Paper outline: sections, the 3 or 4 figures and tables, and what each
+      claims, using only numbers already in the README.
+- [ ] Figures script in the repo (attack success by defence and model,
+      by attack language, wrong payments with and without the amount check).
+- [ ] Error analysis of the cases where models fail (needed for the paper).
+      Start with: the simulated user answers only replies with a "?", so a
+      model that asks "Please confirm ..." gets no answer (about 14 of
+      Hermes 3's 64 failed normal tasks; 1 to 2 per Qwen model); and
+      Hermes 3 sometimes says it paid without calling a payment tool (9 tasks).
 
 ## November 2026
 
-- [ ] A trained multilingual injection detector (small model; Bangla,
-      Banglish and English) as a third defence, compared with provenance on
-      attack success and false blocks.
-- [ ] Error analysis of the cases where models fail. Start with: the
-      simulated user answers only replies with a "?", so a model that asks
-      "Please confirm ..." gets no answer (about 14 of Hermes 3's 64 failed
-      normal tasks; 1 to 2 per Qwen model); and Hermes 3 sometimes says it
-      paid without calling a payment tool (9 tasks).
-
-## December 2026
-
-- [ ] Paper draft. Working title: "Can AI agents be tricked into moving
-      money in Bangla?"
+- [ ] Full paper draft by 30 November (cloud credits end 5 November, so the
+      outline, figures and first sections come first). Working title: "Can AI
+      agents be tricked into moving money in Bangla?"
   - Sections: motivation (mobile money in Bangladesh, agents that make
     payments), benchmark design, defences, results, the invented-payee
     finding, limitations (synthetic data, one wallet, simulated user),
     ethics.
-- [ ] Make the figures with a script in the repo.
+
+## December 2026
+
+- [ ] Final checks and submit to STALA by 11 December.
+- [ ] Release the dataset with the submission (or at camera-ready if the
+      workshop asks for anonymity).
 - [ ] Write a one-page plan for Project 2 so it can start straight after
       the paper.
 
 ## January 2027 onwards
 
-- [ ] Submit the paper and release the dataset.
+- [ ] A trained multilingual injection detector (small model; Bangla,
+      Banglish and English) as a third defence, compared with provenance on
+      attack success and false blocks. Moved after the first submission;
+      it strengthens the February resubmission or a longer version.
+- [ ] If needed, resubmit to an ICLR 2027 or ACL 2027 workshop (early
+      February).
 - [ ] Start Project 2: detecting compromised AI agents in a security
       operations centre (SOC), using this project's traces as attack data.
 
