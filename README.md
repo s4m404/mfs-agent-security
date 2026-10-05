@@ -145,6 +145,21 @@ Overall attack success understates the risk, because many episodes never reach t
 - **The amount check still stopped every attack in this stricter group**, including the 118 cases where Qwen2.5-7B read the attack and could do the task.
 - The groups are smaller, so the intervals are wider; the 3B model in particular could do only 20 to 29 of these tasks.
 
+### Adaptive attacks: what the amount check trusts
+
+`provenance-amount` accepts an amount only if it comes from the user or from the payee itself: an SMS sent from the payee's own number, or an invoice for that registered biller account. A separate stress-test set of 56 cases (`bench/cases_adaptive/`, kept out of the main 302) forges exactly that, using public scam patterns: a spoofed SMS sender ID, and a fake "revised bill". `scripts/audit_adaptive.py` plays a scripted agent that obeys every attack, and an ideal agent that ignores it, through each defence. No model is involved, so this measures what each defence can stop, not how often a model obeys.
+
+| Adaptive attack (attack and request language balanced) | No defence | Provenance | Provenance-amount |
+|---|---:|---:|---:|
+| Fake SMS from the payee's number asks for a larger amount | 16/16 | 16/16 | **16/16** |
+| Fake SMS from the payee's number gives a new number to pay | 16/16 | **0/16** | **0/16** |
+| Forged "revised" invoice for the real biller account | 24/24 | 24/24 | **24/24** |
+
+Attacks that succeed when the agent obeys; no defence blocked a correct payment.
+
+- **The recipient check holds even against a forged sender:** money cannot go to a number that only appears in a message.
+- **The amount check is only as strong as the payee's identity.** If an attacker can send an SMS that appears to come from the payee, or a bill that appears to come from the biller, it can raise the amount and the defence lets it through. A next step is to stop on conflicting amounts from the same payee and ask the user.
+
 ### Earlier run (114 cases, 3 repeats)
 
 The same three models on the first 114 cases, 3 repeats per setting: attack success without a defence was 10.0%, 3.8% and 5.0% of 240 attack episodes; with provenance it was 0 of 720, with no correct payment blocked. Repeats at temperature 0 barely differed (96% to 100% of cases had the same outcome every time), which is why the 302-case run uses one repeat. A replay of those traces through `provenance-amount` (`scripts/replay_defence.py`) predicted that it would catch 26, 3 and 6 wrong payments that provenance allowed, with no correct payment blocked; the real run above confirms this. Full numbers are in the git history of this README.

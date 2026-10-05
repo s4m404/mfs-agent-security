@@ -109,10 +109,19 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
 - [x] Attack success among agents that read the attack and could do the
       task (`scripts/conditional_rates.py`, README; PR #10): 10% to 24%
       without a defence, 0 with provenance-amount.
-- [ ] Adaptive attacker: cases where the attacker fakes an SMS from the
-      real payee's number, which provenance-amount trusts. Show with
-      scripted agents and replays what gets through; report it honestly as
-      a limit of the defence. New Bangla / Banglish text needs his review.
+- [x] Adaptive attacker (PR #12): 56 separate cases in
+      `bench/cases_adaptive/` (spoofed payee SMS raising the amount or
+      giving a new number; forged revised invoice for the real biller).
+      `scripts/audit_adaptive.py`: with an agent that obeys, the recipient
+      check stops the new-number trick (0/16), but provenance-amount lets
+      every forged amount through (40/40). 9 new Bangla / Banglish sentences
+      in review_texts.csv need his review.
+- [ ] Fix for the adaptive attacks: when the same payee's messages or
+      invoices give different amounts, block and ask the user. Check with
+      the audit (should stop 40/40) and replay the recorded 302-case traces
+      (`scripts/replay_defence.py`) to confirm no correct payment is blocked.
+- [ ] Optional: run a model on the adaptive set (`--cases
+      bench/cases_adaptive`) to see how often models actually obey them.
 - [ ] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ, no
       Hugging Face account needed). Notebook ready (PR #11): all three
       defences, about 2 to 2.5 hours. It only just fits two T4s; if it does
@@ -189,6 +198,9 @@ against the earlier 114-case run with 3 repeats.
 - Counted only where the agent read the attack and could do the task,
   attacks worked in 10% to 24% of cases without a defence (2 to 4 times the
   overall rate); provenance-amount still stopped all of them.
+- Adaptive attacks that forge the payee's identity (spoofed SMS sender,
+  fake revised bill) beat provenance-amount when the agent obeys (40/40);
+  the recipient check still stops a forged new number (0/16).
 - Results reproduce: the original 114 cases gave 10.0% / 3.8% / 6.2%
   attack success, against 10.0% / 3.8% / 5.0% before. Repeats at
   temperature 0 are nearly identical, so more cases matter more than more
