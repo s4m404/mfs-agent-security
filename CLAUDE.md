@@ -89,4 +89,6 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 
 ## Next tasks
 
-See `docs/ROADMAP.md`.
+See `docs/ROADMAP.md`. Paper target: STALA 2027 workshop at NDSS (Security
+Testing and Assurance for LLMs and Agents), deadline 11 December 2026; backup:
+ICLR 2027 or ACL 2027 workshops in early February 2027.
