@@ -106,6 +106,17 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
 
 ## October 2026 (rest of the month)
 
+- [x] Attack success among agents that read the attack and could do the
+      task (`scripts/conditional_rates.py`, README; PR #10): 10% to 24%
+      without a defence, 0 with provenance-amount.
+- [ ] Adaptive attacker: cases where the attacker fakes an SMS from the
+      real payee's number, which provenance-amount trusts. Show with
+      scripted agents and replays what gets through; report it honestly as
+      a limit of the defence. New Bangla / Banglish text needs his review.
+- [ ] One stronger model on Kaggle, if it fits two T4s: Qwen2.5-32B-Instruct
+      (4-bit AWQ, no Hugging Face account needed). About 1 hour.
+- [ ] Related work for the paper: AgentDojo, InjecAgent, CaMeL and
+      multilingual jailbreak papers; say clearly what is new here.
 - [ ] Paper outline: sections, the 3 or 4 figures and tables, and what each
       claims, using only numbers already in the README.
 - [ ] Figures script in the repo (attack success by defence and model,
@@ -173,6 +184,9 @@ against the earlier 114-case run with 3 repeats.
 - The pattern holds for a second model family: Hermes 3 (Llama 3.1 8B)
   2.3% attack success without a defence, 1 amount-only attack past
   provenance, 0 with provenance-amount, no correct payment blocked.
+- Counted only where the agent read the attack and could do the task,
+  attacks worked in 10% to 24% of cases without a defence (2 to 4 times the
+  overall rate); provenance-amount still stopped all of them.
 - Results reproduce: the original 114 cases gave 10.0% / 3.8% / 6.2%
   attack success, against 10.0% / 3.8% / 5.0% before. Repeats at
   temperature 0 are nearly identical, so more cases matter more than more

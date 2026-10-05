@@ -45,7 +45,8 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   for native-speaker review and keeps his Y/N answers for unchanged
   sentences). `score.py` has all metrics.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
-  (table with bootstrap CIs), `scripts/replay_defence.py` (replay recorded
+  (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
+  success among read / capable cases), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser. Done so far: three Qwen2.5 models and Hermes-3-Llama-3.1-8B
@@ -85,6 +86,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   (10.0% / 3.8% / 6.2% vs 10.0% / 3.8% / 5.0%).
 - Hermes-3-Llama-3.1-8B (second family): 2.3% without defence, 1 with
   `provenance` (amount-only), 0 with `provenance-amount`, 0 correct payments blocked.
+- Among attacks the agent read and on tasks it could do (`scripts/conditional_rates.py`):
+  24% / 11% / 15% (Qwen 3B / 7B / 14B) and 10% (Hermes 3) without defence; 0 with
+  `provenance-amount`.
 - Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks

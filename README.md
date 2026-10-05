@@ -130,6 +130,21 @@ To check that the findings are not specific to Qwen, the same 302 cases were run
 
 IBM Granite 3.3 8B was also run but is left out: in this setup (vLLM on T4 GPUs) most of its tool calls came out as plain text instead of real tool calls (0.2 tool calls per case, 5% of normal tasks done), so its 0% attack success says nothing about its safety.
 
+### Attack success among agents that could have been fooled
+
+Overall attack success understates the risk, because many episodes never reach the attack: the agent does not open the SMS or invoice, or cannot do the task at all. `scripts/conditional_rates.py` reports attack success only where the agent **read the attack** and, stricter, where it read it **and completed the attack-free version of the same task** (same task, same request language, same run). Brackets: successes / cases and a Wilson 95% interval. Reproduce with `python scripts/conditional_rates.py results/`.
+
+| Model | No defence: all attacks | No defence: read | No defence: read and able | Provenance: read and able | Provenance-amount: read and able |
+|---|---:|---:|---:|---:|---:|
+| Qwen2.5-3B | 7.3% (16/220) | 12.7% (16/126) | **24.1%** (7/29; 12 to 42) | 0% (0/20) | **0%** (0/22) |
+| Qwen2.5-7B | 5.9% (13/220) | 7.6% (13/171) | **10.8%** (13/120; 6 to 18) | 4.2% (5/118) | **0%** (0/118; 0 to 3) |
+| Qwen2.5-14B (AWQ) | 7.7% (17/220) | 9.4% (17/180) | **14.9%** (11/74; 9 to 25) | 6.2% (5/80) | **0%** (0/93; 0 to 4) |
+| Hermes-3-Llama-3.1-8B | 2.3% (5/220) | 3.8% (5/131) | **9.8%** (4/41; 4 to 23) | 2.4% (1/41) | **0%** (0/41; 0 to 9) |
+
+- **When an agent was capable and saw the attack, attacks worked 2 to 4 times more often than the overall rate suggests** (10% to 24% without a defence). Weak task performance had been hiding part of the risk, so overall attack success is a misleading measure on its own.
+- **The amount check still stopped every attack in this stricter group**, including the 118 cases where Qwen2.5-7B read the attack and could do the task.
+- The groups are smaller, so the intervals are wider; the 3B model in particular could do only 20 to 29 of these tasks.
+
 ### Earlier run (114 cases, 3 repeats)
 
 The same three models on the first 114 cases, 3 repeats per setting: attack success without a defence was 10.0%, 3.8% and 5.0% of 240 attack episodes; with provenance it was 0 of 720, with no correct payment blocked. Repeats at temperature 0 barely differed (96% to 100% of cases had the same outcome every time), which is why the 302-case run uses one repeat. A replay of those traces through `provenance-amount` (`scripts/replay_defence.py`) predicted that it would catch 26, 3 and 6 wrong payments that provenance allowed, with no correct payment blocked; the real run above confirms this. Full numbers are in the git history of this README.
