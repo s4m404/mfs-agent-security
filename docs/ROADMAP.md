@@ -73,6 +73,10 @@ fallback if one on low-resource or multilingual safety is announced.
   proceedings (Internet Society). The same paper cannot then go to another
   archival venue; most ICLR workshops are non-archival.
 - Selective: about 7 to 9 papers in a single-track day.
+- In person in Seoul (workshop day Monday 22 March 2027, to be confirmed by
+  NDSS). Attending needs NDSS workshop registration. Before submitting,
+  check whether an author must register and present in person, the cost,
+  and whether NDSS offers student travel grants or remote presentation.
 - Template and anonymisation rules: not out yet ("submission site opens
   soon"). Check again in November. If reviewing is double-blind, the paper
   must link an anonymised copy of the repo instead of github.com/s4m404.
