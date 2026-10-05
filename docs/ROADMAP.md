@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 4 October 2026 (paper target added).
+Last updated: 5 October 2026 (STALA call for papers checked).
 
 ## Done
 
@@ -49,9 +49,9 @@ Last updated: 4 October 2026 (paper target added).
 
 ## Paper target
 
-Checked on 4 October 2026. Open each call for papers before writing: page
-limit, template and whether papers are archival could not be checked from a
-cloud session, and deadlines can move.
+Checked on 4 October 2026. STALA details below were read from its call for
+papers on 5 October 2026; the ICLR and ACL rows still need checking when
+their workshop lists come out.
 
 | Workshop | Fit | Paper deadline | Notification | Where and when |
 |---|---|---|---|---|
@@ -61,6 +61,44 @@ cloud session, and deadlines can move.
 
 EACL 2027 workshops (papers about 15 Dec 2026, Athens, March 2027) are a
 fallback if one on low-resource or multilingual safety is announced.
+
+**STALA call for papers (read 5 October 2026):**
+
+- Full papers: 8 pages; short, position and experience papers (including
+  "early methods, benchmark or dataset contributions"): 4 pages. References
+  do not count. We aim for an 8-page full paper.
+- Deadline 11 December 2026, 23:59 AoE; notification 1 February 2027;
+  camera-ready 19 February 2027; workshop 22 March 2027 in Seoul.
+- Archival: accepted papers appear in the NDSS 2027 co-located workshop
+  proceedings (Internet Society). The same paper cannot then go to another
+  archival venue; most ICLR workshops are non-archival.
+- Selective: about 7 to 9 papers in a single-track day.
+- In person in Seoul (workshop day Monday 22 March 2027, to be confirmed by
+  NDSS). Attending needs NDSS workshop registration. Before submitting,
+  check whether an author must register and present in person, the cost,
+  and whether NDSS offers student travel grants or remote presentation.
+- Template and anonymisation rules: not out yet ("submission site opens
+  soon"). Check again in November. If reviewing is double-blind, the paper
+  must link an anonymised copy of the repo instead of github.com/s4m404.
+- Reviewers want general testing insight, not just a new attack: "a new
+  attack shown on a small prompt collection is not sufficient on its own
+  unless it contributes a general testing insight", and "negative results
+  are particularly welcome when they show that an intuitive testing metric,
+  benchmark or assurance interpretation is misleading".
+
+**How the paper should be framed for STALA** (every point already backed by
+the README numbers):
+
+1. Attack success alone is a misleading metric for payment agents: models
+   made wrong payments with no attacker involved (invented payees, guessed
+   amounts) more often than any attack succeeded.
+2. Checking only "did money reach the attacker" misses amount-only attacks,
+   which pay the real payee; all attacks that got past recipient provenance
+   were of this kind, and the amount check stopped them with no false blocks.
+3. Harness choices change the scores: the simulated user only answers a
+   "?", which lowered Hermes 3's task completion.
+4. The benchmark itself: 302 cases in Bangla, Banglish, code-mixed and
+   English text, over MCP, with reproducible results on two model families.
 
 **Plan:** submit to STALA on 11 December 2026. If it is not accepted
 (1 February), improve the paper with the reviews and the injection detector
