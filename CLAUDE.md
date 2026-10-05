@@ -49,8 +49,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
-  parser. Done so far: three Qwen2.5 models and Hermes-3-Llama-3.1-8B
-  (`hermes`). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
+  three Qwen2.5 models and Hermes-3-Llama-3.1-8B (`hermes`). Currently set to
+  run Qwen2.5-32B-Instruct-AWQ (needs `--gpu-memory-utilization 0.95`). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,

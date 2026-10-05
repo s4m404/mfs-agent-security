@@ -113,8 +113,10 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       real payee's number, which provenance-amount trusts. Show with
       scripted agents and replays what gets through; report it honestly as
       a limit of the defence. New Bangla / Banglish text needs his review.
-- [ ] One stronger model on Kaggle, if it fits two T4s: Qwen2.5-32B-Instruct
-      (4-bit AWQ, no Hugging Face account needed). About 1 hour.
+- [ ] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ, no
+      Hugging Face account needed). Notebook ready (PR #11): all three
+      defences, about 2 to 2.5 hours. It only just fits two T4s; if it does
+      not start, the server log is saved in results.zip.
 - [ ] Related work for the paper: AgentDojo, InjecAgent, CaMeL and
       multilingual jailbreak papers; say clearly what is new here.
 - [ ] Paper outline: sections, the 3 or 4 figures and tables, and what each
