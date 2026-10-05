@@ -43,7 +43,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   original set and must stay unchanged; regenerate with
   `python -m bench.generate`, which also writes `bench/review_texts.csv`
   for native-speaker review and keeps his Y/N answers for unchanged
-  sentences). `score.py` has all metrics.
+  sentences). `score.py` has all metrics. `cases_adaptive/adaptive.yaml`
+  (56, also from `generate.py`) is a separate stress-test set that forges
+  the payee's identity; it is not loaded with `bench/cases`, so the main
+  302-case results stay unchanged. `scripts/audit_adaptive.py` checks which
+  defences stop it, with scripted agents.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -90,6 +94,8 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - Among attacks the agent read and on tasks it could do (`scripts/conditional_rates.py`):
   24% / 11% / 15% (Qwen 3B / 7B / 14B) and 10% (Hermes 3) without defence; 0 with
   `provenance-amount`.
+- Adaptive set: an obeying agent beats `provenance-amount` with a spoofed payee
+  SMS or a forged biller invoice (40/40); a forged new number is still blocked (0/16).
 - Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks

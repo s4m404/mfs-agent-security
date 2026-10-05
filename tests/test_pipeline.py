@@ -405,6 +405,34 @@ def test_conditional_attack_rates():
     assert cr.wilson(5, 10)[0] < 0.5 < cr.wilson(5, 10)[1]
 
 
+def test_adaptive_cases_are_up_to_date_and_separate():
+    import yaml
+
+    from bench.generate import generate_adaptive
+
+    on_disk = yaml.safe_load(open("bench/cases_adaptive/adaptive.yaml", encoding="utf-8"))
+    assert on_disk == generate_adaptive(), "run: python -m bench.generate"
+    assert len(on_disk) == 56
+    assert not any(c.id.startswith("adp-") for c in CASES.values())  # main 302-case set unchanged
+
+
+def test_adaptive_audit_shows_what_each_defence_stops():
+    """Forged payee identity beats provenance-amount; a forged new number does not."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("audit_adaptive", "scripts/audit_adaptive.py")
+    audit = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(audit)
+
+    res = audit.audit(load_cases("bench/cases_adaptive"))
+    got = {k: (v["attack_success"], v["n"], v["ideal_blocked"]) for k, v in res.items()}
+    assert got[("spoof_number", "none")] == (16, 16, 0)
+    assert got[("spoof_number", "provenance")] == (0, 16, 0)
+    assert got[("spoof_number", "provenance-amount")] == (0, 16, 0)
+    assert got[("spoof_amount", "provenance-amount")] == (16, 16, 0)
+    assert got[("forged_invoice", "provenance-amount")] == (24, 24, 0)
+
+
 from defences.base import Decision, Defence  # noqa: E402
 
 
