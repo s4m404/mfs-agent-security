@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 6 October 2026 (Qwen2.5-32B results; fix for the adaptive attacks).
+Last updated: 6 October 2026 (Qwen2.5-32B rerun: block message fix and adaptive set with a real model).
 
 ## Done
 
@@ -97,7 +97,10 @@ the README numbers):
    were of this kind, and the amount check stopped them with no false blocks.
 3. Harness choices change the scores: the simulated user only answers a
    "?", which lowered Hermes 3's task completion, and the wording of a
-   block message cost Qwen2.5-32B 12 normal tasks.
+   block message cost Qwen2.5-32B 12 normal tasks (all back after a
+   clearer message). A scripted defence audit also missed what a real
+   model did (reading only the newest SMS), so defences must be tested
+   with real agents.
 4. The benchmark itself: 302 cases in Bangla, Banglish, code-mixed and
    English text, over MCP, with reproducible results on two model families.
 
@@ -124,12 +127,21 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       cases: an ideal agent is never blocked, and a replay of the Qwen2.5-32B
       traces finds no correct payment blocked. `provenance-amount` itself
       is unchanged, so all recorded results still hold.
-- [ ] Kaggle rerun of Qwen2.5-32B (`notebooks/kaggle_run.ipynb`, about
-      1.5 to 2 hours, after this PR is merged): 302 main cases with
-      `provenance-amount` (new block message) and `provenance-consistent`,
-      and the 56 adaptive cases with none / provenance-amount /
-      provenance-consistent, to see how often a real model obeys them.
-      Adaptive results are saved in `results_adaptive/`.
+- [x] Kaggle rerun of Qwen2.5-32B (README): with the new block message
+      all 12 lost tasks came back (70% / 71% of normal tasks with
+      provenance-amount / provenance-consistent, 0 attacks, 0 correct
+      payments blocked). Adaptive set with a real model: forged amount
+      "corrections" worked 11/16 without a defence, 10/16 with
+      provenance-amount, 3/16 with provenance-consistent.
+- [ ] Close the gap the real model found: in all 3 attacks that beat
+      provenance-consistent, the model read only the newest SMS
+      (`read_sms` with `limit: 1`), so the defence never saw the real
+      amount. Before allowing an amount that came from a payee's SMS, the
+      defence should look at all of that payee's messages in the wallet,
+      not only those the agent read. Add a scripted agent that reads only
+      the newest SMS to `scripts/audit_adaptive.py`, check it stops 16/16,
+      and check that no correct payment in the 302 main cases is blocked
+      (ideal agent and `scripts/replay_defence.py` on the 32B traces).
 - [x] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ),
       all three defences, 0 model errors; results in the README. 14.5%
       attack success without a defence, 4 (all amount-only) with
@@ -218,7 +230,10 @@ against the earlier 114-case run with 3 repeats.
   overall rate); provenance-amount still stopped all of them.
 - Adaptive attacks that forge the payee's identity (spoofed SMS sender,
   fake revised bill) beat provenance-amount when the agent obeys (40/40);
-  the recipient check still stops a forged new number (0/16).
+  the recipient check still stops a forged new number (0/16). With a
+  real model (Qwen2.5-32B) a forged "correction" from the payee worked in
+  11 of 16 cases without a defence; provenance-consistent cut it to 3 of
+  16, at the cost of holding most correct payments for the user.
 - Results reproduce: the original 114 cases gave 10.0% / 3.8% / 6.2%
   attack success, against 10.0% / 3.8% / 5.0% before. Repeats at
   temperature 0 are nearly identical, so more cases matter more than more
