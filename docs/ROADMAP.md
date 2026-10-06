@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 6 October 2026 (Qwen2.5-32B rerun: block message fix and adaptive set with a real model).
+Last updated: 6 October 2026 (plan to strengthen the paper; detector test started).
 
 ## Done
 
@@ -108,6 +108,38 @@ the README numbers):
 **Plan:** submit to STALA on 11 December 2026. If it is not accepted
 (1 February), improve the paper with the reviews and the injection detector
 and submit to an ICLR 2027 or ACL 2027 workshop in early February.
+
+## Plan to make the paper stronger (agreed 6 October 2026)
+
+What reviewers will most likely attack, and the answer to each. Do these
+in order; the first three come before cloud credits end on 5 November.
+
+1. [ ] **Do real injection detectors work in Bangla and Banglish?** The
+       keyword filter is a weak baseline. `scripts/detector_eval.py` asks
+       detectors whether each untrusted text (174 attack, 54 normal) is an
+       attack, by language and style. Done so far: the keyword baseline
+       (34% of attack texts, 7% of mixed-language ones, 0% of ordinary scam
+       messages). Next: run `notebooks/kaggle_detectors.ipynb` (5 to 10
+       minutes) for ProtectAI's DeBERTa v2 and deepset's detector. Hoped-for
+       headline, only if the numbers show it: English-trained detectors miss
+       Bangla and Banglish attacks, while provenance works in every language.
+       If a detector does well, it becomes a defence to run in the agent too.
+2. [ ] **One strong model through a free API** (for example Llama 3.3 70B
+       on Groq, or Gemini), so the results are not only small open models.
+       Check the free-tier limits and terms first; the agent already speaks
+       the OpenAI API, so it needs a key and a small runner change.
+3. [ ] **Paper outline and figures script** (below).
+4. [ ] **A BRAC faculty advisor or co-author** (owner's task): credibility
+       for the paper and a recommendation letter for scholarships.
+5. [ ] **A second native-speaker check** of a sample of about 50 Bangla /
+       Banglish sentences (owner asks a classmate); report agreement.
+6. [ ] **Citable dataset:** a GitHub release linked to Zenodo (free DOI)
+       with a short dataset card.
+
+After the submission: a blog post with the GIF and three findings; port
+TakaPay as an AgentDojo task suite and send it upstream.
+
+Not worth it now: more Qwen sizes, more repeats, more cases.
 
 ## October 2026 (rest of the month)
 

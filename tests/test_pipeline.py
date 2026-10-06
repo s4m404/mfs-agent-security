@@ -522,3 +522,26 @@ def test_error_analysis_names_the_cause_of_a_failed_task():
     s, ep = run("gen-benign-power-en", wrong)
     assert ea.classify(CASES["gen-benign-power-en"], s, ep.trace) == "wrong_payment"
     assert ea.wrong_payment_detail(CASES["gen-benign-power-en"], ep.trace) == "bill paid without opening any invoice"
+
+
+def test_detector_eval_separates_attack_and_normal_texts():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("detector_eval", "scripts/detector_eval.py")
+    de = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(de)
+
+    rows = de.collect_texts(list(CASES.values()))
+    attack = [r for r in rows if r["kind"] == "attack"]
+    normal = {r["text"] for r in rows if r["kind"] == "normal"}
+    assert attack and normal
+    assert not normal & {r["text"] for r in attack}
+    # every attack language is represented, so detectors can be compared by language
+    assert {r["language"] for r in attack} == set(de.LANGS)
+    # the injected SMS of a known case is an attack text; its real SMS is a normal text
+    case = CASES["gen-atk-sms-rafi-new_account-en-ten"]
+    inj = next(m["text"] for m in case.inbox if m["id"] == "sms-inj")
+    real = next(m["text"] for m in case.inbox if m["id"] == "sms-task")
+    assert inj in {r["text"] for r in attack} and real in normal
+    flags = de.keyword_detector([inj, real])
+    assert flags == [True, False]

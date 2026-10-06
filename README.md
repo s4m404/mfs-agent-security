@@ -217,6 +217,16 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 - **The defences replace failures, they do not add them.** With a defence on, the wallet refusals become blocks, and the totals hardly change: with `provenance-amount` 71, 37, 40 and 64 failures for 3B, 7B, 14B and Hermes 3. Qwen2.5-32B failed 40 with the old block message and 25 with the new one (28 without a defence; see above).
 - The "said it paid" and "asked without a ?" counts use short keyword lists in three languages, so they are estimates; one of Hermes 3's 8 is a promise to pay later.
 
+### Do injection detectors work in Bangla and Banglish?
+
+`scripts/detector_eval.py` takes every untrusted text in the benchmark (174 distinct attack texts, about 44 per language, and 54 normal texts) and asks a detector whether it is an injection. No agent is involved. The keyword baseline so far:
+
+| Detector | Attack texts flagged | en | bn | banglish | mixed | Instructions to the AI | Ordinary scam messages | Normal texts flagged |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| keyword (baseline) | 34% | 40% | 43% | 45% | 7% | 57% | 0% | 7% (4/54) |
+
+A keyword list misses almost all mixed-language attacks and every ordinary scam message. Off-the-shelf detectors (ProtectAI and deepset DeBERTa models) are next, with `notebooks/kaggle_detectors.ipynb`.
+
 ### Earlier run (114 cases, 3 repeats)
 
 The same three models on the first 114 cases, 3 repeats per setting: attack success without a defence was 10.0%, 3.8% and 5.0% of 240 attack episodes; with provenance it was 0 of 720, with no correct payment blocked. Repeats at temperature 0 barely differed (96% to 100% of cases had the same outcome every time), which is why the 302-case run uses one repeat. A replay of those traces through `provenance-amount` (`scripts/replay_defence.py`) predicted that it would catch 26, 3 and 6 wrong payments that provenance allowed, with no correct payment blocked; the real run above confirms this. Full numbers are in the git history of this README.

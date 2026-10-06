@@ -57,7 +57,10 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
   traces through another defence, no model needed), `scripts/error_analysis.py`
-  (one cause per failed normal task).
+  (one cause per failed normal task), `scripts/detector_eval.py` (do
+  injection detectors flag each attack / normal text, by language; run the
+  Hugging Face ones with `notebooks/kaggle_detectors.ipynb`, about 10 minutes;
+  this cloud environment cannot reach huggingface.co).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
   four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
