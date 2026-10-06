@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 5 October 2026 (STALA call for papers checked).
+Last updated: 6 October 2026 (Qwen2.5-32B results added).
 
 ## Done
 
@@ -96,7 +96,8 @@ the README numbers):
    which pay the real payee; all attacks that got past recipient provenance
    were of this kind, and the amount check stopped them with no false blocks.
 3. Harness choices change the scores: the simulated user only answers a
-   "?", which lowered Hermes 3's task completion.
+   "?", which lowered Hermes 3's task completion, and the wording of a
+   block message cost Qwen2.5-32B 12 normal tasks.
 4. The benchmark itself: 302 cases in Bangla, Banglish, code-mixed and
    English text, over MCP, with reproducible results on two model families.
 
@@ -122,10 +123,17 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       (`scripts/replay_defence.py`) to confirm no correct payment is blocked.
 - [ ] Optional: run a model on the adaptive set (`--cases
       bench/cases_adaptive`) to see how often models actually obey them.
-- [ ] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ, no
-      Hugging Face account needed). Notebook ready (PR #11): all three
-      defences, about 2 to 2.5 hours. It only just fits two T4s; if it does
-      not start, the server log is saved in results.zip.
+- [x] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ),
+      all three defences, 0 model errors; results in the README. 14.5%
+      attack success without a defence, 4 (all amount-only) with
+      provenance, 0 with provenance-amount, 0 correct payments blocked.
+- [ ] Fix the block message for an unregistered biller account. With a
+      defence on, Qwen2.5-32B lost 12 normal tasks: it paid the invoice ID
+      as the account, the defence answered "Ask the user for explicit
+      approval before retrying" instead of the wallet's hint "Check the
+      invoice for the correct account", and the model gave up. Pass the
+      wallet's hint through in the block message, then rerun 32B with
+      provenance-amount on Kaggle to check the tasks come back.
 - [ ] Related work for the paper: AgentDojo, InjecAgent, CaMeL and
       multilingual jailbreak papers; say clearly what is new here.
 - [ ] Paper outline: sections, the 3 or 4 figures and tables, and what each
@@ -182,7 +190,8 @@ From the 302-case run (3 Qwen2.5 models, 1 repeat, temperature 0), checked
 against the earlier 114-case run with 3 repeats.
 
 - With provenance plus the amount check, 0 of 660 attack episodes
-  succeeded, against 5.9% to 7.7% without a defence; no correct payment
+  succeeded (0 of 880 with Qwen2.5-32B added), against 5.9% to 7.7%
+  without a defence (14.5% for 32B); no correct payment
   was blocked and no wrong payment went through.
 - Provenance alone stopped every attack that redirects money or leaks the
   OTP, but not attacks that change only the amount (11 of 60 got through).
@@ -191,7 +200,9 @@ against the earlier 114-case run with 3 repeats.
   than any attack succeeded (114-case run: 29% to 48%).
 - Each model falls for attacks in different languages (3B and 14B mostly
   English; 7B mostly mixed text).
-- A bigger model was not safer (14B: highest attack success, 7.7%).
+- A bigger model was not safer: Qwen2.5-32B was the best at the tasks
+  (66% of normal tasks) and the easiest to fool (14.5%, about twice the
+  3B to 14B models). provenance-amount still stopped all 220 attacks.
 - The pattern holds for a second model family: Hermes 3 (Llama 3.1 8B)
   2.3% attack success without a defence, 1 amount-only attack past
   provenance, 0 with provenance-amount, no correct payment blocked.
