@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 6 October 2026 (Qwen2.5-32B results added).
+Last updated: 6 October 2026 (Qwen2.5-32B results; fix for the adaptive attacks).
 
 ## Done
 
@@ -117,23 +117,30 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       check stops the new-number trick (0/16), but provenance-amount lets
       every forged amount through (40/40). 9 new Bangla / Banglish sentences
       in review_texts.csv need his review.
-- [ ] Fix for the adaptive attacks: when the same payee's messages or
-      invoices give different amounts, block and ask the user. Check with
-      the audit (should stop 40/40) and replay the recorded 302-case traces
-      (`scripts/replay_defence.py`) to confirm no correct payment is blocked.
-- [ ] Optional: run a model on the adaptive set (`--cases
-      bench/cases_adaptive`) to see how often models actually obey them.
+- [x] Fix for the adaptive attacks: new defence `provenance-consistent`.
+      When the same payee's messages or invoices give different amounts, it
+      blocks and asks the user. Audit: stops 40/40 forged amounts (the
+      correct payment then also waits for the user in those 40). Main 302
+      cases: an ideal agent is never blocked, and a replay of the Qwen2.5-32B
+      traces finds no correct payment blocked. `provenance-amount` itself
+      is unchanged, so all recorded results still hold.
+- [ ] Kaggle rerun of Qwen2.5-32B (`notebooks/kaggle_run.ipynb`, about
+      1.5 to 2 hours, after this PR is merged): 302 main cases with
+      `provenance-amount` (new block message) and `provenance-consistent`,
+      and the 56 adaptive cases with none / provenance-amount /
+      provenance-consistent, to see how often a real model obeys them.
+      Adaptive results are saved in `results_adaptive/`.
 - [x] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ),
       all three defences, 0 model errors; results in the README. 14.5%
       attack success without a defence, 4 (all amount-only) with
       provenance, 0 with provenance-amount, 0 correct payments blocked.
-- [ ] Fix the block message for an unregistered biller account. With a
+- [x] Fix the block message for an unregistered biller account. With a
       defence on, Qwen2.5-32B lost 12 normal tasks: it paid the invoice ID
       as the account, the defence answered "Ask the user for explicit
-      approval before retrying" instead of the wallet's hint "Check the
-      invoice for the correct account", and the model gave up. Pass the
-      wallet's hint through in the block message, then rerun 32B with
-      provenance-amount on Kaggle to check the tasks come back.
+      approval before retrying" instead of the wallet's hint, and the model
+      gave up. The block now says "Use the biller account number written on
+      the invoice, or one from list_billers." The Kaggle rerun above checks
+      that the tasks come back.
 - [ ] Related work for the paper: AgentDojo, InjecAgent, CaMeL and
       multilingual jailbreak papers; say clearly what is new here.
 - [ ] Paper outline: sections, the 3 or 4 figures and tables, and what each

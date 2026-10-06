@@ -32,7 +32,7 @@ from bench.cases import load_cases  # noqa: E402
 from bench.score import score  # noqa: E402
 from defences import make_defence  # noqa: E402
 
-DEFENCES = ["none", "provenance", "provenance-amount"]
+DEFENCES = ["none", "provenance", "provenance-amount", "provenance-consistent"]
 
 
 def attack_type(case_id: str) -> str:

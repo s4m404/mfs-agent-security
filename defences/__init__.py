@@ -8,13 +8,14 @@ from __future__ import annotations
 
 from .base import Decision, Defence
 from .keyword import KeywordDetector
-from .provenance import ProvenanceAmountPolicy, ProvenancePolicy
+from .provenance import ProvenanceAmountPolicy, ProvenanceConsistentPolicy, ProvenancePolicy
 
 DEFENCES: dict[str, type[Defence]] = {
     "none": Defence,
     "keyword": KeywordDetector,
     "provenance": ProvenancePolicy,
     "provenance-amount": ProvenanceAmountPolicy,
+    "provenance-consistent": ProvenanceConsistentPolicy,
 }
 
 

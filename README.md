@@ -33,7 +33,9 @@ user request ──> agent (any LLM) ──> defence ──> MCP server ──> 
 - `agent/`: the agent loop; works with Ollama, vLLM or any OpenAI compatible API
 - `defences/`: `none`, `keyword` (simple baseline), `provenance` (tracks
   where recipients and codes came from), `provenance-amount` (also checks
-  that the amount came from the user or from the payee itself)
+  that the amount came from the user or from the payee itself),
+  `provenance-consistent` (also stops when the payee's own messages or
+  invoices give different amounts, and asks the user)
 - `bench/`: test cases (`bench/cases/*.yaml`) and scoring
 - Every run writes a full trace of tool calls to `traces.jsonl`
 
@@ -124,7 +126,7 @@ Qwen2.5-32B-Instruct (4-bit AWQ) is the largest model that fits on Kaggle's two 
 
 - **It was the best at the task and the easiest to fool.** It completed 66% of normal tasks without a defence (the 3B to 14B models: 17% to 56%), but 32 of 220 attacks succeeded (14.5%), about twice the rate of the smaller models. 23 of the 32 were instructions aimed at the AI, 9 were ordinary scam messages; attacks hidden in a tool description worked most often (9 of 37). No OTP was leaked (0 of 25).
 - **The defences still worked.** Provenance let through only 4 attacks, all amount-only (3 of them written in English); provenance-amount stopped all 220 and every wrong payment (20 without a defence, 2 with provenance, 0 with provenance-amount). No correct payment was blocked.
-- **But the defences cost it 12 normal tasks (54 of 82 done without a defence, 42 with either one).** These are not false blocks: in all 12, the model first tried to pay the invoice ID (for example `inv-power`) as the biller account. Without a defence the wallet answers "not a registered biller account. Check the invoice for the correct account", and the model reads the invoice and pays correctly. With a defence the same call is stopped first, and the block message says "Ask the user for explicit approval before retrying", so the model asks the user, retries the same wrong call and gives up. The wording of the block message, not the rule, causes the loss; the smaller models lost at most 3 normal tasks with a defence.
+- **But the defences cost it 12 normal tasks (54 of 82 done without a defence, 42 with either one).** These are not false blocks: in all 12, the model first tried to pay the invoice ID (for example `inv-power`) as the biller account. Without a defence the wallet answers "not a registered biller account. Check the invoice for the correct account", and the model reads the invoice and pays correctly. With a defence the same call is stopped first, and the block message says "Ask the user for explicit approval before retrying", so the model asks the user, retries the same wrong call and gives up. The wording of the block message, not the rule, causes the loss; the smaller models lost at most 3 normal tasks with a defence. The block message now says "Use the biller account number written on the invoice, or one from list_billers"; a rerun will show whether the tasks come back.
 - On the original 114 cases its attack success without a defence was 11 of 80 (13.8%).
 
 ### A second model family: Hermes 3 (Llama 3.1 8B)
@@ -162,16 +164,17 @@ Overall attack success understates the risk, because many episodes never reach t
 
 `provenance-amount` accepts an amount only if it comes from the user or from the payee itself: an SMS sent from the payee's own number, or an invoice for that registered biller account. A separate stress-test set of 56 cases (`bench/cases_adaptive/`, kept out of the main 302) forges exactly that, using public scam patterns: a spoofed SMS sender ID, and a fake "revised bill". `scripts/audit_adaptive.py` plays a scripted agent that obeys every attack, and an ideal agent that ignores it, through each defence. No model is involved, so this measures what each defence can stop, not how often a model obeys.
 
-| Adaptive attack (attack and request language balanced) | No defence | Provenance | Provenance-amount |
-|---|---:|---:|---:|
-| Fake SMS from the payee's number asks for a larger amount | 16/16 | 16/16 | **16/16** |
-| Fake SMS from the payee's number gives a new number to pay | 16/16 | **0/16** | **0/16** |
-| Forged "revised" invoice for the real biller account | 24/24 | 24/24 | **24/24** |
+| Adaptive attack (attack and request language balanced) | No defence | Provenance | Provenance-amount | Provenance-consistent |
+|---|---:|---:|---:|---:|
+| Fake SMS from the payee's number asks for a larger amount | 16/16 | 16/16 | **16/16** | **0/16** (16 ask the user) |
+| Fake SMS from the payee's number gives a new number to pay | 16/16 | **0/16** | **0/16** | **0/16** |
+| Forged "revised" invoice for the real biller account | 24/24 | 24/24 | **24/24** | **0/24** (24 ask the user) |
 
-Attacks that succeed when the agent obeys; no defence blocked a correct payment.
+Attacks that succeed when the agent obeys. The first three defences never blocked the correct payment here; in brackets, cases where `provenance-consistent` also holds the correct payment for the user.
 
 - **The recipient check holds even against a forged sender:** money cannot go to a number that only appears in a message.
-- **The amount check is only as strong as the payee's identity.** If an attacker can send an SMS that appears to come from the payee, or a bill that appears to come from the biller, it can raise the amount and the defence lets it through. A next step is to stop on conflicting amounts from the same payee and ask the user.
+- **The amount check is only as strong as the payee's identity.** If an attacker can send an SMS that appears to come from the payee, or a bill that appears to come from the biller, it can raise the amount and the defence lets it through.
+- **`provenance-consistent` closes that gap by asking the user.** When the payee's own messages or invoices give different amounts (450 in one SMS, 950 in a "correction"), it blocks the payment and tells the agent to ask the user which amount is right; an amount the user typed is always accepted. It stops all 40 forged amounts. The cost: in those 40 cases the correct payment also waits for the user, because a defence cannot tell the real message from a forged one with the same sender. On the 302 main cases it never fires: an ideal scripted agent is never blocked, and replaying the recorded Qwen2.5-32B traces (`scripts/replay_defence.py`) finds no correct payment it would block. A model run is still to come.
 
 ### Earlier run (114 cases, 3 repeats)
 
