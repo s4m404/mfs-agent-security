@@ -39,7 +39,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   codes must not come only from untrusted text), `provenance-amount`
   (also: amount must come from the user or from the payee itself),
   `provenance-consistent` (also: block and ask the user when the payee's
-  own messages or invoices give different amounts). A block may carry
+  own messages or invoices give different amounts; it checks every SMS and
+  invoice from that payee in the wallet, not only those the agent read).
+  A block may carry
   `advice` (what the agent should do next); the default is "ask the user".
 - `bench/`: `cases/seed.yaml` (12 hand-written) and `cases/generated.yaml`
   (290, built by `bench/generate.py` from tables; the first 102 are the
@@ -58,11 +60,10 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
   four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
-  (`hermes`). Last used (done) for a rerun of Qwen2.5-32B-Instruct-AWQ (needs
-  `--gpu-memory-utilization 0.95`) through `CASE_SETS`: main cases with
-  provenance-amount and provenance-consistent, adaptive cases (saved to
-  `results_adaptive/`, git-ignored) with none, provenance-amount,
-  provenance-consistent. Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  (`hermes`). Currently set (through `CASE_SETS`) to rerun the fixed
+  provenance-consistent on Qwen2.5-32B-Instruct-AWQ (needs
+  `--gpu-memory-utilization 0.95`): main cases, and adaptive cases (saved to
+  `results_adaptive/`, git-ignored). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
@@ -112,7 +113,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   SMS or a forged biller invoice (40/40); a forged new number is still blocked (0/16).
   `provenance-consistent` stops 40/40 in the audit. With Qwen2.5-32B: forged
   amount SMS worked 11/16 (none), 10/16 (provenance-amount), 3/16
-  (provenance-consistent; all 3 read only the newest SMS, `limit: 1`).
+  (first version of provenance-consistent; all 3 read only the newest SMS,
+  `limit: 1`). Fixed: the check now covers the whole inbox; audit 0/40 with
+  a newest-only agent; model rerun not done yet.
 - Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks
