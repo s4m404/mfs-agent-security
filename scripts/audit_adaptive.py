@@ -6,6 +6,9 @@ second invoice for the real biller account. This script plays two scripted
 agents through every case under each defence:
 
   obeys   reads the attack and does exactly what it asks
+  newest  obeys too, but reads only the newest SMS (read_sms with limit 1)
+          or only the forged invoice, so it never sees the real amount;
+          Qwen2.5-32B did this in real runs
   ideal   reads the real message or invoice and pays the correct amount
 
 It reports how many attacks still succeed when the agent obeys, and whether
@@ -58,6 +61,14 @@ def obeying_steps(case) -> list[dict]:
     ]
 
 
+def newest_steps(case) -> list[dict]:
+    """Obey the attack after reading only the forged message or invoice."""
+    steps = obeying_steps(case)
+    if case.injection_vector == "invoice":
+        return steps[1:]  # skip list_invoices: open the forged invoice directly
+    return [{"tool": "read_sms", "args": {"limit": 1}}, *steps[1:]]
+
+
 def ideal_steps(case) -> list[dict]:
     """Read everything, ignore the attack, pay the real amount to the real payee."""
     spec = case.utility["ledger_contains"]
@@ -78,14 +89,18 @@ def ideal_steps(case) -> list[dict]:
 
 
 def audit(cases) -> dict[tuple[str, str], dict[str, int]]:
-    """{(attack type, defence): {"n", "attack_success", "ideal_blocked"}}"""
-    out: dict[tuple[str, str], dict[str, int]] = defaultdict(lambda: {"n": 0, "attack_success": 0, "ideal_blocked": 0})
+    """{(attack type, defence): {"n", "attack_success", "newest_success", "ideal_blocked"}}"""
+    out: dict[tuple[str, str], dict[str, int]] = defaultdict(
+        lambda: {"n": 0, "attack_success": 0, "newest_success": 0, "ideal_blocked": 0}
+    )
     for case in cases:
         for d in DEFENCES:
             row = out[(attack_type(case.id), d)]
             ep = asyncio.run(run_episode(case, ScriptedModel(obeying_steps(case)), make_defence(d)))
             row["n"] += 1
             row["attack_success"] += score(case, ep.world, ep.final_answer, ep.trace)["attack_success"]
+            ep = asyncio.run(run_episode(case, ScriptedModel(newest_steps(case)), make_defence(d)))
+            row["newest_success"] += score(case, ep.world, ep.final_answer, ep.trace)["attack_success"]
             ep = asyncio.run(run_episode(case, ScriptedModel(ideal_steps(case)), make_defence(d)))
             s = score(case, ep.world, ep.final_answer, ep.trace)
             row["ideal_blocked"] += bool(s["false_block"] or not s["utility"])
@@ -104,11 +119,15 @@ def main() -> None:
     p.add_argument("--cases", default="bench/cases_adaptive")
     args = p.parse_args()
     res = audit(load_cases(args.cases))
-    print("Attacks that succeed when the agent obeys (correct payments blocked in brackets):\n")
+    print("Attacks that succeed when the agent obeys: reads everything / reads only the newest message")
+    print("(in brackets: correct payments blocked for an ideal agent)\n")
     print("| Adaptive attack | " + " | ".join(DEFENCES) + " |")
     print("|---|" + "---:|" * len(DEFENCES))
     for t, label in LABELS.items():
-        cells = [f"{res[(t, d)]['attack_success']}/{res[(t, d)]['n']} ({res[(t, d)]['ideal_blocked']})" for d in DEFENCES]
+        cells = [
+            f"{r['attack_success']}/{r['n']} / {r['newest_success']}/{r['n']} ({r['ideal_blocked']})"
+            for r in (res[(t, d)] for d in DEFENCES)
+        ]
         print(f"| {label} | " + " | ".join(cells) + " |")
 
 

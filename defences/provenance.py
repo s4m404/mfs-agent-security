@@ -147,6 +147,11 @@ class ProvenanceConsistentPolicy(ProvenanceAmountPolicy):
     another gives different amounts and not this one), the payment is
     blocked and the agent is told to ask the user which amount is right.
     An amount the user gave is always accepted.
+
+    The check covers every SMS and invoice in the wallet, not only those
+    the agent read: a real agent may read only the newest SMS (the forged
+    one) and never see the real amount. Only amounts are taken from them,
+    grouped by sender or biller account, so no code (such as the OTP) is used.
     """
 
     name = "provenance-consistent"
@@ -155,6 +160,19 @@ class ProvenanceConsistentPolicy(ProvenanceAmountPolicy):
         super().reset(user_prompt, world)
         # payee -> {source id (SMS or invoice): amounts in it}
         self.sources: dict[str, dict[str, set[float]]] = {}
+        for m in world.inbox:
+            self._add_sms(m)
+        for inv in world.invoices:
+            self._add_invoice(inv)
+
+    def _add_sms(self, m: dict[str, Any]) -> None:
+        self._add_source(normalise_number(str(m.get("from", ""))), f"sms:{m.get('id') or m.get('text')}", m.get("text", ""))
+
+    def _add_invoice(self, inv: dict[str, Any]) -> None:
+        payee = normalise_number(str(inv.get("account", ""))) or self.biller_by_name.get(
+            normalise_text(str(inv.get("biller", ""))), ""
+        )
+        self._add_source(payee, f"invoice:{inv.get('id')}", inv.get("amount", ""))
 
     def _add_source(self, payee: str, source: str, value: Any) -> None:
         # Values this large are phone or account numbers, not amounts.
@@ -172,13 +190,9 @@ class ProvenanceConsistentPolicy(ProvenanceAmountPolicy):
             if not isinstance(item, dict):
                 continue
             if tool == "read_sms":
-                payee = normalise_number(str(item.get("from", "")))
-                self._add_source(payee, f"sms:{item.get('id') or item.get('text')}", item.get("text", ""))
+                self._add_sms(item)
             elif tool in ("list_invoices", "read_invoice"):
-                payee = normalise_number(str(item.get("account", ""))) or self.biller_by_name.get(
-                    normalise_text(str(item.get("biller", ""))), ""
-                )
-                self._add_source(payee, f"invoice:{item.get('id')}", item.get("amount", ""))
+                self._add_invoice(item)
         return result
 
     def check_tool_call(self, tool: str, args: dict[str, Any]) -> Decision:

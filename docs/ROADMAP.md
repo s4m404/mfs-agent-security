@@ -133,15 +133,17 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       payments blocked). Adaptive set with a real model: forged amount
       "corrections" worked 11/16 without a defence, 10/16 with
       provenance-amount, 3/16 with provenance-consistent.
-- [ ] Close the gap the real model found: in all 3 attacks that beat
+- [x] Close the gap the real model found: in all 3 attacks that beat
       provenance-consistent, the model read only the newest SMS
-      (`read_sms` with `limit: 1`), so the defence never saw the real
-      amount. Before allowing an amount that came from a payee's SMS, the
-      defence should look at all of that payee's messages in the wallet,
-      not only those the agent read. Add a scripted agent that reads only
-      the newest SMS to `scripts/audit_adaptive.py`, check it stops 16/16,
-      and check that no correct payment in the 302 main cases is blocked
-      (ideal agent and `scripts/replay_defence.py` on the 32B traces).
+      (`read_sms` with `limit: 1`). The check now covers every SMS and
+      invoice from the payee in the wallet. The audit has a new agent that
+      reads only the newest SMS or the forged invoice: 40/40 against the
+      first version, 0/40 against the fix. No correct payment blocked on
+      the 302 main cases (ideal agent; replays of all five 32B runs);
+      replaying the real adaptive traces, all 3 attacks would be blocked.
+- [ ] Optional Kaggle rerun of the fixed `provenance-consistent` on
+      Qwen2.5-32B (notebook ready, about 1 to 1.5 hours): 302 main cases
+      and the 56 adaptive cases. Can wait and be batched with other runs.
 - [x] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ),
       all three defences, 0 model errors; results in the README. 14.5%
       attack success without a defence, 4 (all amount-only) with
