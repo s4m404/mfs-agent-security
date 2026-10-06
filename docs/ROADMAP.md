@@ -45,7 +45,8 @@ Last updated: 6 October 2026 (Qwen2.5-32B rerun: block message fix and adaptive 
       earliest realistic one (see "Paper target" below; PR #8).
 - [ ] Paper outline and figures script (`scripts/make_figures.py`), so the
       draft can start before cloud credits run out on 5 November.
-- [ ] Add a short GIF of the demo to the top of the README.
+- [x] Add a short GIF of the demo to the top of the README (`docs/demo.gif`,
+      made by `scripts/make_demo_gif.py` from the demo page).
 
 ## Paper target
 
@@ -161,11 +162,16 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       claims, using only numbers already in the README.
 - [ ] Figures script in the repo (attack success by defence and model,
       by attack language, wrong payments with and without the amount check).
-- [ ] Error analysis of the cases where models fail (needed for the paper).
-      Start with: the simulated user answers only replies with a "?", so a
-      model that asks "Please confirm ..." gets no answer (about 14 of
-      Hermes 3's 64 failed normal tasks; 1 to 2 per Qwen model); and
-      Hermes 3 sometimes says it paid without calling a payment tool (9 tasks).
+- [x] Error analysis script (`scripts/error_analysis.py`): one cause per
+      failed normal task. Qwen2.5-32B: most failures come from paying the
+      invoice ID as the biller account (`list_invoices` does not show the
+      account): 15 of 28 without a defence, 12 of the 16 blocks with
+      provenance-amount (README).
+- [ ] Run `scripts/error_analysis.py` on the other models (3B, 7B, 14B,
+      Hermes 3): needs their earlier results.zip files uploaded in a
+      session. Expected from the earlier manual check: Hermes 3 asks
+      "Please confirm ..." without a "?" (about 14 of 64 failed tasks) and
+      says it paid without a payment call (9).
 
 ## November 2026
 

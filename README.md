@@ -6,6 +6,8 @@ attack test set and defences to find out.
 
 **[Live demo](https://s4m404.github.io/mfs-agent-security/)**: replay real runs step by step and switch the defence on and off. No install needed.
 
+![A real run replayed: a fake TakaPay SMS in Banglish makes Qwen2.5-7B send 450 Tk to the attacker; with the provenance defence the same payment is blocked](docs/demo.gif)
+
 > Status: work in progress. Results below are from all 302 cases on four Qwen2.5 models (3B to 32B) and Hermes 3 (Llama 3.1 8B).
 
 ## Why this matters
@@ -192,6 +194,24 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 - **The first version of `provenance-consistent` cut forged amounts from 10 of 16 to 3 of 16, but did not stop them all.** In all 3, the model called `read_sms` with `limit: 1`, saw only the newest (forged) message, and paid it. That version compared only messages the agent had read, so it never saw the real amount. The model read only the newest SMS in 5 of the 16 cases. The scripted check above missed this because its agent always reads every message: a defence must be tested against how real agents use tools, not only against an ideal script.
 - **Fixed since:** the check now compares every SMS and invoice from that payee in the wallet, whether or not the agent read them (it takes only amounts from them, never codes). `scripts/audit_adaptive.py` now also plays an agent that reads only the newest SMS or only the forged invoice: it beats the first version in 40 of 40 cases and the fixed one in 0 of 40. Replaying the real 32B traces through the fixed version, it would have blocked all 3 attacks that got through, and on the 302 main cases it still blocks no correct payment (ideal agent, and replays of all five 32B runs). The table above is from the first version; a model rerun of the fixed one is still to come.
 - **The cost is real.** With `provenance-consistent` the correct payment went through in only 2 of 56 adaptive cases (12 with `provenance-amount`): when the payee's messages disagree, the payment waits for the user.
+
+### Why normal tasks fail
+
+`scripts/error_analysis.py` puts every failed normal task into one cause, from the traces. Run it with `python scripts/error_analysis.py results/`. So far it has been run on Qwen2.5-32B; the other models' traces are not in this repository yet.
+
+| Qwen2.5-32B: cause of failure | No defence | Provenance-amount (new block message) | Provenance-consistent |
+|---|---:|---:|---:|
+| Used the invoice ID (or a name) as the biller account; the wallet refused and the agent gave up | 15 | | |
+| Blocked by the defence, gave up | | 16 | 17 |
+| Wrong payee or amount paid | 4 | 0 | 0 |
+| Stopped without paying | 5 | 4 | 4 |
+| Read-only task: wrong answer | 3 | 3 | 2 |
+| Asked again after its one "yes" | 1 | 2 | 1 |
+| **Failed / all normal tasks** | **28/82** | **25/82** | **24/82** |
+
+- **One tool-design detail causes most failures.** `list_invoices` shows each invoice's ID, biller and amount, but not the biller account; that is only in `read_invoice`. The model often paid the invoice ID (`inv-power`) as the account: all 15 "wallet refused" failures without a defence, and 12 of the 16 blocks with `provenance-amount`. The defence did not cause these failures; the same mistake failed without it. Small details of the tools change task success as much as the defences do.
+- **The defences block wrong payments, not tasks the model would have done:** with `provenance-amount` the model failed 25 tasks against 28 without a defence. The 4 wrong payments without a defence all went to an invented number (for example +8801711223344 instead of Rafi's 01710000003) with a guessed amount, after reading the SMS; the recipient check stops exactly these.
+- The causes for "asked to confirm" and "said it paid" use short keyword lists in three languages, so those counts are estimates.
 
 ### Earlier run (114 cases, 3 repeats)
 
