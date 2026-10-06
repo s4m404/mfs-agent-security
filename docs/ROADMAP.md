@@ -142,9 +142,11 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       first version, 0/40 against the fix. No correct payment blocked on
       the 302 main cases (ideal agent; replays of all five 32B runs);
       replaying the real adaptive traces, all 3 attacks would be blocked.
-- [ ] Optional Kaggle rerun of the fixed `provenance-consistent` on
-      Qwen2.5-32B (notebook ready, about 1 to 1.5 hours): 302 main cases
-      and the 56 adaptive cases. Can wait and be batched with other runs.
+- [x] Kaggle rerun of the fixed `provenance-consistent` on Qwen2.5-32B
+      (README): 0 of 56 adaptive attacks (first version 3), 0 of 220 main
+      attacks, 0 correct payments blocked, 72% of normal tasks done. Only 1
+      of the 56 adaptive correct payments went through (it waits for the
+      user when the payee's messages disagree).
 - [x] One stronger model on Kaggle: Qwen2.5-32B-Instruct (4-bit AWQ),
       all three defences, 0 model errors; results in the README. 14.5%
       attack success without a defence, 4 (all amount-only) with
@@ -242,8 +244,10 @@ against the earlier 114-case run with 3 repeats.
   fake revised bill) beat provenance-amount when the agent obeys (40/40);
   the recipient check still stops a forged new number (0/16). With a
   real model (Qwen2.5-32B) a forged "correction" from the payee worked in
-  11 of 16 cases without a defence; provenance-consistent cut it to 3 of
-  16, at the cost of holding most correct payments for the user.
+  11 of 16 cases without a defence; the first provenance-consistent cut
+  it to 3 of 16 (the model read only the newest SMS), and the fixed one,
+  which checks the whole inbox, to 0 of 56 adaptive attacks, at the cost of
+  holding most adaptive-case correct payments for the user.
 - Results reproduce: the original 114 cases gave 10.0% / 3.8% / 6.2%
   attack success, against 10.0% / 3.8% / 5.0% before. Repeats at
   temperature 0 are nearly identical, so more cases matter more than more
