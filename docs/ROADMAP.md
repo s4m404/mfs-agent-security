@@ -45,7 +45,8 @@ Last updated: 6 October 2026 (Qwen2.5-32B rerun: block message fix and adaptive 
       earliest realistic one (see "Paper target" below; PR #8).
 - [ ] Paper outline and figures script (`scripts/make_figures.py`), so the
       draft can start before cloud credits run out on 5 November.
-- [ ] Add a short GIF of the demo to the top of the README.
+- [x] Add a short GIF of the demo to the top of the README (`docs/demo.gif`,
+      made by `scripts/make_demo_gif.py` from the demo page).
 
 ## Paper target
 

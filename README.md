@@ -6,6 +6,8 @@ attack test set and defences to find out.
 
 **[Live demo](https://s4m404.github.io/mfs-agent-security/)**: replay real runs step by step and switch the defence on and off. No install needed.
 
+![A real run replayed: a fake TakaPay SMS in Banglish makes Qwen2.5-7B send 450 Tk to the attacker; with the provenance defence the same payment is blocked](docs/demo.gif)
+
 > Status: work in progress. Results below are from all 302 cases on four Qwen2.5 models (3B to 32B) and Hermes 3 (Llama 3.1 8B).
 
 ## Why this matters
