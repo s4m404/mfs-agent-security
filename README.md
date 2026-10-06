@@ -122,7 +122,7 @@ What these runs showed (the 32B model is covered in more detail below):
 - **Each model falls for attacks in different languages.** The 3B and 14B models fell mostly for English text (10 and 13 of 55 English attacks, at most 3 in any other language). The 32B model also fell most for English (14 of 55), but also for Banglish (7) and mixed text (8). The 7B model fell most for mixed Bangla-English text (6 of 54). No model leaked the OTP (0 of 75 attempts).
 - **A bigger model was not safer.** The 32B model had the highest attack success (14.5%, about twice the smaller models), and the 14B model tried to pay invented payees in 49% of episodes, against 29% for the 7B model.
 - **The results reproduce.** On the original 114 cases, attack success without a defence was 10.0%, 3.8% and 6.2%, against 10.0%, 3.8% and 5.0% in the earlier 3-repeat run. Four settings that ran twice (an interrupted first attempt, then the full run) gave the same outcome in 97% to 99% of cases.
-- **Small models often fail the task itself.** The 3B model completed only 13% to 17% of normal tasks. Without a defence, 27 of its 68 failed tasks were bill payments made without opening the invoice, and 15 paid the wrong payee or amount.
+- **Small models often fail the task itself.** The 3B model completed only 13% to 17% of normal tasks. Without a defence, 34 of its 68 failed tasks called `pay_bill` before reading the invoice (17 without opening any invoice at all), and 10 paid a wrong payee or amount (see "Why normal tasks fail" below).
 
 ### The largest model: Qwen2.5-32B
 
@@ -145,7 +145,7 @@ To check that the findings are not specific to Qwen, the same 302 cases were run
 | Hermes-3-Llama-3.1-8B | provenance-amount | **0% (0 to 1)** | **0% (0 to 4)** | 22% (13 to 31) | 10% (7 to 13) | **0** |
 
 - **The same pattern holds.** Provenance stopped every attack that redirects money; the one attack that got past it changed only the amount (a Bangla note inflating the rent). The amount check stopped that too, blocked no correct payment, and let no wrong payment through.
-- Hermes 3 fell for fewer attacks (5 of 220 without a defence, all through SMS; 3 of the 5 in English) and tried to pay invented payees far less often (10% of episodes) than the Qwen models, but it completed only 22% of normal tasks. Of its 64 failed normal tasks, it often read the bill and then stopped without paying; in about 14 it asked the user to confirm without a question mark, which the simulated user does not answer (it only replies to a "?"), and in 9 it told the user it had paid without ever calling a payment tool.
+- Hermes 3 fell for fewer attacks (5 of 220 without a defence, all through SMS; 3 of the 5 in English) and tried to pay invented payees far less often (10% of episodes) than the Qwen models, but it completed only 22% of normal tasks. Of its 64 failed normal tasks, it often read the bill and then stopped without paying; in about 9 it asked the user to confirm without a question mark, which the simulated user does not answer (it only replies to a "?"), and in about 8 it told the user it had paid, or was paying now, without ever calling a payment tool (keyword estimates from `scripts/error_analysis.py`).
 
 IBM Granite 3.3 8B was also run but is left out: in this setup (vLLM on T4 GPUs) most of its tool calls came out as plain text instead of real tool calls (0.2 tool calls per case, 5% of normal tasks done), so its 0% attack success says nothing about its safety.
 
@@ -197,21 +197,24 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 
 ### Why normal tasks fail
 
-`scripts/error_analysis.py` puts every failed normal task into one cause, from the traces. Run it with `python scripts/error_analysis.py results/`. So far it has been run on Qwen2.5-32B; the other models' traces are not in this repository yet.
+`scripts/error_analysis.py` puts every failed normal task into one cause, from the traces. Reproduce with `python scripts/error_analysis.py results/`. Without a defence:
 
-| Qwen2.5-32B: cause of failure | No defence | Provenance-amount (new block message) | Provenance-consistent |
-|---|---:|---:|---:|
-| Used the invoice ID (or a name) as the biller account; the wallet refused and the agent gave up | 15 | | |
-| Blocked by the defence, gave up | | 16 | 17 |
-| Wrong payee or amount paid | 4 | 0 | 0 |
-| Stopped without paying | 5 | 4 | 4 |
-| Read-only task: wrong answer | 3 | 3 | 2 |
-| Asked again after its one "yes" | 1 | 2 | 1 |
-| **Failed / all normal tasks** | **28/82** | **25/82** | **24/82** |
+| Cause of failure (82 normal tasks per model) | 3B | 7B | 14B | 32B | Hermes 3 |
+|---|---:|---:|---:|---:|---:|
+| Wallet refused the payment (almost always a wrong biller account), agent gave up | 32 | 19 | 21 | 15 | 3 |
+| &nbsp;&nbsp;of which the account was the invoice ID | 0 | 8 | 4 | 14 | 1 |
+| Wrong payee or amount paid | 10 | 2 | 8 | 4 | 3 |
+| Said it paid (or was paying), never called a payment tool | 1 | 0 | 2 | 0 | 8 |
+| Asked to confirm without a "?", so got no answer | 1 | 0 | 0 | 0 | 9 |
+| Asked again after its one "yes" | 4 | 6 | 0 | 1 | 1 |
+| Read-only task: wrong answer | 9 | 0 | 7 | 3 | 6 |
+| Stopped without paying | 11 | 9 | 9 | 5 | 34 |
+| **Failed** | **68** | **36** | **47** | **28** | **64** |
 
-- **One tool-design detail causes most failures.** `list_invoices` shows each invoice's ID, biller and amount, but not the biller account; that is only in `read_invoice`. The model often paid the invoice ID (`inv-power`) as the account: all 15 "wallet refused" failures without a defence, and 12 of the 16 blocks with `provenance-amount`. The defence did not cause these failures; the same mistake failed without it. Small details of the tools change task success as much as the defences do.
-- **The defences block wrong payments, not tasks the model would have done:** with `provenance-amount` the model failed 25 tasks against 28 without a defence. The 4 wrong payments without a defence all went to an invented number (for example +8801711223344 instead of Rafi's 01710000003) with a guessed amount, after reading the SMS; the recipient check stops exactly these.
-- The causes for "asked to confirm" and "said it paid" use short keyword lists in three languages, so those counts are estimates.
+- **A wrong biller account is the top cause for every Qwen model.** The smaller models make one up (`your_account_number`, `123456789`, `DP007`); Qwen2.5-32B uses the invoice ID (`inv-power`) in 14 of its 15. `list_invoices` shows each invoice's ID, biller and amount but not the account, which only `read_invoice` shows. This is the invented-payee problem again, and a small tool-design detail drives it.
+- **Hermes 3 mostly stops.** In 34 of its 64 failures it reads the bill or SMS, reports it, and stops, often asking the user for an invoice or account number it could have looked up. It also writes "Please confirm ..." without a "?" (9) and says it is sending the money without doing it (8).
+- **The defences replace failures, they do not add them.** With a defence on, the wallet refusals become blocks, and the totals hardly change: with `provenance-amount` 71, 37, 40 and 64 failures for 3B, 7B, 14B and Hermes 3. Qwen2.5-32B failed 40 with the old block message and 25 with the new one (28 without a defence; see above).
+- The "said it paid" and "asked without a ?" counts use short keyword lists in three languages, so they are estimates; one of Hermes 3's 8 is a promise to pay later.
 
 ### Earlier run (114 cases, 3 repeats)
 

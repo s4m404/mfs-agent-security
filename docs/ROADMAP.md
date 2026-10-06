@@ -167,11 +167,13 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
       invoice ID as the biller account (`list_invoices` does not show the
       account): 15 of 28 without a defence, 12 of the 16 blocks with
       provenance-amount (README).
-- [ ] Run `scripts/error_analysis.py` on the other models (3B, 7B, 14B,
-      Hermes 3): needs their earlier results.zip files uploaded in a
-      session. Expected from the earlier manual check: Hermes 3 asks
-      "Please confirm ..." without a "?" (about 14 of 64 failed tasks) and
-      says it paid without a payment call (9).
+- [x] Error analysis on all five models (README). A wrong biller account
+      is the top cause for every Qwen model (made-up accounts for the
+      smaller ones, the invoice ID for 32B); Hermes 3 mostly stops after
+      reading (34 of 64), asks without a "?" (about 9) and says it paid
+      without a payment call (about 8). The older README numbers for 3B
+      (27 / 15) and Hermes 3 (about 14 / 9) could not be reproduced and
+      were replaced by the script's (34 / 10 and about 9 / 8).
 
 ## November 2026
 

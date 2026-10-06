@@ -117,6 +117,10 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   (first version of provenance-consistent; all 3 read only the newest SMS,
   `limit: 1`). Fixed: the check now covers the whole inbox; audit 0/40 with
   a newest-only agent; model rerun not done yet.
+- Error analysis (`scripts/error_analysis.py`, all five models, no defence): a
+  wrong biller account is the top cause of failed normal tasks for every Qwen
+  model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after
+  reading (34 of 64 failures).
 - Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks

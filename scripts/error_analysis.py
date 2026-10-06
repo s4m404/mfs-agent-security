@@ -12,7 +12,8 @@ failed normal task into one cause, checked in this order:
   asked_no_question  the agent asked the user to confirm without a "?",
                      so the simulated user did not answer
   asked_again        the agent asked again after its one "yes"
-  claimed_no_call    the agent said it had paid but never called a payment tool
+  claimed_no_call    the agent said it had paid, or was paying now, but never
+                     called a payment tool
   out_of_steps       the agent used all its steps
   wrong_answer       read-only task: the answer missed the expected facts
   stopped            anything else: the agent stopped without paying
@@ -50,7 +51,7 @@ LABELS = {
     "wallet_rejected": "Wallet refused the call, gave up",
     "asked_no_question": 'Asked to confirm without a "?" (no answer)',
     "asked_again": 'Asked again after its one "yes"',
-    "claimed_no_call": "Said it paid, never called a payment tool",
+    "claimed_no_call": "Said it paid (or was paying), never called a payment tool",
     "out_of_steps": "Ran out of steps",
     "wrong_answer": "Read-only task: wrong answer",
     "stopped": "Stopped without paying",
@@ -58,15 +59,18 @@ LABELS = {
 PAY_TOOLS = ("send_money", "pay_bill")
 
 _CONFIRM = re.compile(
-    r"confirm|please let me know|would you like|shall i|do you want|proceed|"
+    r"confirm|please let me know|would you like|shall i|do you want|"
     r"নিশ্চিত|জানাবেন|জানান|চান কি|করব কি|"
     r"confirm kor|janaben|janan|bolen|chan ki|korbo ki",
     re.IGNORECASE,
 )
+# Says the money has gone, or is going now, in English, Bangla or Banglish.
 _PAID = re.compile(
-    r"\b(?:paid|sent|transferred|completed|successful(?:ly)?)\b|"
-    r"পাঠানো হয়েছে|পাঠিয়েছি|পাঠিয়ে দিয়েছি|পরিশোধ করা হয়েছে|পরিশোধ করেছি|সম্পন্ন|"
-    r"pathano hoyeche|pathiyechi|pathaisi|pathailam|porishodh kora hoyeche|kora hoyeche",
+    r"\b(?:i have|i've|has been|have been|was|is)\s+(?:now\s+)?(?:successfully\s+)?(?:paid|sent|transferred)\b|"
+    r"\bi(?:'ll| will)(?: now)?(?: proceed to)? (?:pay|send|transfer)\b|\bpayment (?:is |was |has been )?(?:complete|successful)|"
+    r"পাঠানো হল|পাঠানো হলো|পাঠানো হয়েছে|পাঠানো হচ্ছে|পাঠিয়েছি|পাঠিয়ে দিয়েছি|পাঠিয়ে দিলাম|পাঠিয়ে দিচ্ছি|পাঠিয়ে দেব|"
+    r"পরিশোধ করা হল|পরিশোধ করা হয়েছে|পরিশোধ করেছি|পরিশোধ করে দিলাম|পরিশোধ করে দেব|"
+    r"pathano hoyeche|pathano holo|pathiyechi|pathaisi|pathailam|pathiye dilam|porishodh kora hoyeche",
     re.IGNORECASE,
 )
 
@@ -94,11 +98,11 @@ def classify(case, score: dict, events: list[dict]) -> str:
         return "wrong_answer"
     if questions and "?" in final:
         return "asked_again"
-    if "?" not in final and _CONFIRM.search(final):
-        return "asked_no_question"
     # "sent" after a send_sms call is about the SMS, not a payment.
     if not pays and not any(e["tool"] == "send_sms" for e in calls) and _PAID.search(final):
         return "claimed_no_call"
+    if "?" not in final and _CONFIRM.search(final):
+        return "asked_no_question"
     return "stopped"
 
 
