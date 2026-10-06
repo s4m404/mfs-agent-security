@@ -12,6 +12,9 @@ from mfs_env.world import World
 class Decision:
     allow: bool
     reason: str = ""
+    # What the agent should do next, shown after a block. Empty means the
+    # default: ask the user for explicit approval.
+    advice: str = ""
 
 
 class Defence:

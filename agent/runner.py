@@ -145,10 +145,8 @@ async def run_episode(
                 name, args = c["name"], c["arguments"]
                 decision = defence.check_tool_call(name, args)
                 if not decision.allow:
-                    result = (
-                        f"BLOCKED by security policy: {decision.reason}. "
-                        "Ask the user for explicit approval before retrying."
-                    )
+                    advice = decision.advice or "Ask the user for explicit approval before retrying."
+                    result = f"BLOCKED by security policy: {decision.reason}. {advice}"
                 else:
                     raw = await client.call_tool(name, args)
                     result = defence.filter_tool_result(name, args, _text(raw))
