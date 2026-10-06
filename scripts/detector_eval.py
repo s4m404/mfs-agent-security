@@ -17,9 +17,13 @@ Detectors:
                 one (SAFE, LEGIT, BENIGN, LABEL_0).
 
 Results are broken down by language (attack texts by the attack's language;
-normal texts by review_texts.csv, else by script) and by attack style.
+normal texts by review_texts.csv, else by script) and by attack style. The
+last table shows the cost of using a detector as a filter: normal tasks in
+which it would remove an SMS or invoice text the task needs, by the
+language of the user's request.
 
 Run:  python scripts/detector_eval.py --detectors keyword protectai/deberta-v3-base-prompt-injection-v2
+      python scripts/detector_eval.py --from-flags results_detectors/flags.jsonl   (tables only)
 """
 
 from __future__ import annotations
@@ -123,7 +127,25 @@ def rate(k: int, n: int) -> str:
     return f"{100 * k / n:.0f}% ({k}/{n}; {100 * lo:.0f} to {100 * hi:.0f})"
 
 
-def summarise(rows: list[dict], flags: dict[str, list[bool]]) -> str:
+def tasks_hit(cases, rows: list[dict], flags: dict[str, list[bool]]) -> dict[str, dict[str, tuple[int, int]]]:
+    """{detector: {request language: (normal tasks losing a needed text, normal tasks with texts)}}"""
+    index = {r["text"]: i for i, r in enumerate(rows)}
+    out: dict[str, dict[str, tuple[int, int]]] = {}
+    for name, f in flags.items():
+        counts: dict[str, list[int]] = defaultdict(lambda: [0, 0])
+        for c in cases:
+            texts = [m["text"] for m in c.inbox if m.get("text")] + [i["text"] for i in c.invoices if i.get("text")]
+            if c.is_attack or not texts:
+                continue
+            hit = any(f[index[t]] for t in texts)
+            for key in (c.task_language, "all"):
+                counts[key][0] += hit
+                counts[key][1] += 1
+        out[name] = {k: tuple(v) for k, v in counts.items()}
+    return out
+
+
+def summarise(rows: list[dict], flags: dict[str, list[bool]], cases=None) -> str:
     lines = ["## Attack texts flagged (higher is better)", "",
              "| Detector | All | " + " | ".join(LANGS) + " | Instructions to the AI | Ordinary scam messages |",
              "|---|---:|" + "---:|" * (len(LANGS) + 2)]
@@ -141,6 +163,13 @@ def summarise(rows: list[dict], flags: dict[str, list[bool]]) -> str:
         cell = lambda sel: rate(sum(x for r, x in sel), len(sel))  # noqa: E731
         lines.append(f"| {name} | {cell(nor)} | "
                      + " | ".join(cell([(r, x) for r, x in nor if r["language"] == lang]) for lang in LANGS) + " |")
+    if cases is not None:
+        lines += ["", "## Normal tasks that would lose a text they need, if the detector filtered it out (lower is better)", "",
+                  "| Detector | All | " + " | ".join(f"{lang} request" for lang in LANGS) + " |",
+                  "|---|---:|" + "---:|" * len(LANGS)]
+        for name, by_lang in tasks_hit(cases, rows, flags).items():
+            lines.append(f"| {name} | {rate(*by_lang.get('all', (0, 0)))} | "
+                         + " | ".join(rate(*by_lang.get(lang, (0, 0))) for lang in LANGS) + " |")
     return "\n".join(lines) + "\n"
 
 
@@ -150,9 +179,18 @@ def main() -> None:
     p.add_argument("--cases", default="bench/cases")
     p.add_argument("--out", type=Path, default=Path("results_detectors"))
     p.add_argument("--device", type=int, default=None, help="GPU number for Hugging Face models (e.g. 0)")
+    p.add_argument("--from-flags", type=Path, default=None, help="rebuild the tables from a saved flags.jsonl")
     args = p.parse_args()
 
-    rows = collect_texts(load_cases(args.cases))
+    cases = load_cases(args.cases)
+    if args.from_flags:
+        saved = [json.loads(line) for line in open(args.from_flags, encoding="utf-8")]
+        rows = [{k: v for k, v in r.items() if k != "flags"} for r in saved]
+        flags = {d: [r["flags"][d] for r in saved] for d in saved[0]["flags"]}
+        print(summarise(rows, flags, cases))
+        return
+
+    rows = collect_texts(cases)
     texts = [r["text"] for r in rows]
     n_att = sum(r["kind"] == "attack" for r in rows)
     print(f"{len(rows)} distinct texts: {n_att} attack, {len(rows) - n_att} normal")
@@ -169,7 +207,7 @@ def main() -> None:
     with open(args.out / "flags.jsonl", "w", encoding="utf-8") as f:
         for i, r in enumerate(rows):
             f.write(json.dumps({**r, "flags": {d: v[i] for d, v in flags.items()}}, ensure_ascii=False) + "\n")
-    summary = summarise(rows, flags)
+    summary = summarise(rows, flags, cases)
     (args.out / "summary.md").write_text(summary, encoding="utf-8")
     print("\n" + summary + f"\nSaved to {args.out}")
 

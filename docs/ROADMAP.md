@@ -90,6 +90,10 @@ fallback if one on low-resource or multilingual safety is announced.
 **How the paper should be framed for STALA** (every point already backed by
 the README numbers):
 
+0. Off-the-shelf injection detectors do not transfer to Bangla: they flag
+   the Bengali script itself (84% of normal Bangla texts for ProtectAI's
+   detector), so a detection benchmark score in English says nothing about
+   other languages; provenance, which never reads the text, does.
 1. Attack success alone is a misleading metric for payment agents: models
    made wrong payments with no attacker involved (invented payees, guessed
    amounts) more often than any attack succeeded.
@@ -114,16 +118,14 @@ and submit to an ICLR 2027 or ACL 2027 workshop in early February.
 What reviewers will most likely attack, and the answer to each. Do these
 in order; the first three come before cloud credits end on 5 November.
 
-1. [ ] **Do real injection detectors work in Bangla and Banglish?** The
-       keyword filter is a weak baseline. `scripts/detector_eval.py` asks
-       detectors whether each untrusted text (174 attack, 54 normal) is an
-       attack, by language and style. Done so far: the keyword baseline
-       (34% of attack texts, 7% of mixed-language ones, 0% of ordinary scam
-       messages). Next: run `notebooks/kaggle_detectors.ipynb` (5 to 10
-       minutes) for ProtectAI's DeBERTa v2 and deepset's detector. Hoped-for
-       headline, only if the numbers show it: English-trained detectors miss
-       Bangla and Banglish attacks, while provenance works in every language.
-       If a detector does well, it becomes a defence to run in the agent too.
+1. [x] **Do real injection detectors work in Bangla and Banglish?**
+       (`scripts/detector_eval.py`, Kaggle run; README.) No: ProtectAI's
+       DeBERTa v2 flags 84% of normal Bangla texts (more than Bangla attacks,
+       57%) and as a filter would break 20 of 22 normal Bangla-request tasks
+       (1 of 21 in English); deepset's flags 87% of all normal texts. Even in
+       English ProtectAI caught only 47% of attacks. Provenance: 0 correct
+       payments blocked in every language. Optional later: Prompt Guard
+       (needs a Hugging Face account) or a multilingual LLM judge.
 2. [ ] **One strong model through a free API** (for example Llama 3.3 70B
        on Groq, or Gemini), so the results are not only small open models.
        Check the free-tier limits and terms first; the agent already speaks
@@ -280,6 +282,11 @@ against the earlier 114-case run with 3 repeats.
   it to 3 of 16 (the model read only the newest SMS), and the fixed one,
   which checks the whole inbox, to 0 of 56 adaptive attacks, at the cost of
   holding most adaptive-case correct payments for the user.
+- Off-the-shelf injection detectors fail on Bangla: ProtectAI's DeBERTa v2
+  flagged 16 of 19 normal Bangla texts (as a filter it would break 20 of 22
+  Bangla-request tasks, 1 of 21 English) and caught only 47% of English
+  attacks; deepset's flagged 87% of all normal texts. Provenance blocked no
+  correct payment in any language.
 - Results reproduce: the original 114 cases gave 10.0% / 3.8% / 6.2%
   attack success, against 10.0% / 3.8% / 5.0% before. Repeats at
   temperature 0 are nearly identical, so more cases matter more than more
