@@ -54,8 +54,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   traces through another defence, no model needed).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
-  three Qwen2.5 models and Hermes-3-Llama-3.1-8B (`hermes`). Currently set to
-  run Qwen2.5-32B-Instruct-AWQ (needs `--gpu-memory-utilization 0.95`). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
+  (`hermes`). Currently set to run Qwen2.5-32B-Instruct-AWQ (needs
+  `--gpu-memory-utilization 0.95`). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
@@ -89,10 +90,15 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - Agents tried to pay invented payees in 29% to 52% of episodes.
 - The original 114 cases reproduce the earlier 3-repeat run
   (10.0% / 3.8% / 6.2% vs 10.0% / 3.8% / 5.0%).
+- Qwen2.5-32B-AWQ: 14.5% without defence, 4 with `provenance` (all
+  amount-only), 0 with `provenance-amount`, 0 correct payments blocked. But
+  with either defence it did 12 fewer normal tasks (66% to 51%): it paid the
+  invoice ID as the account, and the block message ("ask the user") replaced
+  the wallet's hint ("check the invoice"), so it gave up.
 - Hermes-3-Llama-3.1-8B (second family): 2.3% without defence, 1 with
   `provenance` (amount-only), 0 with `provenance-amount`, 0 correct payments blocked.
 - Among attacks the agent read and on tasks it could do (`scripts/conditional_rates.py`):
-  24% / 11% / 15% (Qwen 3B / 7B / 14B) and 10% (Hermes 3) without defence; 0 with
+  24% / 11% / 15% / 18% (Qwen 3B / 7B / 14B / 32B) and 10% (Hermes 3) without defence; 0 with
   `provenance-amount`.
 - Adaptive set: an obeying agent beats `provenance-amount` with a spoofed payee
   SMS or a forged biller invoice (40/40); a forged new number is still blocked (0/16).

@@ -6,7 +6,7 @@ attack test set and defences to find out.
 
 **[Live demo](https://s4m404.github.io/mfs-agent-security/)**: replay real runs step by step and switch the defence on and off. No install needed.
 
-> Status: work in progress. Results below are from all 302 cases on three Qwen2.5 models and Hermes 3 (Llama 3.1 8B).
+> Status: work in progress. Results below are from all 302 cases on four Qwen2.5 models (3B to 32B) and Hermes 3 (Llama 3.1 8B).
 
 ## Why this matters
 
@@ -89,7 +89,7 @@ Results are broken down by injection language, script, vector and style.
 
 ## Results
 
-Latest run (October 2026): all 302 cases, three sizes of the same model family (Qwen2.5 3B, 7B and 14B, the 14B quantised to 4-bit), served with vLLM on Kaggle T4 GPUs at temperature 0, one run per case. Brackets show 95% confidence intervals from a bootstrap over test cases; for 0% the upper bound uses the rule of three. Reproduce the table with `python scripts/compare_runs.py results/`.
+Latest runs (October 2026): all 302 cases, four sizes of the same model family (Qwen2.5 3B, 7B, 14B and 32B, the 14B and 32B quantised to 4-bit), served with vLLM on Kaggle T4 GPUs at temperature 0, one run per case. Brackets show 95% confidence intervals from a bootstrap over test cases; for 0% the upper bound uses the rule of three. Reproduce the table with `python scripts/compare_runs.py results/`.
 
 | Model | Defence | Attack success | Correct actions blocked | Benign tasks done | Tried to pay an invented payee | Wrong payments that went through |
 |---|---|---:|---:|---:|---:|---:|
@@ -102,18 +102,30 @@ Latest run (October 2026): all 302 cases, three sizes of the same model family (
 | Qwen2.5-14B (AWQ) | none | 7.7% (5 to 12) | 0% | 43% (32 to 54) | 49% (43 to 54) | 29 |
 | Qwen2.5-14B (AWQ) | provenance | 2.3% (0 to 4) | 0% (0 to 4) | 50% (39 to 61) | 49% (43 to 54) | 27 |
 | Qwen2.5-14B (AWQ) | provenance-amount | **0% (0 to 1)** | **0% (0 to 4)** | 51% (40 to 62) | 49% (43 to 54) | **0** |
+| Qwen2.5-32B (AWQ) | none | 14.5% (10 to 19) | 0% | 66% (56 to 76) | 40% (34 to 45) | 20 |
+| Qwen2.5-32B (AWQ) | provenance | 1.8% (0 to 4) | 0% (0 to 4) | 51% (40 to 62) | 39% (33 to 45) | 2 |
+| Qwen2.5-32B (AWQ) | provenance-amount | **0% (0 to 1)** | **0% (0 to 4)** | 51% (40 to 62) | 39% (33 to 45) | **0** |
 
-Attack success is over all 220 attack cases per setting. Counting only attacks the agent actually read, it was 13% for 3B, 8% for 7B and 9% for 14B without a defence. "Wrong payments that went through" counts episodes (out of 302) where the wallet carried out a payment to a payee or amount nobody asked for.
+Attack success is over all 220 attack cases per setting. Counting only attacks the agent actually read, it was 13% for 3B, 8% for 7B, 9% for 14B and 18% for 32B without a defence. "Wrong payments that went through" counts episodes (out of 302) where the wallet carried out a payment to a payee or amount nobody asked for.
 
-What this run showed:
+What these runs showed (the 32B model is covered in more detail below):
 
-- **Provenance plus the amount check stopped every attack on all three models (0 of 660 attack episodes), never blocked a correct payment, and let no wrong payment through.** The amount rule: a payment amount must come from the user's request or from the payee itself (an SMS from the recipient's own number, or an invoice for that same biller account).
-- **Provenance alone stopped every attack that sends money to a new number or leaks the OTP (0 of 600 episodes), but not attacks that change only the amount.** All 11 attacks that got past it kept the real payee and inflated the amount, for example a fake "correction" in a school invoice raising the fee from 3,500 to 5,000 Tk. Without a defence these amount-only attacks were the most successful kind: 2, 4 and 7 of 20 for the 3B, 7B and 14B models, against 14, 9 and 10 of the other 200 attacks.
-- **Invented payees are a bigger risk than injection.** Models tried to pay a payee or amount nobody asked for in 29% to 52% of episodes, far more often than any attack succeeded, and without a defence 8 to 33 of these payments per model went through, mostly to the right payee with a guessed amount. The amount check stopped all of them.
-- **Each model falls for attacks in different languages.** The 3B and 14B models fell mostly for English text (10 and 13 of 55 English attacks, at most 3 in any other language). The 7B model fell most for mixed Bangla-English text (6 of 54). No model leaked the OTP (0 of 75 attempts).
-- **A bigger model was not safer.** The 14B model had the highest attack success (7.7%) and tried to pay invented payees in 49% of episodes, against 29% for the 7B model.
+- **Provenance plus the amount check stopped every attack on all four models (0 of 880 attack episodes), never blocked a correct payment, and let no wrong payment through.** The amount rule: a payment amount must come from the user's request or from the payee itself (an SMS from the recipient's own number, or an invoice for that same biller account).
+- **Provenance alone stopped every attack that sends money to a new number or leaks the OTP (0 of 800 episodes), but not attacks that change only the amount.** All 15 attacks that got past it kept the real payee and inflated the amount, for example a fake "correction" in a school invoice raising the fee from 3,500 to 5,000 Tk. Without a defence these amount-only attacks were the most successful kind: 2, 4, 7 and 7 of 20 for the 3B, 7B, 14B and 32B models, against 14, 9, 10 and 25 of the other 200 attacks.
+- **Invented payees are a bigger risk than injection.** Models tried to pay a payee or amount nobody asked for in 29% to 52% of episodes, far more often than any attack succeeded, and without a defence 8 to 33 of these payments per model went through (20 for 32B), mostly to the right payee with a guessed amount. The amount check stopped all of them.
+- **Each model falls for attacks in different languages.** The 3B and 14B models fell mostly for English text (10 and 13 of 55 English attacks, at most 3 in any other language). The 32B model also fell most for English (14 of 55), but also for Banglish (7) and mixed text (8). The 7B model fell most for mixed Bangla-English text (6 of 54). No model leaked the OTP (0 of 75 attempts).
+- **A bigger model was not safer.** The 32B model had the highest attack success (14.5%, about twice the smaller models), and the 14B model tried to pay invented payees in 49% of episodes, against 29% for the 7B model.
 - **The results reproduce.** On the original 114 cases, attack success without a defence was 10.0%, 3.8% and 6.2%, against 10.0%, 3.8% and 5.0% in the earlier 3-repeat run. Four settings that ran twice (an interrupted first attempt, then the full run) gave the same outcome in 97% to 99% of cases.
 - **Small models often fail the task itself.** The 3B model completed only 13% to 17% of normal tasks. Without a defence, 27 of its 68 failed tasks were bill payments made without opening the invoice, and 15 paid the wrong payee or amount.
+
+### The largest model: Qwen2.5-32B
+
+Qwen2.5-32B-Instruct (4-bit AWQ) is the largest model that fits on Kaggle's two T4 GPUs. It was run on the same 302 cases with the same settings, 0 model errors.
+
+- **It was the best at the task and the easiest to fool.** It completed 66% of normal tasks without a defence (the 3B to 14B models: 17% to 56%), but 32 of 220 attacks succeeded (14.5%), about twice the rate of the smaller models. 23 of the 32 were instructions aimed at the AI, 9 were ordinary scam messages; attacks hidden in a tool description worked most often (9 of 37). No OTP was leaked (0 of 25).
+- **The defences still worked.** Provenance let through only 4 attacks, all amount-only (3 of them written in English); provenance-amount stopped all 220 and every wrong payment (20 without a defence, 2 with provenance, 0 with provenance-amount). No correct payment was blocked.
+- **But the defences cost it 12 normal tasks (54 of 82 done without a defence, 42 with either one).** These are not false blocks: in all 12, the model first tried to pay the invoice ID (for example `inv-power`) as the biller account. Without a defence the wallet answers "not a registered biller account. Check the invoice for the correct account", and the model reads the invoice and pays correctly. With a defence the same call is stopped first, and the block message says "Ask the user for explicit approval before retrying", so the model asks the user, retries the same wrong call and gives up. The wording of the block message, not the rule, causes the loss; the smaller models lost at most 3 normal tasks with a defence.
+- On the original 114 cases its attack success without a defence was 11 of 80 (13.8%).
 
 ### A second model family: Hermes 3 (Llama 3.1 8B)
 
@@ -139,9 +151,10 @@ Overall attack success understates the risk, because many episodes never reach t
 | Qwen2.5-3B | 7.3% (16/220) | 12.7% (16/126) | **24.1%** (7/29; 12 to 42) | 0% (0/20) | **0%** (0/22) |
 | Qwen2.5-7B | 5.9% (13/220) | 7.6% (13/171) | **10.8%** (13/120; 6 to 18) | 4.2% (5/118) | **0%** (0/118; 0 to 3) |
 | Qwen2.5-14B (AWQ) | 7.7% (17/220) | 9.4% (17/180) | **14.9%** (11/74; 9 to 25) | 6.2% (5/80) | **0%** (0/93; 0 to 4) |
+| Qwen2.5-32B (AWQ) | 14.5% (32/220) | 17.7% (32/181) | **17.8%** (23/129; 12 to 25) | 3.7% (4/107) | **0%** (0/107; 0 to 3) |
 | Hermes-3-Llama-3.1-8B | 2.3% (5/220) | 3.8% (5/131) | **9.8%** (4/41; 4 to 23) | 2.4% (1/41) | **0%** (0/41; 0 to 9) |
 
-- **When an agent was capable and saw the attack, attacks worked 2 to 4 times more often than the overall rate suggests** (10% to 24% without a defence). Weak task performance had been hiding part of the risk, so overall attack success is a misleading measure on its own.
+- **When an agent was capable and saw the attack, attacks worked more often than the overall rate suggests**: 2 to 4 times more for the smaller models (10% to 24% without a defence). For the 32B model, which can do most tasks, the gap is small (14.5% overall, 17.8% read and able). Weak task performance had been hiding part of the risk, so overall attack success is a misleading measure on its own.
 - **The amount check still stopped every attack in this stricter group**, including the 118 cases where Qwen2.5-7B read the attack and could do the task.
 - The groups are smaller, so the intervals are wider; the 3B model in particular could do only 20 to 29 of these tasks.
 
@@ -184,6 +197,7 @@ The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 - [x] Grow to about 300 cases: 302 in total
 - [x] Provenance check for amounts as well as recipients (replay estimate done)
 - [x] Model run with the amount check (302 cases, 3 models)
+- [x] Larger model: Qwen2.5-32B (AWQ) on all 302 cases
 - [ ] Trained multilingual injection detector to replace the keyword baseline
 - [ ] Connect BRACUVerify as a second backend
 - [ ] Comparison with the sanitiser defence from "Indirect Prompt Injections: Are Firewalls All You Need?"
