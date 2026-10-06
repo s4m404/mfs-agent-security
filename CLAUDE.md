@@ -61,7 +61,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
   four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
-  (`hermes`). Currently set (through `CASE_SETS`) to rerun the fixed
+  (`hermes`). Last set (through `CASE_SETS`, done) to rerun the fixed
   provenance-consistent on Qwen2.5-32B-Instruct-AWQ (needs
   `--gpu-memory-utilization 0.95`): main cases, and adaptive cases (saved to
   `results_adaptive/`, git-ignored). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
@@ -116,7 +116,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   amount SMS worked 11/16 (none), 10/16 (provenance-amount), 3/16
   (first version of provenance-consistent; all 3 read only the newest SMS,
   `limit: 1`). Fixed: the check now covers the whole inbox; audit 0/40 with
-  a newest-only agent; model rerun not done yet.
+  a newest-only agent; 32B rerun: 0/56 adaptive, 0/220 main attacks, 0
+  correct payments blocked, 72% of normal tasks; 1/56 adaptive correct
+  payments went through (the rest wait for the user).
 - Error analysis (`scripts/error_analysis.py`, all five models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after
