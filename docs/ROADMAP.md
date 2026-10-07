@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 6 October 2026 (plan to strengthen the paper; detector test started).
+Last updated: 7 October 2026 (Groq free-tier run set up as a daily GitHub Actions job).
 
 ## Done
 
@@ -126,10 +126,20 @@ in order; the first three come before cloud credits end on 5 November.
        English ProtectAI caught only 47% of attacks. Provenance: 0 correct
        payments blocked in every language. Optional later: Prompt Guard
        (needs a Hugging Face account) or a multilingual LLM judge.
-2. [ ] **One strong model through a free API** (for example Llama 3.3 70B
-       on Groq, or Gemini), so the results are not only small open models.
-       Check the free-tier limits and terms first; the agent already speaks
-       the OpenAI API, so it needs a key and a small runner change.
+2. [ ] **One strong model through a free API: OpenAI's GPT-OSS-120B on
+       Groq** (a third model family). The owner chose the free tier (about
+       200,000 tokens a day, from third-party summaries of Groq's limits,
+       August 2026), so the run is slow: one defence needs roughly 1.5
+       million tokens (estimate), about a week. Set up (PR "Groq run"):
+       `.github/workflows/groq_run.yml` runs every 6 hours, continues with
+       `run_bench.py --resume`, stops cleanly at the daily limit (exit code
+       3, the case is not scored) and saves to the `groq-results` branch.
+       Order: none, provenance-amount, provenance. Setting: reasoning effort
+       low (fewer tokens per reply; say so in the paper). Owner's steps: add
+       the `GROQ_API_KEY` repository secret, then start the first run by
+       hand (Actions > Groq model run > Run workflow). Expected: none and
+       provenance-amount by about the end of October; provenance may finish
+       after 5 November.
 3. [ ] **Paper outline and figures script** (below).
 4. [ ] **A BRAC faculty advisor or co-author** (owner's task): credibility
        for the paper and a recommendation letter for scholarships.

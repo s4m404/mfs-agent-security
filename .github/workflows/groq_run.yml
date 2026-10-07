@@ -1,0 +1,99 @@
+# Runs the benchmark on a strong model through Groq's free API tier, a little
+# every day. The free tier allows only about 200,000 tokens a day, so each run
+# continues where the last one stopped (--resume) and ends cleanly when the
+# daily limit is reached. Results are saved to the `groq-results` branch.
+#
+# Setup (once): add the API key as a repository secret named GROQ_API_KEY
+# (Settings > Secrets and variables > Actions > New repository secret).
+# Start a run by hand: Actions > Groq model run > Run workflow.
+
+name: Groq model run
+
+on:
+  schedule:
+    - cron: "41 */6 * * *" # every 6 hours; a run stops as soon as the limit is reached
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: groq-run
+  cancel-in-progress: false
+
+env:
+  MODEL: openai/gpt-oss-120b
+  BASE_URL: https://api.groq.com/openai/v1
+  # Low reasoning effort keeps each reply short, so more cases fit in the daily limit.
+  EXTRA_BODY: '{"reasoning_effort": "low"}'
+  # In this order; the most important first.
+  DEFENCES: none provenance-amount provenance
+  OUT: results_groq
+  RESULTS_BRANCH: groq-results
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Get the results saved so far
+        env:
+          REPO_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        run: |
+          if git ls-remote --exit-code --heads "$REPO_URL" "$RESULTS_BRANCH" >/dev/null; then
+            git clone --quiet --branch "$RESULTS_BRANCH" --single-branch "$REPO_URL" /tmp/saved
+            if [ -d "/tmp/saved/$OUT" ]; then cp -r "/tmp/saved/$OUT" .; fi
+          else
+            mkdir -p /tmp/saved && (cd /tmp/saved && git init --quiet -b "$RESULTS_BRANCH" && git remote add origin "$REPO_URL")
+          fi
+          ls -R "$OUT" 2>/dev/null | head -20 || echo "No results yet"
+
+      - name: Check the API key and model
+        id: check
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ]; then echo "Add the GROQ_API_KEY repository secret first."; exit 1; fi
+          set +e
+          python scripts/check_api.py --model "$MODEL" --base-url "$BASE_URL" --api-key-env GROQ_API_KEY --extra-body "$EXTRA_BODY"
+          code=$?
+          if [ $code -eq 3 ]; then echo "limited=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          exit $code
+
+      - name: Run until done or until the daily limit
+        if: steps.check.outputs.limited != 'true'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          set +e
+          for d in $DEFENCES; do
+            python scripts/run_bench.py --model "$MODEL" --base-url "$BASE_URL" --api-key-env GROQ_API_KEY \
+              --extra-body "$EXTRA_BODY" --defence "$d" --out "$OUT" --resume --workers 2
+            code=$?
+            if [ $code -eq 3 ]; then echo "Daily limit reached during defence $d; the next run continues."; break; fi
+            if [ $code -ne 0 ]; then echo "Run failed with exit code $code"; exit $code; fi
+          done
+          exit 0
+
+      - name: Save results to the ${{ env.RESULTS_BRANCH }} branch
+        if: always()
+        run: |
+          if [ ! -d "$OUT" ]; then echo "Nothing to save"; exit 0; fi
+          rm -rf "/tmp/saved/$OUT" && cp -r "$OUT" /tmp/saved/
+          cd /tmp/saved
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "No new results"; exit 0; fi
+          for f in "$OUT"/*/scores.jsonl; do echo "$(wc -l < "$f") cases: $f"; done
+          git commit --quiet -m "Groq results, $(date -u '+%Y-%m-%d %H:%M') UTC"
+          git push --quiet origin "$RESULTS_BRANCH"

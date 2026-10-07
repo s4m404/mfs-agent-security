@@ -549,3 +549,74 @@ def test_detector_eval_separates_attack_and_normal_texts():
     every = {"all": [True] * len(rows)}
     hit = de.tasks_hit(list(CASES.values()), rows, every)["all"]["all"]
     assert hit[0] == hit[1] > 0
+
+
+def _rate_limit_error(message, headers=None):
+    """An openai.RateLimitError without a real HTTP reply (works with any openai version)."""
+    from types import SimpleNamespace
+
+    from openai import RateLimitError
+
+    err = RateLimitError.__new__(RateLimitError)
+    Exception.__init__(err, message)
+    err.message = message
+    err.response = SimpleNamespace(headers=headers or {})
+    return err
+
+
+def test_rate_limit_wait_is_read_from_the_reply():
+    from agent.llm import retry_after_seconds
+
+    assert retry_after_seconds(_rate_limit_error("slow down", {"retry-after": "7"})) == 7.0
+    groq = _rate_limit_error("Rate limit reached on tokens per day (TPD): Limit 200000. Please try again in 1h2m3.5s.")
+    assert retry_after_seconds(groq) == 3600 + 120 + 3.5
+    assert retry_after_seconds(_rate_limit_error("no hint")) is None
+
+
+def test_daily_rate_limit_stops_the_run_and_resume_continues_it(tmp_path, monkeypatch):
+    """A long rate-limit wait stops the run without scoring the case; --resume runs only the rest."""
+    import importlib.util
+    import json as _json
+
+    from agent.llm import OpenAICompatModel, RateLimited
+
+    # the client turns a long retry-after into RateLimited instead of waiting
+    m = OpenAICompatModel("x", "http://localhost:1/v1", max_wait=10)
+    err = _rate_limit_error("daily", {"retry-after": "3600"})
+
+    def boom(**kw):
+        raise err
+
+    monkeypatch.setattr(m.client.chat.completions, "create", boom)
+    with pytest.raises(RateLimited):
+        m.complete([], [])
+    spec = importlib.util.spec_from_file_location("run_bench", "scripts/run_bench.py")
+    rb = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rb)
+    calls = {"n": 0, "limit": 5}
+
+    class FakeModel:
+        def __init__(self, model, *a, **kw):
+            self.name = model
+
+        def complete(self, messages, tools):
+            calls["n"] += 1
+            if calls["n"] > calls["limit"]:
+                raise RateLimited("daily limit")
+            return {"content": "Done.", "tool_calls": []}
+
+    monkeypatch.setattr(rb, "OpenAICompatModel", FakeModel)
+    args = rb.argparse.Namespace(model="fake", base_url="", api_key_env="X", defence="none", prompt="guarded",
+                                 cases="bench/cases/seed.yaml", out=str(tmp_path), run_name="r", repeats=1,
+                                 max_steps=8, temperature=0.0, max_tokens=64, workers=1, resume=True, extra_body=None)
+    with pytest.raises(SystemExit) as stop:
+        rb.main_run(args)
+    assert stop.value.code == rb.RATE_LIMITED_EXIT
+    first = [_json.loads(x) for x in open(tmp_path / "r" / "scores.jsonl")]
+    assert 0 < len(first) < 12 and not any(s["model_error"] for s in first)
+
+    calls["limit"] = 10**9  # the limit has reset
+    rb.main_run(args)
+    final = [_json.loads(x) for x in open(tmp_path / "r" / "scores.jsonl")]
+    assert len(final) == 12 and len({s["case_id"] for s in final}) == 12
+    assert [s["case_id"] for s in final[: len(first)]] == [s["case_id"] for s in first]

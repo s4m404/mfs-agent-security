@@ -76,6 +76,12 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   Model replies are capped at 1,024 tokens; a model error ends only that case
   and is counted as `model_error` in scores.jsonl and summary.md.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
+- `.github/workflows/groq_run.yml`: GPT-OSS-120B on Groq's free tier, every 6
+  hours, `run_bench.py --resume` until the daily limit (exit code 3: the case
+  is not scored and runs again next time), results on the `groq-results`
+  branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.
+  `scripts/check_api.py` checks a key and model with one tool call first.
+  `run_bench.py --extra-body` passes API settings (`reasoning_effort: low`).
 - `docs/index.html`: the public demo page (GitHub Pages from /docs).
   It embeds real traces; regenerate it if the demo cases change.
 - `results/` is git-ignored.
