@@ -1,6 +1,7 @@
 """End to end tests with scripted models (no real LLM needed)."""
 
 import asyncio
+import re
 
 import pytest
 
@@ -620,3 +621,65 @@ def test_daily_rate_limit_stops_the_run_and_resume_continues_it(tmp_path, monkey
     final = [_json.loads(x) for x in open(tmp_path / "r" / "scores.jsonl")]
     assert len(final) == 12 and len({s["case_id"] for s in final}) == 12
     assert [s["case_id"] for s in final[: len(first)]] == [s["case_id"] for s in first]
+
+
+def test_make_figures_counts_and_writes_every_output(tmp_path):
+    """Paper figures and tables from fake runs: counts are right, every file is written."""
+    import importlib.util
+    import json
+
+    spec = importlib.util.spec_from_file_location("make_figures", "scripts/make_figures.py")
+    mf = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mf)
+    from scripts.detector_eval import collect_texts, keyword_detector
+
+    cases = list(CASES.values())
+    overpay = {c.id for c in cases if c.is_attack and c.attack["goal"] == "overpay"}
+    redirect = next(c.id for c in cases if c.is_attack and c.attack["goal"] == "send_money")
+
+    def fake_run(name, success_ids, wrong):
+        d = tmp_path / "results" / name
+        d.mkdir(parents=True)
+        with open(d / "scores.jsonl", "w", encoding="utf-8") as f:
+            for i, c in enumerate(cases):
+                f.write(json.dumps({
+                    "case_id": c.id, "is_attack": c.is_attack, "task_language": c.task_language,
+                    "injection_language": c.injection_language, "attack_success": c.id in success_ids,
+                    "utility": not c.is_attack, "false_block": False, "unintended_attempt": i < 2 * wrong,
+                    "unintended_transfer": i < wrong}) + "\n")
+
+    fake_run("Qwen_Qwen2.5-7B-Instruct__none__default", overpay | {redirect}, 5)
+    fake_run("Qwen_Qwen2.5-7B-Instruct__provenance__default", overpay, 4)
+    fake_run("Qwen_Qwen2.5-7B-Instruct__provenance-amount__default", set(), 0)
+    fake_run("NousResearch_Hermes-3-Llama-3.1-8B__none__default", set(), 1)
+
+    texts = collect_texts(cases)
+    flags = keyword_detector([t["text"] for t in texts])
+    with open(tmp_path / "flags.jsonl", "w", encoding="utf-8") as f:
+        for t, k in zip(texts, flags):
+            f.write(json.dumps({**t, "flags": {"keyword": k, "script": bool(re.search("[ঀ-৿]", t["text"]))}},
+                               ensure_ascii=False) + "\n")
+
+    out = tmp_path / "figs"
+    written = mf.make_all([tmp_path / "results"], out, detectors=tmp_path / "flags.jsonl", figures=False)
+    assert {p.name for p in written} == {"table1_main.md", "table1_main.tex", "table2_language.md",
+                                         "table2_language.tex", "numbers.json"}
+    nums = json.loads((out / "numbers.json").read_text(encoding="utf-8"))
+    assert list(nums["runs"]) == ["Qwen2.5-7B", "Hermes-3-8B"]
+    q = nums["runs"]["Qwen2.5-7B"]
+    assert list(q) == ["none", "provenance", "provenance-amount"]
+    assert (q["none"]["attacks"], q["none"]["attack_success"], q["none"]["amount_only_success"]) == (220, 21, 20)
+    assert q["provenance"]["amount_only_success"] == q["provenance"]["attack_success"] == 20
+    assert (q["none"]["wrong_payments_through"], q["none"]["invented_payee_tries"]) == (5, 10)
+    assert q["provenance-amount"]["attack_success"] == 0 and q["none"]["benign_done"] == 82
+    assert sum(n for _, n in nums["by_language"]["Qwen2.5-7B"].values()) == 220
+    det = nums["detectors"]
+    assert det["script"]["normal_flagged"]["en"][0] == 0 < det["script"]["normal_flagged"]["bn"][0]
+    assert det["provenance (real runs)"]["tasks_broken"]["bn"][0] == 0
+    assert "| Qwen2.5-7B | none | 9.5% (21/220) | 20/20 |" in (out / "table1_main.md").read_text(encoding="utf-8")
+    assert r"9.5\% (21/220)" in (out / "table1_main.tex").read_text(encoding="utf-8")
+
+    pytest.importorskip("matplotlib")
+    written = mf.make_all([tmp_path / "results"], out, detectors=tmp_path / "flags.jsonl")
+    for name in ("fig1_detectors", "fig2_attack_vs_invented", "fig3_defences"):
+        assert (out / f"{name}.pdf").stat().st_size > 1000 and (out / f"{name}.png").exists()

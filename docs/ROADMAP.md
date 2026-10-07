@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 7 October 2026 (Groq free-tier run set up as a daily GitHub Actions job).
+Last updated: 7 October 2026 (paper outline and figures script).
 
 ## Done
 
@@ -43,8 +43,9 @@ Last updated: 7 October 2026 (Groq free-tier run set up as a daily GitHub Action
       out as plain text in this setup (0.2 tool calls per case).
 - [x] Find 2 or 3 suitable workshops and plan the paper around the
       earliest realistic one (see "Paper target" below; PR #8).
-- [ ] Paper outline and figures script (`scripts/make_figures.py`), so the
-      draft can start before cloud credits run out on 5 November.
+- [x] Paper outline and figures script (`scripts/make_figures.py`), so the
+      draft can start before cloud credits run out on 5 November
+      (`docs/paper/outline.md`; owner runs the script on the real results).
 - [x] Add a short GIF of the demo to the top of the README (`docs/demo.gif`,
       made by `scripts/make_demo_gif.py` from the demo page).
 
@@ -140,7 +141,9 @@ in order; the first three come before cloud credits end on 5 November.
        hand (Actions > Groq model run > Run workflow). Expected: none and
        provenance-amount by about the end of October; provenance may finish
        after 5 November.
-3. [ ] **Paper outline and figures script** (below).
+3. [x] **Paper outline and figures script** (`docs/paper/outline.md`,
+       `scripts/make_figures.py`; 3 figures and 2 tables, Groq numbers
+       marked [Groq] and added by rerunning the script).
 4. [ ] **A BRAC faculty advisor or co-author** (owner's task): credibility
        for the paper and a recommendation letter for scholarships.
 5. [ ] **A second native-speaker check** of a sample of about 50 Bangla /
@@ -204,10 +207,14 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
       that the tasks come back.
 - [ ] Related work for the paper: AgentDojo, InjecAgent, CaMeL and
       multilingual jailbreak papers; say clearly what is new here.
-- [ ] Paper outline: sections, the 3 or 4 figures and tables, and what each
-      claims, using only numbers already in the README.
-- [ ] Figures script in the repo (attack success by defence and model,
-      by attack language, wrong payments with and without the amount check).
+- [x] Paper outline: sections, the 3 or 4 figures and tables, and what each
+      claims, using only numbers already in the README
+      (`docs/paper/outline.md`, leads with the detector finding).
+- [x] Figures script in the repo (`scripts/make_figures.py`): detectors by
+      language, attack success vs invented payees, attack success by
+      defence and model (amount-only split) with wrong payments, main
+      table, attacks by language. Not yet run on the real results (they
+      are not in the cloud session).
 - [x] Error analysis script (`scripts/error_analysis.py`): one cause per
       failed normal task. Qwen2.5-32B: most failures come from paying the
       invoice ID as the biller account (`list_invoices` does not show the
