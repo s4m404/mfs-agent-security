@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 7 October 2026 (paper outline and figures script).
+Last updated: 8 October 2026 (Groq run: wait out the per-minute limit).
 
 ## Done
 
@@ -140,7 +140,11 @@ in order; the first three come before cloud credits end on 5 November.
        the `GROQ_API_KEY` repository secret, then start the first run by
        hand (Actions > Groq model run > Run workflow). Expected: none and
        provenance-amount by about the end of October; provenance may finish
-       after 5 November.
+       after 5 November. First run (7 October): 37 of 302 cases, then it
+       stopped on the per-minute limit (8,000 tokens a minute), not the daily
+       one: the client gave up after 8 short retries. Fixed (PR "Groq
+       per-minute limit"): short waits are now waited out (up to 15 minutes
+       per reply); only a long wait (the daily limit) stops the run.
 3. [x] **Paper outline and figures script** (`docs/paper/outline.md`,
        `scripts/make_figures.py`; 3 figures and 2 tables, Groq numbers
        marked [Groq] and added by rerunning the script).

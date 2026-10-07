@@ -61,6 +61,7 @@ class OpenAICompatModel:
         timeout: float = 300.0,
         extra_body: dict[str, Any] | None = None,
         max_wait: float = 120.0,
+        max_total_wait: float = 900.0,
     ):
         from openai import OpenAI  # imported lazily so tests do not need it
 
@@ -72,9 +73,12 @@ class OpenAICompatModel:
         self.max_tokens = max_tokens
         # Provider-specific settings, e.g. {"reasoning_effort": "low"} on Groq.
         self.extra_body = extra_body or None
-        # Wait out short rate-limit pauses (per-minute limits); stop the run on
-        # long ones (daily limits) by raising RateLimited.
+        # Rate limits. A per-minute limit asks for a short wait, often many times
+        # in a row (Groq's free tier: 8,000 tokens a minute), so keep waiting, up
+        # to max_total_wait seconds for one reply. A daily limit asks for a long
+        # wait (more than max_wait): stop the run by raising RateLimited.
         self.max_wait = max_wait
+        self.max_total_wait = max_total_wait
         self.client = OpenAI(
             base_url=base_url, api_key=os.environ.get(api_key_env, "not-needed"), timeout=timeout, max_retries=1
         )
@@ -82,7 +86,8 @@ class OpenAICompatModel:
     def _create(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> Any:
         from openai import RateLimitError
 
-        for attempt in range(8):
+        waited, attempt = 0.0, 0
+        while True:
             try:
                 return self.client.chat.completions.create(
                     model=self.name,
@@ -95,10 +100,11 @@ class OpenAICompatModel:
             except RateLimitError as exc:
                 wait = retry_after_seconds(exc)
                 wait = min(5.0 * 2**attempt, 60.0) if wait is None else wait + 1.0
-                if wait > self.max_wait or attempt == 7:
+                if wait > self.max_wait or waited + wait > self.max_total_wait:
                     raise RateLimited(str(exc)[:500]) from exc
                 time.sleep(wait)
-        raise AssertionError("unreachable")
+                waited += wait
+                attempt += 1
 
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
         resp = self._create(messages, tools)

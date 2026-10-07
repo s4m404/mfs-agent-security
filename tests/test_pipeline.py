@@ -574,6 +574,37 @@ def test_rate_limit_wait_is_read_from_the_reply():
     assert retry_after_seconds(_rate_limit_error("no hint")) is None
 
 
+def test_per_minute_rate_limit_is_waited_out(monkeypatch):
+    """Many short 429s in a row (Groq's tokens-per-minute limit) are waited out, not
+    mistaken for the daily limit; only too much waiting in total stops the run."""
+    from types import SimpleNamespace
+
+    import agent.llm as llm
+
+    slept = []
+    monkeypatch.setattr(llm.time, "sleep", slept.append)
+    m = llm.OpenAICompatModel("x", "http://localhost:1/v1")
+    err = _rate_limit_error("Rate limit reached on tokens per minute (TPM): Limit 8000, Used 7336, "
+                            "Requested 807. Please try again in 1.0725s.")
+    calls = {"n": 0}
+    ok = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="Done.", tool_calls=None))])
+
+    def create(**kw):
+        calls["n"] += 1
+        if calls["n"] <= 10:  # the old client gave up after 8 tries
+            raise err
+        return ok
+
+    monkeypatch.setattr(m.client.chat.completions, "create", create)
+    assert m.complete([], [])["content"] == "Done."
+    assert len(slept) == 10 and all(2.0 < s < 2.1 for s in slept)
+
+    m.max_total_wait = 5.0  # but waiting is capped in total
+    calls["n"] = 0
+    with pytest.raises(llm.RateLimited):
+        m.complete([], [])
+
+
 def test_daily_rate_limit_stops_the_run_and_resume_continues_it(tmp_path, monkeypatch):
     """A long rate-limit wait stops the run without scoring the case; --resume runs only the rest."""
     import importlib.util
