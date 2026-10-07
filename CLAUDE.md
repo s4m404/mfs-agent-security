@@ -61,6 +61,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   injection detectors flag each attack / normal text, by language; run the
   Hugging Face ones with `notebooks/kaggle_detectors.ipynb`, about 10 minutes;
   this cloud environment cannot reach huggingface.co).
+- `docs/paper/outline.md`: the STALA paper outline (claims and the README
+  numbers behind each; [Groq] marks numbers still to come).
+  `scripts/make_figures.py results/ [results_groq/] --detectors
+  results_detectors/flags.jsonl` writes its figures and tables to
+  `docs/paper/figures/` (figures need matplotlib).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
   four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
