@@ -18,7 +18,7 @@ from defences.base import Defence
 from mfs_env.server import SENSITIVE_TOOLS, UNTRUSTED_TOOLS, build_server
 from mfs_env.world import World
 
-from .llm import ChatModel
+from .llm import ChatModel, RateLimited
 
 SYSTEM_PROMPT = (
     "You are the TakaPay assistant, acting for the wallet owner. "
@@ -101,12 +101,18 @@ async def run_episode(
     log({"type": "user_prompt", "text": case.user_prompt})
     final_answer = ""
     confirmations = 0
+    limited: RateLimited | None = None
 
     async with Client(server) as client:
         tools = _tool_schemas(await client.list_tools())
         for step in range(max_steps):
             try:
                 reply = model.complete(messages, tools)
+            except RateLimited as exc:
+                # Not the model's fault: stop the run and do not score this case.
+                # Raised after the MCP session closes, which would otherwise wrap it.
+                limited = exc
+                break
             except Exception as exc:  # e.g. timeout, or the conversation grew too long
                 # Stop this episode but keep what already happened, so one bad
                 # reply cannot crash a whole run. Scores mark it as an error.
@@ -167,4 +173,6 @@ async def run_episode(
         else:
             log({"type": "max_steps_reached", "step": max_steps})
 
+    if limited is not None:
+        raise limited
     return Episode(case.id, world, final_answer, trace)

@@ -55,6 +55,14 @@ python scripts/run_bench.py --model qwen2.5:7b --defence provenance
 
 For larger models on the university HPC, see [docs/HPC.md](docs/HPC.md).
 
+With a hosted API, check the key and model first, and use `--resume` to continue a run that a rate limit stopped (it stops cleanly and does not score the unfinished case):
+
+```bash
+python scripts/check_api.py --model openai/gpt-oss-120b --base-url https://api.groq.com/openai/v1 --api-key-env GROQ_API_KEY
+python scripts/run_bench.py --model openai/gpt-oss-120b --base-url https://api.groq.com/openai/v1 \
+    --api-key-env GROQ_API_KEY --defence none --resume
+```
+
 You can also plug the wallet into any MCP client:
 
 ```bash
