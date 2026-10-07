@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 8 October 2026 (Groq run: wait out the per-minute limit).
+Last updated: 8 October 2026 (figures checked on the real results; Groq progress).
 
 ## Done
 
@@ -145,6 +145,8 @@ in order; the first three come before cloud credits end on 5 November.
        one: the client gave up after 8 short retries. Fixed (PR "Groq
        per-minute limit"): short waits are now waited out (up to 15 minutes
        per reply); only a long wait (the daily limit) stops the run.
+       Progress on 7 October, 19:11 UTC: 130 of 302 `none` cases saved on
+       the `groq-results` branch (1 model error), faster than the estimate.
 3. [x] **Paper outline and figures script** (`docs/paper/outline.md`,
        `scripts/make_figures.py`; 3 figures and 2 tables, Groq numbers
        marked [Groq] and added by rerunning the script).
