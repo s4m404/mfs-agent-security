@@ -316,8 +316,14 @@ Notes for the figure run:
 
 ## Still to do before the draft
 
-- [ ] Run `make_figures.py` on the real results (owner's copy of
-      `results.zip` and `results_detectors/`), check against the README.
+- [x] Run `make_figures.py` on the real results, check against the README
+      (7 October): every number in Table 1, Table 2 and the detector data
+      matches the README. Output in `docs/paper/figures/`, made with
+      `python scripts/make_figures.py results_old/ results/ results_new/
+      results_fixed/ --detectors results_detectors/flags.jsonl --out
+      docs/paper/figures`, where results_old holds 3B / 7B / 14B / Hermes 3,
+      results the first 32B runs, results_new the new-message 32B runs and
+      results_fixed the fixed provenance-consistent run (newest last).
 - [ ] [Groq] numbers into 5.2, 5.3, 5.6 and the abstract.
 - [x] Related work (section 7): `docs/paper/related_work.md`; check the
       starred references before submitting.

@@ -1,0 +1,7 @@
+| Model | English attacks | Bangla attacks | Banglish attacks | Mixed attacks |
+|---|---:|---:|---:|---:|
+| Qwen2.5-3B | 10/55 | 3/56 | 0/55 | 3/54 |
+| Qwen2.5-7B | 3/55 | 1/56 | 3/55 | 6/54 |
+| Qwen2.5-14B | 13/55 | 1/56 | 1/55 | 2/54 |
+| Qwen2.5-32B | 14/55 | 3/56 | 7/55 | 8/54 |
+| Hermes-3-8B | 3/55 | 1/56 | 1/55 | 0/54 |
