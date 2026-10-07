@@ -6,7 +6,7 @@ whenever a task is finished or the plan changes.
 
 **Goal:** a strong research project and a workshop paper.
 
-Last updated: 8 October 2026 (figures checked on the real results; Groq progress).
+Last updated: 8 October 2026 (related work drafted; figures checked on the real results; Groq progress).
 
 ## Done
 
@@ -138,15 +138,16 @@ in order; the first three come before cloud credits end on 5 November.
        Order: none, provenance-amount, provenance. Setting: reasoning effort
        low (fewer tokens per reply; say so in the paper). Owner's steps: add
        the `GROQ_API_KEY` repository secret, then start the first run by
-       hand (Actions > Groq model run > Run workflow). Expected: none and
-       provenance-amount by about the end of October; provenance may finish
-       after 5 November. First run (7 October): 37 of 302 cases, then it
+       hand (Actions > Groq model run > Run workflow). Expected (updated
+       8 October): the daily limit allows about 130 cases a day, so the
+       three defences (906 case runs) take about 7 days and should all
+       finish around 13 to 14 October, well before 5 November. First run (7 October): 37 of 302 cases, then it
        stopped on the per-minute limit (8,000 tokens a minute), not the daily
        one: the client gave up after 8 short retries. Fixed (PR "Groq
        per-minute limit"): short waits are now waited out (up to 15 minutes
        per reply); only a long wait (the daily limit) stops the run.
        Progress on 7 October, 19:11 UTC: 130 of 302 `none` cases saved on
-       the `groq-results` branch (1 model error), faster than the estimate.
+       the `groq-results` branch (1 model error), in line with the 8 October estimate.
 3. [x] **Paper outline and figures script** (`docs/paper/outline.md`,
        `scripts/make_figures.py`; 3 figures and 2 tables, Groq numbers
        marked [Groq] and added by rerunning the script).
@@ -211,8 +212,14 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
       gave up. The block now says "Use the biller account number written on
       the invoice, or one from list_billers." The Kaggle rerun above checks
       that the tasks come back.
-- [ ] Related work for the paper: AgentDojo, InjecAgent, CaMeL and
-      multilingual jailbreak papers; say clearly what is new here.
+- [x] Related work for the paper (`docs/paper/related_work.md`): AgentDojo,
+      InjecAgent, CaMeL, the firewalls paper (Bhagwatkar et al., full title
+      "... Are Firewalls All You Need, or Stronger Benchmarks?") and four
+      multilingual jailbreak papers (two include Bengali), 11 references,
+      and what is new here. Before submitting: export BibTeX and check the
+      starred references (CaMeL's venue and 77%, ASB authors, firewalls
+      venue), and find a Bangla NLP safety paper for the introduction or
+      soften that sentence.
 - [x] Paper outline: sections, the 3 or 4 figures and tables, and what each
       claims, using only numbers already in the README
       (`docs/paper/outline.md`, leads with the detector finding).
@@ -269,7 +276,8 @@ From the earlier README roadmap; not part of the plan above unless moved in.
 
 - Connect BRACUVerify as a second backend.
 - Compare with the sanitiser defence from "Indirect Prompt Injections: Are
-  Firewalls All You Need?".
+  Firewalls All You Need, or Stronger Benchmarks?" (an LLM that reads the
+  text, so the detector result suggests testing it on Bangla).
 - Prepaid mobile recharge as a task (needs a new wallet tool).
 
 ## Key findings to keep
