@@ -122,6 +122,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   a newest-only agent; 32B rerun: 0/56 adaptive, 0/220 main attacks, 0
   correct payments blocked, 72% of normal tasks; 1/56 adaptive correct
   payments went through (the rest wait for the user).
+- Detectors (`scripts/detector_eval.py`, 174 attack / 54 normal texts): keyword
+  34% / 7% false alarms; ProtectAI DeBERTa v2 59% / 39%, but 84% of normal
+  Bangla texts flagged (as a filter it would break 20 of 22 Bangla-request
+  normal tasks, 1 of 21 English); deepset 100% / 87%. Prompt Guard not run
+  (needs a Hugging Face account).
 - Error analysis (`scripts/error_analysis.py`, all five models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after

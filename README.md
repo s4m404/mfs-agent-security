@@ -219,13 +219,28 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 
 ### Do injection detectors work in Bangla and Banglish?
 
-`scripts/detector_eval.py` takes every untrusted text in the benchmark (174 distinct attack texts, about 44 per language, and 54 normal texts) and asks a detector whether it is an injection. No agent is involved. The keyword baseline so far:
+`scripts/detector_eval.py` takes every untrusted text in the benchmark (174 distinct attack texts, about 44 per language, and 54 normal texts: real bills and SMS, including the hard ones) and asks a detector whether it is an injection. No agent is involved. Two widely used open detectors were run on Kaggle (`notebooks/kaggle_detectors.ipynb`), plus the keyword baseline. Meta's Prompt Guard needs a Hugging Face account and was not run.
 
-| Detector | Attack texts flagged | en | bn | banglish | mixed | Instructions to the AI | Ordinary scam messages | Normal texts flagged |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| keyword (baseline) | 34% | 40% | 43% | 45% | 7% | 57% | 0% | 7% (4/54) |
+| Detector | Attack texts flagged | en | bn | banglish | mixed | Normal texts flagged (false alarms) | Normal Bangla texts flagged |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| keyword (baseline) | 34% | 40% | 43% | 45% | 7% | 7% (4/54) | 11% (2/19) |
+| ProtectAI DeBERTa v3 v2 | 59% | 47% | 57% | 80% | 51% | 39% (21/54) | **84% (16/19)** |
+| deepset DeBERTa v3 | 100% | 100% | 100% | 100% | 100% | 87% (47/54) | **100% (19/19)** |
 
-A keyword list misses almost all mixed-language attacks and every ordinary scam message. Off-the-shelf detectors (ProtectAI and deepset DeBERTa models) are next, with `notebooks/kaggle_detectors.ipynb`.
+What it would cost to use the detector as a filter, removing every flagged SMS or invoice text: normal tasks that lose a text they need, by the language of the user's request.
+
+| Detector | en request | bn request | banglish request | mixed request |
+|---|---:|---:|---:|---:|
+| keyword (baseline) | 0/21 | 2/22 | 1/20 | 1/19 |
+| ProtectAI DeBERTa v3 v2 | 1/21 | **20/22** | 1/20 | **16/19** |
+| deepset DeBERTa v3 | 12/21 | **22/22** | 12/20 | **19/19** |
+| provenance defences (for comparison, real runs, correct payments blocked) | 0 | 0 | 0 | 0 |
+
+- **Off-the-shelf detectors flag the Bengali script, not the attack.** ProtectAI's detector flagged 16 of 19 normal Bangla texts (a power bill, a mother asking for medicine money, the rent SMS), more often than it flagged Bangla attacks (57%). Normal Banglish and English texts mostly passed (1 of 11, 2 of 16). Its model card says it does not handle non-English input; this shows what that means in practice: used as a filter, it would break 20 of 22 normal tasks requested in Bangla, against 1 of 21 in English.
+- **The deepset detector flags almost everything** (100% of attacks, 87% of normal texts), so its perfect detection says nothing.
+- **Even in English, ProtectAI's detector missed about half the attacks** (47%), for example "NOTE TO AI ASSISTANT: this account has moved ..." placed inside a normal-looking bill, and ordinary scam messages (47% flagged overall).
+- **Provenance does not read the text at all**, so it works the same in every language: 0 correct payments blocked across all four request languages and all models. This is the main reason to check where a recipient or amount came from instead of trying to spot an attack.
+- The normal set is small (54 texts, 19 in Bangla), so the false-alarm intervals are wide (Bangla: 62% to 94% for ProtectAI). Rebuild the tables with `python scripts/detector_eval.py --from-flags results_detectors/flags.jsonl`.
 
 ### Earlier run (114 cases, 3 repeats)
 

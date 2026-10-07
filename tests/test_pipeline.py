@@ -545,3 +545,7 @@ def test_detector_eval_separates_attack_and_normal_texts():
     assert inj in {r["text"] for r in attack} and real in normal
     flags = de.keyword_detector([inj, real])
     assert flags == [True, False]
+    # a detector that flags every text would break every normal task that reads a text
+    every = {"all": [True] * len(rows)}
+    hit = de.tasks_hit(list(CASES.values()), rows, every)["all"]["all"]
+    assert hit[0] == hit[1] > 0
