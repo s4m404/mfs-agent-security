@@ -63,6 +63,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   this cloud environment cannot reach huggingface.co).
 - `docs/paper/outline.md`: the STALA paper outline (claims and the README
   numbers behind each; [Groq] marks numbers still to come).
+  `docs/paper/related_work.md`: section 7 draft with checked references.
   `scripts/make_figures.py results/ [results_groq/] --detectors
   results_detectors/flags.jsonl` writes its figures and tables to
   `docs/paper/figures/` (figures need matplotlib).

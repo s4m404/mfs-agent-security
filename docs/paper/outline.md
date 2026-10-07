@@ -14,8 +14,8 @@ Rules for this outline:
   No new numbers. If a number changes in the README, change it here too.
 - **[Groq]** marks a number that will come from the GPT-OSS-120B run on Groq
   (`.github/workflows/groq_run.yml`, results on the `groq-results` branch).
-  Expected: `none` and `provenance-amount` by about the end of October,
-  `provenance` maybe after 5 November. Until then the paper says "two model
+  Expected: all three defences by about 13 to 14 October (the daily limit
+  allows about 130 cases a day). Until then the paper says "two model
   families"; with it, "three".
 - **[Fig N] / [Table N]** are made by `scripts/make_figures.py` (see the end).
 
@@ -44,9 +44,9 @@ Lead with the detector finding (roadmap point 0), then the rest.
   impersonation and PIN or OTP theft is common. Agents that read messages and
   make payments are arriving; indirect prompt injection is the top risk in the
   OWASP Top 10 for Agentic Applications (2026). [README: Why this matters]
-- **Gap.** Agent injection benchmarks are English only; Bangla safety work
-  covers chatbots, not agents that act. [README: Why this matters; related
-  work still to write, see section 7]
+- **Gap.** Agent injection benchmarks are English only; multilingual safety
+  work (jailbreaks, including Bengali) covers chat models, not agents that
+  act. [README: Why this matters; `related_work.md`]
 - **Point 0, the headline.** The usual defence answer, "put a detector in
   front", fails outside English, and an English detection score hides it.
   ProtectAI's DeBERTa v2 flagged 16 of 19 normal Bangla texts (84%), more than
@@ -183,8 +183,8 @@ those through; the amount check closes them with no false blocks.
 
 Example for the text: a fake "correction" in a school invoice raising the fee
 from 3,500 to 5,000 Tk.
-**[Groq]** GPT-OSS-120B rows of Table 1 and bars of Fig 3 (`provenance` may
-arrive after 5 November; the figure works without it).
+**[Groq]** GPT-OSS-120B rows of Table 1 and bars of Fig 3 (all three
+defences expected by about 13 to 14 October).
 
 ### 5.4 Adaptive attacks: test defences with real agents (point 3, part 1)
 
@@ -242,13 +242,18 @@ one language cannot rank models.
   run). All scripts and the demo page are
   public (or anonymised, depending on STALA's rules; check in November).
 
-## 7. Related work (about 0.5 page) — still to write
+## 7. Related work (about 0.5 page)
 
-AgentDojo, InjecAgent, CaMeL (provenance / capability ideas), multilingual
-jailbreak papers, "Indirect Prompt Injections: Are Firewalls All You Need?".
-Say what is new: non-English agent injection with real money tools; detector
-transfer across scripts; amount-only attacks; harness effects. Roadmap item
-"Related work for the paper" is still open. No numbers here.
+Drafted in `docs/paper/related_work.md` (text, comparison table, 11 checked
+references). Four paragraphs: agent injection benchmarks (Greshake et al.,
+InjecAgent, AgentDojo, Agent Security Bench); defences by design (CaMeL,
+our provenance as a simpler, language-independent form); filters and
+firewalls (Bhagwatkar et al., ProtectAI's model card); multilingual
+jailbreaks (Yong et al., MultiJail, XSafety, code-switching red-teaming).
+What is new: agent injection in a low-resource language with real money
+tools; detector transfer across scripts; provenance holds in every
+language; amount-only attacks, wrong payments without an attacker and
+forged payee messages. Numbers only by section reference.
 
 ## 8. Limitations and ethics (about 0.5 page)
 
@@ -314,5 +319,6 @@ Notes for the figure run:
 - [ ] Run `make_figures.py` on the real results (owner's copy of
       `results.zip` and `results_detectors/`), check against the README.
 - [ ] [Groq] numbers into 5.2, 5.3, 5.6 and the abstract.
-- [ ] Related work (section 7).
+- [x] Related work (section 7): `docs/paper/related_work.md`; check the
+      starred references before submitting.
 - [ ] STALA template and anonymisation rules (check in November).
