@@ -14,8 +14,7 @@ Rules for this outline:
   No new numbers. If a number changes in the README, change it here too.
 - **[Groq]** marks a number that will come from the GPT-OSS-120B run on Groq
   (`.github/workflows/groq_run.yml`, results on the `groq-results` branch).
-  Expected: all three defences by about 13 to 14 October (the daily limit
-  allows about 130 cases a day). Until then the paper says "two model
+  Expected: all three defences by about 17 October (about 85 cases a day). Until then the paper says "two model
   families"; with it, "three".
 - **[Fig N] / [Table N]** are made by `scripts/make_figures.py` (see the end).
 
@@ -25,11 +24,12 @@ Rules for this outline:
 
 Claims, in order:
 
-1. Off-the-shelf prompt-injection detectors do not transfer to Bangla: one
-   flags 84% of normal Bangla texts and would break 20 of 22 Bangla-request
+1. The two off-the-shelf prompt-injection detectors tested do not transfer
+   to Bangla: one flags 84% of normal Bangla texts and would break 20 of 22 Bangla-request
    tasks as a filter (1 of 21 in English). [README: detectors]
-2. A provenance policy that never reads the text blocks 0 correct payments in
-   any language and, with the amount check, lets 0 of 880 attack episodes
+2. Provenance tracking (an existing idea: CaMeL, FIDES; here as simple
+   rules) never reads the text, blocks 0 correct payments in the normal
+   tasks in any language and, with the amount check, lets 0 of 880 attack episodes
    through on four Qwen2.5 models. [README: results]
 3. Two testing lessons: attack success alone is misleading for payment agents
    (invented payees in 29% to 52% of episodes), and checking only "did money
@@ -42,9 +42,10 @@ Lead with the detector finding (roadmap point 0), then the rest.
 
 - **Hook.** Bangladesh has about 239 million mobile money accounts; fraud by
   impersonation and PIN or OTP theft is common. Agents that read messages and
-  make payments are arriving; indirect prompt injection is the top risk in the
-  OWASP Top 10 for Agentic Applications (2026). [README: Why this matters]
-- **Gap.** Agent injection benchmarks are English only; multilingual safety
+  make payments are arriving; "agent goal hijack", mostly via indirect prompt
+  injection, is the first risk in the OWASP Top 10 for Agentic Applications
+  (2026). [README: Why this matters]
+- **Gap.** The agent injection benchmarks we know of are in English; multilingual safety
   work (jailbreaks, including Bengali) covers chat models, not agents that
   act. [README: Why this matters; `related_work.md`]
 - **Point 0, the headline.** The usual defence answer, "put a detector in
@@ -54,10 +55,14 @@ Lead with the detector finding (roadmap point 0), then the rest.
   Bangla-request tasks and 1 of 21 English ones. deepset's detector flagged
   100% of attacks and 87% of normal texts. [README: detectors]
 - **What works instead.** Provenance: check where a recipient, code or amount
-  came from, never read the text. 0 correct payments blocked in all four
+  came from, never read the text. This is not our idea (CaMeL, FIDES and other
+  information-flow defences); we test a simple rule-based version in a new
+  setting. 0 correct payments blocked in the normal tasks in all four
   request languages, all models. [README: detectors, results]
 - **Contributions** (bullet list):
   1. The benchmark: TakaPay, a fictional wallet over MCP, 302 cases.
+     (Provenance defences are existing ideas tested here, not a
+     contribution in themselves.)
   2. The detector transfer result (point 0).
   3. Three testing lessons (points 1 to 3 of the roadmap): attack success
      alone misleads; amount-only attacks; harness choices and scripted audits
@@ -184,7 +189,7 @@ those through; the amount check closes them with no false blocks.
 Example for the text: a fake "correction" in a school invoice raising the fee
 from 3,500 to 5,000 Tk.
 **[Groq]** GPT-OSS-120B rows of Table 1 and bars of Fig 3 (all three
-defences expected by about 13 to 14 October).
+defences expected by about 17 October).
 
 ### 5.4 Adaptive attacks: test defences with real agents (point 3, part 1)
 
