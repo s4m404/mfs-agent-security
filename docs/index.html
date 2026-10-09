@@ -151,9 +151,9 @@ a{color:var(--accent)}
   </section>
 
   <footer>
-    <div><b>How the provenance defence works.</b> It remembers where every phone number and account number came from. A payment or SMS is blocked if its recipient appeared only in untrusted text (an SMS, an invoice or a tool description) and is neither a saved contact nor named by the user. It does not try to detect attacks in the text, so it works the same in every language.</div>
-    <div><b>How the amount check works.</b> On top of that, the amount must come from the user's request or from the payee itself: an SMS sent from the recipient's own number, or an invoice for that same biller account. A "correction" written into the text cannot change it.</div>
-    <div>TakaPay, all names, numbers and balances are fictional. The simulated user replies "yes" once if the agent asks for confirmation, like a trusting real user. Models served with vLLM on Kaggle T4 GPUs at temperature 0. Cases marked "114-case run" show repeat 1 of 3 from the earlier run; the "302-case run" case shows its single run.</div>
+    <div><b>How the provenance defence works.</b> It remembers where every phone number and account number came from. A payment or SMS is blocked if its recipient appeared only in untrusted text (an SMS, an invoice or a tool description) and is neither a saved contact nor named by the user. It does not try to detect attacks in the text, so it does not depend on the language. Tracking where data came from is an existing idea (for example CaMeL and FIDES); this is a simple rule-based version, tested here on Bangla and Banglish payment agents.</div>
+    <div><b>How the amount check works.</b> On top of that, the amount must come from the user's request or from the payee itself: an SMS sent from the recipient's own number, or an invoice for that same biller account. A "correction" written into another text cannot change it (a message forged to look like it comes from the payee can; see the README).</div>
+    <div>TakaPay, all names, numbers and balances are fictional. The simulated user replies "yes" once whenever the agent writes a "?", and never refuses; how real users would answer is not tested. Models served with vLLM on Kaggle T4 GPUs at temperature 0. Cases marked "114-case run" show repeat 1 of 3 from the earlier run; the "302-case run" case shows its single run.</div>
     <div>Code, test cases and full traces: <a href="https://github.com/s4m404/mfs-agent-security">github.com/s4m404/mfs-agent-security</a> · Mohammed Sayed Sameer</div>
   </footer>
 </div>

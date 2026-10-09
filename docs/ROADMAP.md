@@ -139,9 +139,10 @@ in order; the first three come before cloud credits end on 5 November.
        low (fewer tokens per reply; say so in the paper). Owner's steps: add
        the `GROQ_API_KEY` repository secret, then start the first run by
        hand (Actions > Groq model run > Run workflow). Expected (updated
-       8 October): the daily limit allows about 130 cases a day, so the
-       three defences (906 case runs) take about 7 days and should all
-       finish around 13 to 14 October, well before 5 November. First run (7 October): 37 of 302 cases, then it
+       9 October): the limit is 200,000 tokens per rolling 24 hours and a
+       case uses about 2,400, so about 85 cases a day (the first day got 130
+       from a full allowance). The three defences (906 case runs) should
+       finish around 17 October, well before 5 November. First run (7 October): 37 of 302 cases, then it
        stopped on the per-minute limit (8,000 tokens a minute), not the daily
        one: the client gave up after 8 short retries. Fixed (PR "Groq
        per-minute limit"): short waits are now waited out (up to 15 minutes
@@ -240,6 +241,27 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
       without a payment call (about 8). The older README numbers for 3B
       (27 / 15) and Hermes 3 (about 14 / 9) could not be reproduced and
       were replaced by the script's (34 / 10 and about 9 / 8).
+
+- [x] Audit before showing the project to a professor (`docs/audit.md`).
+      README numbers match the saved results (`numbers.json`); the
+      GPT-OSS-120B traces re-score to the same 271 scores
+      (`scripts/rescore.py`). Fixed: an OTP sent with spaces or dashes was
+      not counted as leaked. Documented: the simulated user answers any
+      "?" (one GPT-OSS-120B episode paid a bill after a table header "Action
+      Needed?" got a "yes"); "read the attack" means the tool was called.
+      Provenance is now presented as an existing idea (CaMeL, FIDES) tested
+      in a new setting. New README top: what this is, 3 findings, limits.
+- [ ] Rerun the audit scripts on the Kaggle results (owner uploads
+      `results.zip`): `scripts/rescore.py` (confirms "0 of 75 OTP leaks" with
+      the fixed check), `scripts/handcheck.py` (30 episodes across all
+      models and defences, owner checks them by hand) and
+      `scripts/count_confirmations.py` (confirmation questions and block
+      messages by model, language and case type, for the HCI angle).
+- [ ] HCI co-author: Dr. S M Taiabul Haque (BRAC CSE; usable security, ICTD;
+      relevant papers: ICTD 2020 on public digital service centres in Dhaka,
+      COMPASS 2022 on intermediaries in cashless transactions in
+      Bangladesh). Idea: do the agents' confirmation questions and the
+      block messages give a user what they need to say no?
 
 ## November 2026
 

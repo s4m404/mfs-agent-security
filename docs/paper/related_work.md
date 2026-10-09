@@ -43,13 +43,15 @@ with attacks and requests in Bangla, Banglish, code-mixed and English text.
 trusted user query) from data flow (untrusted tool outputs), tracks where
 every value came from, and enforces capability policies before a tool runs;
 it solves 77% of AgentDojo tasks with provable security, against 84% with
-no defence. Our provenance defences use the same idea in a much simpler
+no defence. FIDES [12] tracks integrity and confidentiality labels on
+data with information-flow control and enforces policies on consequential
+actions. Our provenance defences apply the same idea in a much simpler
 form: a payment is checked against where its recipient, code and amount
 came from (the user's request, the wallet's own records, or the payee),
 with no change to the agent and no second model. Because the check never
 reads the untrusted text, it does not depend on the language of that text,
 which is the property our detector results (section 5.1) show matters.
-CaMeL's evaluation is in English; we add evidence that this class of
+CaMeL's and FIDES's evaluations are in English; we add evidence that this class of
 defence carries over to other languages and scripts, and two
 payment-specific findings: recipient provenance alone misses attacks that
 change only the amount, and a forged message that claims to come from the
@@ -93,17 +95,19 @@ over. Four of our five models fell most often for English attacks and one
 for mixed text; for none was Bangla script the most successful attack
 language (section 5.6).
 
-**What is new here.** To our knowledge:
+**What is new here.** We do not claim the provenance idea; it comes from
+CaMeL [5] and information-flow control defences such as FIDES [12]. What we
+add, as far as we know from the papers above (not a full survey):
 
-1. The first agent prompt-injection benchmark in a low-resource language,
+1. An agent prompt-injection benchmark in a low-resource language,
    with Bangla, Banglish (romanised) and code-mixed attacks and user
    requests, native-speaker reviewed, on tools that move money.
-2. The first measurement of injection detectors on non-English tool
-   outputs inside an agent task: they flag the script, not the attack, so
-   an English detection score does not carry over (section 5.1).
-3. Evidence that provenance-style defences (the idea behind CaMeL) are
-   language-independent in practice: no correct payment blocked in any
-   request language.
+2. A measurement of two injection detectors on non-English tool outputs
+   inside an agent task: they flagged the script, not the attack, so an
+   English detection score did not carry over (section 5.1).
+3. A test of simple provenance rules (the idea behind CaMeL) across
+   languages: no correct payment blocked in the normal tasks in any request
+   language, on five open models.
 4. Payment-specific testing lessons: amount-only attacks that pay the real
    payee, wrong payments with no attacker involved, and forged payee
    messages that need a consistency check, which a scripted audit missed
@@ -121,6 +125,7 @@ Facts about other work from the references below; ours from the README.
 | InjecAgent [2] | Benchmark | One injected tool output | English | 17 user tools, 62 attacker tools | Single turn | Prompting variants |
 | AgentDojo [3] | Benchmark | Data inside tool outputs | English | 4 suites incl. e-banking | Environment state | Several, from the literature |
 | CaMeL [5] | Defence | (uses AgentDojo) | English | AgentDojo tools | Environment state | Control/data flow + capabilities |
+| FIDES [12] | Defence | (uses AgentDojo) | English | AgentDojo tools | Environment state | Information-flow labels + policies |
 | Firewalls [6] | Defence + benchmark critique | Tool inputs and outputs | English | 4 benchmarks | The benchmarks' own | LLM minimizer and sanitizer |
 | Multilingual jailbreaks [8-11] | Attacks on chat models | User prompt (direct) | Many, incl. Bengali [9, 10] | None (text only) | Harmful text | Mostly safety tuning or prompting |
 | **This work** | Benchmark + defences | SMS, invoices, tool descriptions | Bangla, Banglish, code-mixed, English | Mobile-money wallet over MCP (9 tools) | Environment state | Keyword, detectors, 3 provenance variants |
@@ -179,6 +184,10 @@ BibTeX from each paper's official page and check the starred items.
 11. Haneul Yoo, Yongjin Yang, Hwaran Lee. *Code-Switching Red-Teaming: LLM
     Evaluation for Safety and Multilingual Understanding.* ACL 2025 (long),
     pp. 13392-13413. arXiv:2406.15481.
+12. Manuel Costa, Boris Köpf, Aashish Kolluri, Andrew Paverd, Mark
+    Russinovich, Ahmed Salem, Shruti Tople, Lukas Wutschitz, Santiago
+    Zanella-Béguelin. *Securing AI Agents with Information-Flow Control.*
+    arXiv:2505.23643 (v2, September 2025). (FIDES.)
 
 Also cited elsewhere in the paper (introduction): OWASP Top 10 for Agentic
 Applications (2026), already in the README.

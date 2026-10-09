@@ -64,6 +64,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - `docs/paper/outline.md`: the STALA paper outline (claims and the README
   numbers behind each; [Groq] marks numbers still to come).
   `docs/paper/related_work.md`: section 7 draft with checked references.
+- Audit tools (no model needed): `scripts/rescore.py` (re-score every
+  episode from its trace, list differences from scores.jsonl),
+  `scripts/handcheck.py` (random episodes for hand checking ->
+  `docs/handcheck.md`), `scripts/count_confirmations.py` (agent questions and
+  block messages -> `docs/paper/confirmations.md`). Findings: `docs/audit.md`.
   `scripts/make_figures.py results/ [results_groq/] --detectors
   results_detectors/flags.jsonl` writes its figures and tables to
   `docs/paper/figures/` (figures need matplotlib).
