@@ -27,6 +27,32 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   say which notebook and the expected time; he uploads results.zip in a new session.
 - Cloud credits run out on 5 November 2026, so October tasks come first.
 
+## Working rules
+
+- Each session starts by reading this file and `docs/ROADMAP.md`. Update the
+  roadmap in the same pull request when a task is finished or the plan
+  changes.
+- `docs/ROADMAP.md`, the README, `docs/`, notebooks and scripts are public
+  research documents: no notes about sessions, credits, who does what,
+  advisors, letters or applications there. Workflow notes belong in this
+  file only.
+- Commits and pull requests: no Co-Authored-By lines and no "Generated with
+  Claude Code" lines.
+- All Bangla and Banglish text is reviewed by him before it counts as
+  reviewed; new sentences go into `bench/review_texts.csv` marked as needing
+  review.
+- Raw results: after a Kaggle run he uploads `results.zip`. Add its run
+  folders to the `kaggle-results` branch as one dated folder per Kaggle run
+  (`YYYY-MM-DD_<what>/results/`, `results_adaptive/`), never overwrite an
+  older folder, and update that branch's README table. GPT-OSS-120B results
+  are written by the workflow to `groq-results`. Recompute and check numbers
+  from these branches (`scripts/rescore.py` first).
+- Still missing from `kaggle-results` (ask him for them): the Qwen2.5 3B, 7B
+  and 14B runs on 302 cases, the 114-case 3-repeat run, and
+  `results_detectors/flags.jsonl`.
+- Branches: keep `main`, `groq-results` and `kaggle-results`; delete a
+  working branch after its pull request is merged.
+
 ## Layout
 
 - `mfs_env/`: fictional TakaPay wallet (`world.py`), text helpers (Bangla
