@@ -262,7 +262,7 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 | Cause of failure (82 normal tasks per model) | 3B | 7B | 14B | 32B | Hermes 3 |
 |---|---:|---:|---:|---:|---:|
 | Wallet refused the payment (almost always a wrong biller account), agent gave up | 32 | 19 | 21 | 15 | 3 |
-| &nbsp;&nbsp;of which the account was the invoice ID | 0 | 8 | 4 | 14 | 1 |
+| &nbsp;&nbsp;of which the account was the invoice ID | 0 | 8 | 2 | 14 | 1 |
 | Wrong payee or amount paid | 10 | 2 | 8 | 4 | 3 |
 | Said it paid (or was paying), never called a payment tool | 1 | 0 | 2 | 0 | 8 |
 | Asked to confirm without a "?", so got no answer | 1 | 0 | 0 | 0 | 9 |
