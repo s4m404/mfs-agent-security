@@ -45,10 +45,10 @@ Last updated: 10 October 2026.
   biller account (Qwen2.5-32B had lost 12 normal tasks to the old one);
   `provenance-consistent` now checks every SMS and invoice from the payee,
   after Qwen2.5-32B beat the first version by reading only the newest SMS.
-- **Audit** (`docs/audit.md`): every available episode (6,930) re-scored from
+- **Audit** (`docs/audit.md`): every available episode (8,982) re-scored from
   its raw trace with no difference; README numbers checked against the raw
   traces of every model and against the raw detector outputs; two small
-  README details corrected; an OTP-format bug in the scorer fixed. Raw Kaggle results are kept on the
+  README details corrected and one unverifiable sentence replaced; an OTP-format bug in the scorer fixed. Raw Kaggle results are kept on the
   `kaggle-results` branch, GPT-OSS-120B results on `groq-results`.
 - **Paper material.** Outline (`docs/paper/outline.md`), figures and tables
   (`scripts/make_figures.py`, `docs/paper/figures/`), related-work draft
@@ -64,24 +64,19 @@ Last updated: 10 October 2026.
        cases a day). Order: none (done, 302 cases), provenance-amount (in
        progress), provenance. Expected to finish around 17 October.
        Setting: reasoning effort low (state this in the paper).
-2. [ ] **Complete the raw-data archive.** Add the earlier 114-case
-       3-repeat run to the `kaggle-results` branch and check the two claims
-       that depend on it: its attack success (10.0% / 3.8% / 5.0%) and the
-       repeat agreement (96% to 100%). If its output is no longer available,
-       report those numbers as from the earlier run, not re-checked.
-3. [ ] **Do the agents' questions let a user say no?** The simulated user
+2. [ ] **Do the agents' questions let a user say no?** The simulated user
        always says yes, and 29 of the 78 successful attacks on the four Qwen
        models (no defence) came right after that "yes". Code each confirmation question and block
        message for what a user would need (payee, amount, where the number
        or amount came from, the risk, what to do), by language. Counts so
        far: `docs/paper/confirmations.md`. A user study would be a separate
        follow-up.
-4. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
+3. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
        Banglish sentences; report agreement. Review the 9 adaptive-set
        sentences marked in `bench/review_texts.csv`.
-5. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
+4. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
        short dataset card.
-6. [ ] **References:** export BibTeX and check the starred items in
+5. [ ] **References:** export BibTeX and check the starred items in
        `docs/paper/related_work.md`; find a Bangla NLP safety paper for the
        introduction or soften that sentence.
 
