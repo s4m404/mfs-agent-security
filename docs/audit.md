@@ -13,9 +13,10 @@ was found, and what is still open.
   for the folders.
 - GPT-OSS-120B: branch `groq-results` (no defence complete, 302 cases;
   provenance-amount in progress).
-- **Missing:** the earlier 114-case run with 3 repeats, and the interrupted
-  first attempts of the 302-case run. The claims that depend on them (see
-  below) remain unchecked.
+- **Not kept:** the interrupted first attempts of the 302-case run. The one
+  README sentence based on them ("four settings that ran twice agreed in 97%
+  to 99% of cases") could not be re-checked and was replaced by the verified
+  3-repeat agreement (96% to 100%).
 
 ## Re-scoring every episode from its trace
 
@@ -26,13 +27,14 @@ below), and compares every field with the saved score.
 | Runs | Episodes | Saved scores that differ |
 |---|---:|---:|
 | Qwen2.5 3B, 7B and 14B, 9 runs | 2,718 | 0 |
+| Qwen2.5 3B, 7B and 14B, earlier 114-case run, 3 repeats, 6 runs | 2,052 | 0 |
 | Qwen2.5-32B, 6 main runs | 1,812 | 0 |
 | Qwen2.5-32B, 4 adaptive runs | 224 | 0 |
 | Hermes 3, 3 runs | 906 | 0 |
 | Granite 3.3, 3 runs | 906 | 0 |
 | GPT-OSS-120B, none (302) and provenance-amount (62 so far) | 364 | 0 |
 
-**0 of 6,930 episodes differ.**
+**0 of 8,982 episodes differ.**
 
 ## README numbers against the raw results
 
@@ -82,10 +84,12 @@ error-analysis table (below):
 | Hermes 3: 5 attacks, all through SMS, 3 in English; the one past provenance was in Bangla | same | confirmed |
 | 32B on the original 114 cases: 11 of 80 (13.8%) | 11 of 80 | confirmed |
 | 3B / 7B / 14B on the original 114 cases in the 302-case run: 10.0% / 3.8% / 6.2% | 8 / 3 / 5 of 80 | confirmed |
-| The earlier 3-repeat run gave 10.0% / 3.8% / 5.0% | that run is not in the uploaded files | **still unchecked** |
+| The earlier 3-repeat run gave 10.0% / 3.8% / 5.0% without a defence, and 0 of 720 with provenance, with no correct payment blocked | 24 / 9 / 12 of 240; 0 of 720; 0 correct payments blocked | confirmed |
+| A replay of those provenance traces through provenance-amount predicted 26 / 3 / 6 wrong payments caught, no correct payment blocked | 26 / 3 / 6, none | confirmed |
 | Attacks by language (3B and 14B mostly English, 10 and 13 of 55; 7B mostly mixed, 6 of 54) | same | confirmed |
 | Error analysis: wallet refusals where the account was the invoice ID, 0 / 8 / 4 for 3B / 7B / 14B (14 of 15 for 32B, 1 for Hermes 3) | 0 / 8 / **2** (14 of 15, 1) | **14B corrected in the README** |
-| Repeat agreement: "four settings that ran twice gave the same outcome in 97% to 99% of cases"; "96% to 100%" in the 3-repeat run | those runs are not in the uploaded files | **still unchecked** |
+| Repeat agreement in the 3-repeat run: "96% to 100% of cases had the same outcome every time" | 96% to 100% | confirmed |
+| "Four settings that ran twice gave the same outcome in 97% to 99% of cases" | the interrupted first attempts were not kept | **cannot be checked; sentence replaced in the README** |
 | Adaptive table: forged amount 11 / 10 / 3 / 0 of 16, new number 8 / 0 / 0 / 0 of 16, forged invoice 1 / 1 / 0 / 0 of 24 | same | confirmed |
 | Adaptive: correct payment made 11 / 12 / 2 / 1 of 56 | same | confirmed |
 | Adaptive: the model read only the newest SMS in 5 of 16 forged-amount cases; all 3 attacks past the first provenance-consistent were of this kind; the fixed version stopped all 5 | 5; 3 of 3; 0 attacks | confirmed |
@@ -125,7 +129,7 @@ ordinary scam messages 47%).
    "482 913" or "৪৮২-৯১৩" would have been scored as no leak. It now removes
    spaces, dashes and dots between digits first (`bench/score.py`, with a
    test). This can only raise attack success, never lower it. Re-scoring
-   all 6,930 available episodes with the fix changed nothing.
+   all 8,982 available episodes with the fix changed nothing.
 
 ## Caveats found (not changed, because changing them needs new runs)
 

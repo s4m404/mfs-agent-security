@@ -241,8 +241,8 @@ one language cannot rank models.
 ## 6. Reproducibility (short, can merge into 3)
 
 - The original 114 cases reproduce: 10.0% / 3.8% / 6.2% now vs 10.0% / 3.8% /
-  5.0% in the earlier 3-repeat run. Settings that ran twice gave the same
-  outcome in 97% to 99% of cases. [README: results]
+  5.0% in the earlier 3-repeat run, whose 3 repeats of a case gave the same
+  outcome in 96% to 100% of cases. [README: results]
 - 0 model errors (README: Qwen2.5-32B run; roadmap: the first 302-case
   run). All scripts and the demo page are
   public (or anonymised, depending on STALA's rules; check in November).
