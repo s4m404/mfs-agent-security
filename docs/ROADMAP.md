@@ -65,8 +65,9 @@ Last updated: 10 October 2026.
        progress), provenance. Expected to finish around 17 October.
        Setting: reasoning effort low (state this in the paper).
 2. [ ] **Do the agents' questions let a user say no?** The simulated user
-       always says yes, and 29 of the 78 successful attacks on the four Qwen
-       models (no defence) came right after that "yes". Code each confirmation question and block
+       always says yes; in 29 of the 78 successful attacks on the four Qwen
+       models (no defence) the agent had asked a question and received that
+       "yes", and the attacker was paid later in the same episode. Code each confirmation question and block
        message for what a user would need (payee, amount, where the number
        or amount came from, the risk, what to do), by language. Counts so
        far: `docs/paper/confirmations.md`. A user study would be a separate
@@ -179,9 +180,11 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   normal Bangla texts (as a filter it would break 20 of 22 Bangla-request
   tasks, 1 of 21 English) and caught only 47% of English attacks; deepset's
   flagged 87% of all normal texts.
-- The simulated user's automatic "yes" is part of the attack path: 29 of the
-  78 successful attacks on the four Qwen models (no defence) came right
-  after it (13 of 32 for Qwen2.5-32B).
+- The simulated user's automatic "yes" is part of the attack path: in 29 of
+  the 78 successful attacks on the four Qwen models (no defence; 13 of 32
+  for Qwen2.5-32B) the agent had asked a question and received the
+  simulated yes, and the attacker was paid later in the same episode (an
+  order in time, not evidence that the question caused the payment).
 - The original 114 cases reproduce: 10.0% / 3.8% / 6.2% attack success for
   3B / 7B / 14B, against 10.0% / 3.8% / 5.0% in the earlier 3-repeat run.
 
