@@ -140,9 +140,10 @@ ordinary scam messages 47%).
    then paid a 1,200 Tk bill. That episode is scored as a failed task and a
    wrong payment that went through, but the harness caused it, not the model
    alone. It is 1 of 302 episodes for GPT-OSS-120B. More broadly, the
-   simulated "yes" is part of many results: without a defence, 29 of the 78
-   successful attacks on the four Qwen models (13 of 32 for Qwen2.5-32B) came
-   right after it (`docs/paper/confirmations.md`). Fixing the trigger would change the
+   simulated "yes" is part of many results: without a defence, in 29 of the 78
+   successful attacks on the four Qwen models (13 of 32 for Qwen2.5-32B), the
+   agent had received it before the attacker was paid later in the episode
+   (`docs/paper/confirmations.md`). Fixing the trigger would change the
    harness in the middle of the Groq run, so it is left as a documented
    limitation.
 3. **"Read the attack" (`exposed`) means "called the tool that shows it",

@@ -65,8 +65,9 @@ Last updated: 10 October 2026.
        progress), provenance. Expected to finish around 17 October.
        Setting: reasoning effort low (state this in the paper).
 2. [ ] **Do the agents' questions let a user say no?** The simulated user
-       always says yes, and 29 of the 78 successful attacks on the four Qwen
-       models (no defence) came right after that "yes". Code each confirmation question and block
+       always says yes, and in 29 of the 78 successful attacks on the four Qwen
+       models (no defence) the agent had received that "yes" before the
+       attacker was paid later in the episode. Code each confirmation question and block
        message for what a user would need (payee, amount, where the number
        or amount came from, the risk, what to do), by language. Counts so
        far: `docs/paper/confirmations.md`. A user study would be a separate
