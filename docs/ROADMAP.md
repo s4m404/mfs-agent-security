@@ -47,7 +47,8 @@ Last updated: 10 October 2026.
   after Qwen2.5-32B beat the first version by reading only the newest SMS.
 - **Audit** (`docs/audit.md`): every available episode (4,212) re-scored from
   its raw trace with no difference; README numbers checked against raw
-  traces for Qwen2.5-32B, Hermes 3 and Granite; one README sentence corrected;
+  traces for Qwen2.5-32B, Hermes 3 and Granite and against the raw detector
+  outputs; one README sentence corrected;
   an OTP-format bug in the scorer fixed. Raw Kaggle results are kept on the
   `kaggle-results` branch, GPT-OSS-120B results on `groq-results`.
 - **Paper material.** Outline (`docs/paper/outline.md`), figures and tables
@@ -65,8 +66,7 @@ Last updated: 10 October 2026.
        progress), provenance. Expected to finish around 17 October.
        Setting: reasoning effort low (state this in the paper).
 2. [ ] **Complete the raw-data archive.** Add the Qwen2.5 3B, 7B and 14B
-       runs, the 114-case 3-repeat run and the detector flags to the
-       `kaggle-results` branch, then rerun `scripts/rescore.py`,
+       runs and the 114-case 3-repeat run to the `kaggle-results` branch, then rerun `scripts/rescore.py`,
        `scripts/compare_runs.py` and `scripts/count_confirmations.py` on
        them. This confirms the claims still checked only against saved
        scores: no OTP leaked by 3B / 7B / 14B (0 of 75), repeat agreement,

@@ -48,8 +48,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   are written by the workflow to `groq-results`. Recompute and check numbers
   from these branches (`scripts/rescore.py` first).
 - Still missing from `kaggle-results` (ask him for them): the Qwen2.5 3B, 7B
-  and 14B runs on 302 cases, the 114-case 3-repeat run, and
-  `results_detectors/flags.jsonl`.
+  and 14B runs on 302 cases and the 114-case 3-repeat run.
 - Branches: keep `main`, `groq-results` and `kaggle-results`; delete a
   working branch after its pull request is merged.
 
