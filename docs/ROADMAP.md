@@ -45,11 +45,10 @@ Last updated: 10 October 2026.
   biller account (Qwen2.5-32B had lost 12 normal tasks to the old one);
   `provenance-consistent` now checks every SMS and invoice from the payee,
   after Qwen2.5-32B beat the first version by reading only the newest SMS.
-- **Audit** (`docs/audit.md`): every available episode (4,212) re-scored from
-  its raw trace with no difference; README numbers checked against raw
-  traces for Qwen2.5-32B, Hermes 3 and Granite and against the raw detector
-  outputs; one README sentence corrected;
-  an OTP-format bug in the scorer fixed. Raw Kaggle results are kept on the
+- **Audit** (`docs/audit.md`): every available episode (6,930) re-scored from
+  its raw trace with no difference; README numbers checked against the raw
+  traces of every model and against the raw detector outputs; two small
+  README details corrected; an OTP-format bug in the scorer fixed. Raw Kaggle results are kept on the
   `kaggle-results` branch, GPT-OSS-120B results on `groq-results`.
 - **Paper material.** Outline (`docs/paper/outline.md`), figures and tables
   (`scripts/make_figures.py`, `docs/paper/figures/`), related-work draft
@@ -65,15 +64,14 @@ Last updated: 10 October 2026.
        cases a day). Order: none (done, 302 cases), provenance-amount (in
        progress), provenance. Expected to finish around 17 October.
        Setting: reasoning effort low (state this in the paper).
-2. [ ] **Complete the raw-data archive.** Add the Qwen2.5 3B, 7B and 14B
-       runs and the 114-case 3-repeat run to the `kaggle-results` branch, then rerun `scripts/rescore.py`,
-       `scripts/compare_runs.py` and `scripts/count_confirmations.py` on
-       them. This confirms the claims still checked only against saved
-       scores: no OTP leaked by 3B / 7B / 14B (0 of 75), repeat agreement,
-       and the 114-case comparison.
+2. [ ] **Complete the raw-data archive.** Add the earlier 114-case
+       3-repeat run to the `kaggle-results` branch and check the two claims
+       that depend on it: its attack success (10.0% / 3.8% / 5.0%) and the
+       repeat agreement (96% to 100%). If its output is no longer available,
+       report those numbers as from the earlier run, not re-checked.
 3. [ ] **Do the agents' questions let a user say no?** The simulated user
-       always says yes, and 13 of Qwen2.5-32B's 32 successful attacks came
-       right after that "yes". Code each confirmation question and block
+       always says yes, and 29 of the 78 successful attacks on the four Qwen
+       models (no defence) came right after that "yes". Code each confirmation question and block
        message for what a user would need (payee, amount, where the number
        or amount came from, the risk, what to do), by language. Counts so
        far: `docs/paper/confirmations.md`. A user study would be a separate
@@ -186,8 +184,9 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   normal Bangla texts (as a filter it would break 20 of 22 Bangla-request
   tasks, 1 of 21 English) and caught only 47% of English attacks; deepset's
   flagged 87% of all normal texts.
-- The simulated user's automatic "yes" is part of the attack path: 13 of
-  Qwen2.5-32B's 32 successful attacks (no defence) came right after it.
+- The simulated user's automatic "yes" is part of the attack path: 29 of the
+  78 successful attacks on the four Qwen models (no defence) came right
+  after it (13 of 32 for Qwen2.5-32B).
 - The original 114 cases reproduce: 10.0% / 3.8% / 6.2% attack success for
   3B / 7B / 14B, against 10.0% / 3.8% / 5.0% in the earlier 3-repeat run.
 
