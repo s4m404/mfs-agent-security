@@ -135,8 +135,8 @@ Facts about other work from the references below; ours from the README.
 ## References
 
 Checked on 7 October 2026 from arXiv listings, conference pages and
-author pages (arXiv itself cannot be opened from the cloud session, so
-abstracts were read through search results). Before submission, export the
+author pages (abstracts were read through search results, not from the
+PDFs). Before submission, export the
 BibTeX from each paper's official page and check the starred items.
 
 1. Kai Greshake, Sahar Abdelnabi, Shailesh Mishra, Christoph Endres,
@@ -194,7 +194,7 @@ Applications (2026), already in the README.
 
 ## Optional additions if space allows
 
-Not checked in this session; verify before citing.
+Not checked yet; verify before citing.
 
 - Spotlighting (Hines et al., 2024): marking untrusted text in the prompt,
   a prompting defence that does read the text.

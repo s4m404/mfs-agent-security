@@ -93,6 +93,8 @@ def main() -> None:
                                  ("Request language", LANG_NAMES.get(case.task_language, case.task_language)),
                                  ("Case type", kind),
                                  ("Model, case type", f"{model} / {kind}"),
+                                 ("Model, request language",
+                                  f"{model} / {LANG_NAMES.get(case.task_language, case.task_language)}"),
                                  ("All", "all")):
                     by[dim][key].update(c)
 
@@ -103,7 +105,8 @@ def main() -> None:
              "number or a payment word); a \"?\" in a table header also counts as a question.",
              "- **Block message**: a payment or SMS call that a defence stopped; the agent sees the block reason "
              "instead of the tool result.", ""]
-    for dim in ("All", "Model and defence", "Case type", "Model, case type", "Request language"):
+    for dim in ("All", "Model and defence", "Case type", "Model, case type", "Request language",
+                "Model, request language"):
         lines += table(dim, dict(sorted(by[dim].items())), [dim])
     text = "\n".join(lines)
     if args.out:

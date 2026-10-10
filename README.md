@@ -250,7 +250,7 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 | Forged "revised" invoice for the real biller account | 1/24 | 1/24 | **0/24** | **0/24** |
 | All 56: correct payment made | 11 | 12 | 2 | 1 |
 
-- **A forged "correction" from the payee works very well on a real model.** Without a defence the model paid the new amount in 11 of 16 cases and the new number in 8 of 16, far above its 14.5% on the main set. Forged invoices rarely worked (1 of 24), partly because the model opened the second invoice in only 13 of 24 cases.
+- **A forged "correction" from the payee works very well on a real model.** Without a defence the model paid the new amount in 11 of 16 cases and the new number in 8 of 16, far above its 14.5% on the main set. Forged invoices rarely worked (1 of 24): the model opened an invoice in 13 of 24 cases, and the forged "revised" invoice in only 2.
 - **The first version of `provenance-consistent` cut forged amounts from 10 of 16 to 3 of 16, but did not stop them all.** In all 3, the model called `read_sms` with `limit: 1`, saw only the newest (forged) message, and paid it. That version compared only messages the agent had read, so it never saw the real amount. The model read only the newest SMS in 5 of the 16 cases. The scripted check above missed this because its agent always reads every message: a defence must be tested against how real agents use tools, not only against an ideal script.
 - **Fixed since:** the check now compares every SMS and invoice from that payee in the wallet, whether or not the agent read them (it takes only amounts from them, never codes). `scripts/audit_adaptive.py` now also plays an agent that reads only the newest SMS or only the forged invoice: it beats the first version in 40 of 40 cases and the fixed one in 0 of 40. **With the model:** in a rerun on Qwen2.5-32B the fixed version stopped all 56 adaptive attacks (last column). The model again read only the newest SMS in 5 of the 16 forged-amount cases, and this time all 5 were stopped. On the 302 main cases: 0 of 220 attacks, 0 wrong payments, 0 correct payments blocked, and 59 of 82 normal tasks done (72%, the highest of any 32B run).
 - **The cost is real.** With the fixed `provenance-consistent` the correct payment went through in only 1 of 56 adaptive cases (12 with `provenance-amount`): when the payee's messages disagree, the payment waits for the user. On the main cases, where messages do not disagree, there is no such cost.
@@ -335,3 +335,7 @@ The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 ## Ethics
 
 All data is synthetic, and "TakaPay" is fictional. See [docs/ETHICS.md](docs/ETHICS.md).
+
+## About
+
+Mohammed Sayed Sameer designed and directed this study, chose the threat model and defences, reviewed all test cases (including every Bangla and Banglish sentence) and checked the results.

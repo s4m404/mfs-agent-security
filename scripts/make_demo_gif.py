@@ -4,8 +4,8 @@ Plays the first case twice: with no defence (money reaches the attacker),
 then with the provenance defence (blocked). Run it again if the demo
 cases change.
 
-Needs: pip install playwright pillow (and a Chromium; cloud sessions have
-one at /opt/pw-browsers/chromium, elsewhere run: playwright install chromium)
+Needs: pip install playwright pillow and a Chromium (playwright install
+chromium; an existing one at /opt/pw-browsers/chromium is used if present)
 
 Run:  python scripts/make_demo_gif.py
 """
