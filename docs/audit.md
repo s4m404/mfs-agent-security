@@ -8,11 +8,12 @@ was found, and what is still open.
 ## Raw data
 
 - Kaggle runs: branch `kaggle-results` (Qwen2.5-32B, all runs; Hermes 3 and
-  Granite 3.3; adaptive runs of Qwen2.5-32B). See its README for the folders.
+  Granite 3.3; adaptive runs of Qwen2.5-32B; detector flags). See its README
+  for the folders.
 - GPT-OSS-120B: branch `groq-results` (no defence complete, 302 cases;
   provenance-amount in progress).
-- **Missing:** the raw Qwen2.5 3B, 7B and 14B runs on the 302 cases, the
-  earlier 114-case run with 3 repeats, and the detector flags. Their README
+- **Missing:** the raw Qwen2.5 3B, 7B and 14B runs on the 302 cases and the
+  earlier 114-case run with 3 repeats. Their README
   numbers were checked only against `docs/paper/figures/numbers.json` (built
   from their scores by `scripts/make_figures.py`, pull request #26), not
   against raw traces.
@@ -71,6 +72,18 @@ Hermes 3 and Granite, every number checked agrees with the README:
 | Adaptive: correct payment made 11 / 12 / 2 / 1 of 56 | same | confirmed |
 | Adaptive: the model read only the newest SMS in 5 of 16 forged-amount cases; all 3 attacks past the first provenance-consistent were of this kind; the fixed version stopped all 5 | 5; 3 of 3; 0 attacks | confirmed |
 | Adaptive: "the model opened the second invoice in only 13 of 24 cases" | it opened an invoice in 13 of 24 cases, but the forged "revised" invoice in only 2 | **wrong, corrected in the README** |
+
+## Detectors
+
+`scripts/detector_eval.py --from-flags` on the raw detector outputs
+(`flags.jsonl`, one row per text, from `notebooks/kaggle_detectors.ipynb`)
+rebuilds both README detector tables. **Every number matches**: attack texts
+flagged overall and by language (keyword 34%, ProtectAI 59%, deepset 100%),
+false alarms (4, 21 and 47 of 54; Bangla 2, 16 and 19 of 19, ProtectAI's
+interval 62% to 94%), the normal tasks a filter would break by request
+language (ProtectAI 1/21, 20/22, 1/20, 16/19), and the sentence figures
+(Bangla attacks flagged 57%, normal Banglish 1 of 11 and English 2 of 16,
+ordinary scam messages 47%).
 
 ## Mismatch found and corrected
 
