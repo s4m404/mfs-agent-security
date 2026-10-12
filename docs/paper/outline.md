@@ -332,4 +332,7 @@ Notes for the figure run:
 - [ ] [Groq] numbers into 5.2, 5.3, 5.6 and the abstract.
 - [x] Related work (section 7): `docs/paper/related_work.md`; check the
       starred references before submitting.
+- [x] First draft of sections 2 to 4: `docs/paper/draft_sections_2_4.md`
+      (sources of every number listed at its end).
+- [ ] Draft section 5 (results), then sections 1, 8 and 9.
 - [ ] STALA template and anonymisation rules (check in November).
