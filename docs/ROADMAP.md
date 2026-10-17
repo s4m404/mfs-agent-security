@@ -62,24 +62,24 @@ Last updated: 17 October 2026.
   results for all six models (`docs/paper/draft_section_5.md`); first
   draft of the abstract, introduction, limitations and conclusion
   (`docs/paper/draft_sections_1_8_9.md`).
+- **What the agents' questions tell the user** (`scripts/code_questions.py`,
+  `docs/paper/question_coding.md`): every question that received the
+  simulated yes, coded by keyword rules for payee, amount, where the
+  request came from, risk and next step, by model and language; block
+  messages coded by template. A random sample of 50 is in
+  `docs/paper/question_sample.csv` for a hand check.
 - **Demo.** `docs/index.html` replays real runs; `docs/demo.gif`.
 
 ## Open tasks before the paper
 
-1. [ ] **Do the agents' questions let a user say no?** The simulated user
-       always says yes; in 29 of the 78 successful attacks on the four Qwen
-       models (no defence) the agent had asked a question and received that
-       "yes", and the attacker was paid later in the same episode. Code each confirmation question and block
-       message for what a user would need (payee, amount, where the number
-       or amount came from, the risk, what to do), by language. Counts so
-       far: `docs/paper/confirmations.md`. A user study would be a separate
-       follow-up.
-2. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
+1. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
        Banglish sentences; report agreement. Review the 9 adaptive-set
-       sentences marked in `bench/review_texts.csv`.
-3. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
+       sentences marked in `bench/review_texts.csv`. Hand-check the 50
+       coded agent questions in `docs/paper/question_sample.csv` before
+       the question-coding counts are quoted as checked.
+2. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
        short dataset card.
-4. [ ] **References, last checks:** BibTeX for every reference is in
+3. [ ] **References, last checks:** BibTeX for every reference is in
        `docs/paper/references.bib` and the starred items are resolved
        (CaMeL cited as arXiv; the firewalls paper is a NeurIPS 2025
        workshop paper; XSafety and MultiJail include Bengali; BanglaSafe
@@ -205,7 +205,10 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   simulated yes, and the attacker was paid later in the same episode (an
   order in time, not evidence that the question caused the payment).
   GPT-OSS-120B asked in only 1 of 302 episodes without a defence, so none
-  of its successful attacks followed the simulated yes.
+  of its successful attacks followed the simulated yes. None of the 35
+  questions after which an attacker was paid (all runs) warned of a risk;
+  most read like an ordinary payment confirmation (keyword coding, to be
+  checked by hand).
 - The original 114 cases reproduce: 10.0% / 3.8% / 6.2% attack success for
   3B / 7B / 14B, against 10.0% / 3.8% / 5.0% in the earlier 3-repeat run.
 
