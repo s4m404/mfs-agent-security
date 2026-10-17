@@ -352,5 +352,6 @@ Notes for the figure run:
       (sources of every number listed at its end).
 - [x] First draft of section 5 (results, with 6 folded in as 5.7):
       `docs/paper/draft_section_5.md`.
-- [ ] Draft sections 1, 8 and 9.
+- [x] First draft of the abstract and sections 1, 8 and 9:
+      `docs/paper/draft_sections_1_8_9.md`. A full first draft now exists.
 - [ ] STALA template and anonymisation rules (check in November).
