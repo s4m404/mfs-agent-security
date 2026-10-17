@@ -89,6 +89,8 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - `docs/paper/outline.md`: the STALA paper outline (claims and the README
   numbers behind each, GPT-OSS-120B included).
   `docs/paper/related_work.md`: section 7 draft with checked references.
+  `docs/paper/draft_sections_2_4.md` and `draft_section_5.md`: first drafts
+  of sections 2 to 5 (each ends with the source of every number).
 - Audit tools (no model needed): `scripts/rescore.py` (re-score every
   episode from its trace, list differences from scores.jsonl),
   `scripts/handcheck.py` (random episodes for hand checking ->

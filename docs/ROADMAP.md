@@ -58,7 +58,8 @@ Last updated: 17 October 2026.
   (`docs/paper/related_work.md`), counts of confirmation questions and block
   messages (`docs/paper/confirmations.md`), first draft of sections 2 to 4:
   background and threat model, the benchmark, the defences
-  (`docs/paper/draft_sections_2_4.md`).
+  (`docs/paper/draft_sections_2_4.md`); first draft of section 5, the
+  results for all six models (`docs/paper/draft_section_5.md`).
 - **Demo.** `docs/index.html` replays real runs; `docs/demo.gif`.
 
 ## Open tasks before the paper
@@ -121,8 +122,9 @@ benchmark or assurance interpretation is misleading".
 4. The benchmark: 302 cases in Bangla, Banglish, code-mixed and English,
    over MCP, with raw traces and re-scoring scripts.
 
-**Schedule.** Sections 2 to 4 drafted (`docs/paper/draft_sections_2_4.md`);
-next: section 5 (results) and the introduction. Full draft by 30 November 2026; submit by 11 December 2026;
+**Schedule.** Sections 2 to 5 drafted (`docs/paper/draft_sections_2_4.md`,
+`docs/paper/draft_section_5.md`); next: the introduction, limitations and
+conclusion (sections 1, 8 and 9). Full draft by 30 November 2026; submit by 11 December 2026;
 release the dataset with the submission (or at camera-ready if anonymity is
 required). If not accepted, revise with the reviews and submit to an ICLR or
 ACL 2027 workshop in early February.

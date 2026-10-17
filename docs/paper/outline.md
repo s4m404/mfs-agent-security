@@ -350,5 +350,7 @@ Notes for the figure run:
       starred references before submitting.
 - [x] First draft of sections 2 to 4: `docs/paper/draft_sections_2_4.md`
       (sources of every number listed at its end).
-- [ ] Draft section 5 (results), then sections 1, 8 and 9.
+- [x] First draft of section 5 (results, with 6 folded in as 5.7):
+      `docs/paper/draft_section_5.md`.
+- [ ] Draft sections 1, 8 and 9.
 - [ ] STALA template and anonymisation rules (check in November).
