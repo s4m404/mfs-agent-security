@@ -88,7 +88,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   this cloud environment cannot reach huggingface.co).
 - `docs/paper/outline.md`: the STALA paper outline (claims and the README
   numbers behind each, GPT-OSS-120B included).
-  `docs/paper/related_work.md`: section 7 draft with checked references.
+  `docs/paper/related_work.md`: section 7 draft with checked references;
+  `docs/paper/references.bib`: their BibTeX (written by hand: this cloud
+  environment cannot reach arXiv, DBLP or the ACL Anthology).
   `docs/paper/draft_sections_1_8_9.md`, `draft_sections_2_4.md` and
   `draft_section_5.md`: first drafts of the abstract and sections 1 to 5,
   8 and 9 (each ends with the source of every number).

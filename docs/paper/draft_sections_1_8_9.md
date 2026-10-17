@@ -41,7 +41,7 @@ switches between Bangla and English inside a sentence.
 
 The agent prompt-injection benchmarks we know of, InjecAgent [2] and
 AgentDojo [3], are in English. Multilingual safety work, including work on
-Bengali [9, 10], studies jailbreaks of chat models, where the harm is the
+Bengali [9, 10, 13], studies jailbreaks of chat models, where the harm is the
 text the model writes, not agents whose harm is an action. We do not know
 whether attacks, or the defences built against them, carry over to an agent
 that moves money in Bangla.
@@ -174,7 +174,7 @@ against an ideal script.
 
 | Number | Source |
 |---|---|
-| 239 million mobile money accounts; OWASP Top 10 for Agentic Applications (2026) | README, "Why this matters" (needs a citation for the account count; see notes) |
+| 239 million mobile money accounts; OWASP Top 10 for Agentic Applications (2026) | README, "Why this matters"; Bangladesh Bank data for January 2025 (`references.bib`) |
 | Detector rates: 16 of 19, 84%, 57%, 20 of 22, 1 of 21, deepset 100% / 87% | README, "Do injection detectors work"; `draft_section_5.md`, 5.1 |
 | 0 correct payments blocked, any language, six models; 0 attacks with the amount check; 2.3% to 15.0% without a defence | README, main results, Hermes 3 and GPT-OSS-120B sections; `draft_section_5.md`, 5.1 and 5.3 |
 | Invented payees 29% to 52% (Qwen), 4.3% and 15.0% (GPT-OSS-120B); two to four times when read and able | README, "Results", "A larger API model", conditional rates |
@@ -185,10 +185,12 @@ against an ideal script.
 
 ## Notes for the next draft
 
-- The 239 million figure needs a citable source (Bangladesh Bank MFS
-  statistics for the month used); check before submitting.
-- "Bengali [9, 10]": check that both papers include Bengali before keeping
-  the bracket (roadmap: references task).
+- The 239 million figure is Bangladesh Bank data for January 2025 (239.3
+  million MFS accounts), found through press reports; download the
+  statement itself from bb.org.bd and fix the entry in `references.bib`.
+- [9, 10, 13] all include Bengali (MultiJail: Bengali as one of three
+  low-resource languages; XSafety: one of 10 languages; BanglaSafe:
+  Bengali only), checked 17 October 2026.
 - If space is short: drop the abstract's last sentence, merge the
   contributions list into the paragraph before it, and shorten the
   "Measurement" paragraph of section 8 to one sentence pointing to the

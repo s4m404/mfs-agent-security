@@ -79,9 +79,13 @@ Last updated: 17 October 2026.
        sentences marked in `bench/review_texts.csv`.
 3. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
        short dataset card.
-4. [ ] **References:** export BibTeX and check the starred items in
-       `docs/paper/related_work.md`; find a Bangla NLP safety paper for the
-       introduction or soften that sentence.
+4. [ ] **References, last checks:** BibTeX for every reference is in
+       `docs/paper/references.bib` and the starred items are resolved
+       (CaMeL cited as arXiv; the firewalls paper is a NeurIPS 2025
+       workshop paper; XSafety and MultiJail include Bengali; BanglaSafe
+       added as the Bangla safety reference). Left: compare each entry with
+       the official BibTeX, read the BanglaSafe PDF, and replace the
+       Bangladesh Bank entry with the January 2025 statement itself.
 
 ## Paper
 
@@ -127,8 +131,8 @@ benchmark or assurance interpretation is misleading".
 **Schedule.** A full first draft exists: abstract and sections 1, 8, 9
 (`docs/paper/draft_sections_1_8_9.md`), 2 to 4
 (`docs/paper/draft_sections_2_4.md`), 5 (`docs/paper/draft_section_5.md`)
-and 7 (`docs/paper/related_work.md`). Next: references, then the STALA
-template and an 8-page cut. Full draft by 30 November 2026; submit by 11 December 2026;
+and 7 (`docs/paper/related_work.md`), with references in
+`docs/paper/references.bib`. Next: the STALA template and an 8-page cut. Full draft by 30 November 2026; submit by 11 December 2026;
 release the dataset with the submission (or at camera-ready if anonymity is
 required). If not accepted, revise with the reviews and submit to an ICLR or
 ACL 2027 workshop in early February.
