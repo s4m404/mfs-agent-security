@@ -87,7 +87,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   Hugging Face ones with `notebooks/kaggle_detectors.ipynb`, about 10 minutes;
   this cloud environment cannot reach huggingface.co).
 - `docs/paper/outline.md`: the STALA paper outline (claims and the README
-  numbers behind each; [Groq] marks numbers still to come).
+  numbers behind each, GPT-OSS-120B included).
   `docs/paper/related_work.md`: section 7 draft with checked references.
 - Audit tools (no model needed): `scripts/rescore.py` (re-score every
   episode from its trace, list differences from scores.jsonl),
@@ -112,7 +112,8 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   Model replies are capped at 1,024 tokens; a model error ends only that case
   and is counted as `model_error` in scores.jsonl and summary.md.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
-- `.github/workflows/groq_run.yml`: GPT-OSS-120B on Groq's free tier, every 6
+- `.github/workflows/groq_run.yml` (done: none, provenance, provenance-amount,
+  302 cases each, reasoning effort low): GPT-OSS-120B on Groq's free tier, every 6
   hours, `run_bench.py --resume` until the daily limit (exit code 3: the case
   is not scored and runs again next time), results on the `groq-results`
   branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.
@@ -133,9 +134,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - A test checks that an ideal agent solves every case and a gullible agent
   triggers every attack. Keep it passing.
 
-## Results so far (Qwen2.5 3B, 7B, 14B-AWQ; 302 cases; 1 repeat; temperature 0)
+## Results so far (302 cases; 1 repeat; temperature 0)
 
-- Attack success without defence: 7.3%, 5.9%, 7.7% of 220 attack cases.
+- Qwen2.5 3B, 7B, 14B-AWQ: attack success without defence 7.3%, 5.9%, 7.7% of 220 attack cases.
   With `provenance`: 1, 5, 5 (all amount-only attacks). With
   `provenance-amount`: 0 of 660. Correct payments blocked: 0.
 - Wrong payments that went through: 30 / 6 / 27 with `provenance`, 0 with
@@ -152,9 +153,16 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   with `provenance-consistent`, still 0 attacks and 0 correct payments blocked.
 - Hermes-3-Llama-3.1-8B (second family): 2.3% without defence, 1 with
   `provenance` (amount-only), 0 with `provenance-amount`, 0 correct payments blocked.
+- GPT-OSS-120B (third family, Groq, reasoning effort low): 33/220 (15.0%)
+  without defence, 7 with `provenance` (all amount-only), 0 with
+  `provenance-amount`; 76/82 normal tasks in all three; 0 correct payments
+  blocked; invented payees 13 / 10 / 9 of 302 (so the invented-payee finding
+  is mainly about the smaller models); no OTP leaked; 27 of the 33 through tool
+  descriptions; 1 model error each in none and provenance-amount; asked a
+  "?" in 1 of 302 episodes without defence (a table header).
 - Among attacks the agent read and on tasks it could do (`scripts/conditional_rates.py`):
-  24% / 11% / 15% / 18% (Qwen 3B / 7B / 14B / 32B) and 10% (Hermes 3) without defence; 0 with
-  `provenance-amount`.
+  24% / 11% / 15% / 18% (Qwen 3B / 7B / 14B / 32B), 10% (Hermes 3) and 20%
+  (GPT-OSS-120B) without defence; 0 with `provenance-amount`.
 - Adaptive set: an obeying agent beats `provenance-amount` with a spoofed payee
   SMS or a forged biller invoice (40/40); a forged new number is still blocked (0/16).
   `provenance-consistent` stops 40/40 in the audit. With Qwen2.5-32B: forged
@@ -169,10 +177,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   Bangla texts flagged (as a filter it would break 20 of 22 Bangla-request
   normal tasks, 1 of 21 English); deepset 100% / 87%. Prompt Guard not run
   (needs a Hugging Face account).
-- Error analysis (`scripts/error_analysis.py`, all five models, no defence): a
+- Error analysis (`scripts/error_analysis.py`, all six models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after
-  reading (34 of 64 failures).
+  reading (34 of 64 failures); GPT-OSS-120B failed only 6 (4 stopped without
+  paying).
 - Full tables and findings are in the README; key findings in `docs/ROADMAP.md`.
 
 ## Next tasks

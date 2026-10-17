@@ -4,10 +4,10 @@
 Bangla) and code-mixed text make an LLM agent move money in a mobile money
 wallet, and which defences stop it without blocking correct payments?
 
-**Output.** A public benchmark (TakaPay, 302 cases), results on several
-open models, and a workshop paper.
+**Output.** A public benchmark (TakaPay, 302 cases), results on six
+models from three families, and a workshop paper.
 
-Last updated: 12 October 2026.
+Last updated: 17 October 2026.
 
 ## Done
 
@@ -30,7 +30,10 @@ Last updated: 12 October 2026.
   simple rule-based versions.
 - **Runs** (vLLM on Kaggle T4 GPUs, temperature 0, one run per case):
   Qwen2.5 3B, 7B, 14B-AWQ and 32B-AWQ; Hermes-3-Llama-3.1-8B (a second
-  family). Granite 3.3 8B was run but left out: its tool calls came out as
+  family). GPT-OSS-120B (a third family, much larger than the others) on
+  Groq's API, reasoning effort low, by `.github/workflows/groq_run.yml`
+  (none, provenance, provenance-amount; 302 cases each). Granite 3.3 8B
+  was run but left out: its tool calls came out as
   plain text (0.2 tool calls per case). An earlier 114-case run with 3
   repeats showed that repeats at temperature 0 barely differ.
 - **Detectors.** ProtectAI DeBERTa v2, deepset DeBERTa and the keyword
@@ -45,7 +48,7 @@ Last updated: 12 October 2026.
   biller account (Qwen2.5-32B had lost 12 normal tasks to the old one);
   `provenance-consistent` now checks every SMS and invoice from the payee,
   after Qwen2.5-32B beat the first version by reading only the newest SMS.
-- **Audit** (`docs/audit.md`): every available episode (8,982) re-scored from
+- **Audit** (`docs/audit.md`): every available episode (9,524) re-scored from
   its raw trace with no difference; README numbers checked against the raw
   traces of every model and against the raw detector outputs; two small
   README details corrected and one unverifiable sentence replaced; an OTP-format bug in the scorer fixed. Raw Kaggle results are kept on the
@@ -60,13 +63,7 @@ Last updated: 12 October 2026.
 
 ## Open tasks before the paper
 
-1. [ ] **GPT-OSS-120B on Groq** (a third model family, larger than any open
-       model run so far). `.github/workflows/groq_run.yml` runs every 6
-       hours and resumes until the free tier's daily token limit (about 85
-       cases a day). Order: none (done, 302 cases), provenance-amount (in
-       progress), provenance. Expected to finish around 17 October.
-       Setting: reasoning effort low (state this in the paper).
-2. [ ] **Do the agents' questions let a user say no?** The simulated user
+1. [ ] **Do the agents' questions let a user say no?** The simulated user
        always says yes; in 29 of the 78 successful attacks on the four Qwen
        models (no defence) the agent had asked a question and received that
        "yes", and the attacker was paid later in the same episode. Code each confirmation question and block
@@ -74,12 +71,12 @@ Last updated: 12 October 2026.
        or amount came from, the risk, what to do), by language. Counts so
        far: `docs/paper/confirmations.md`. A user study would be a separate
        follow-up.
-3. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
+2. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
        Banglish sentences; report agreement. Review the 9 adaptive-set
        sentences marked in `bench/review_texts.csv`.
-4. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
+3. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
        short dataset card.
-5. [ ] **References:** export BibTeX and check the starred items in
+4. [ ] **References:** export BibTeX and check the starred items in
        `docs/paper/related_work.md`; find a Bangla NLP safety paper for the
        introduction or soften that sentence.
 
@@ -110,9 +107,10 @@ benchmark or assurance interpretation is misleading".
    Bangla: ProtectAI's flags 84% of normal Bangla texts, so an English
    detection score says nothing about other languages; provenance rules,
    which never read the text, blocked no correct payment in any language.
-1. Attack success alone is misleading for payment agents: models made wrong
-   payments with no attacker involved (invented payees, guessed amounts)
-   more often than any attack succeeded.
+1. Attack success alone is misleading for payment agents: the smaller open
+   models (Qwen2.5, Hermes 3) made wrong payments with no attacker involved
+   (invented payees, guessed amounts) more often than any attack succeeded
+   (GPT-OSS-120B rarely did, but fell for the most attacks).
 2. Checking only "did money reach the attacker" misses amount-only attacks,
    which pay the real payee; every attack that got past recipient
    provenance was of this kind, and the amount check stopped them.
@@ -155,8 +153,9 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
 302 cases, one run per case, temperature 0. Full tables in the README.
 
 - With provenance plus the amount check, 0 of 880 attack episodes succeeded
-  on the four Qwen2.5 models (0 of 220 for Hermes 3), against 5.9% to 14.5%
-  without a defence; no correct payment was blocked in the normal tasks and
+  on the four Qwen2.5 models (0 of 220 each for Hermes 3 and GPT-OSS-120B),
+  against 2.3% to 15.0% without a defence across the six models; no
+  correct payment was blocked in the normal tasks and
   no wrong payment went through.
 - Provenance alone stopped every attack that redirects money or leaks the
   OTP (0 of 800 on the Qwen models), but 15 attacks that changed only the
@@ -170,9 +169,16 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   and fell for the most attacks (14.5%).
 - Hermes 3 (Llama 3.1 8B) shows the same pattern: 2.3% without a defence,
   one amount-only attack past provenance, 0 with provenance-amount.
+- GPT-OSS-120B (Groq, reasoning effort low) shows it too: 15.0% (33 of 220)
+  without a defence, the highest of all models; 7 past provenance, all
+  amount-only; 0 with provenance-amount; 0 correct payments blocked and 76
+  of 82 normal tasks with every defence. 27 of its 33 successful attacks
+  came through tool descriptions (27 of 37 such attacks); by attack language
+  they were spread evenly (8, 8, 9, 8). Unlike the smaller models it rarely
+  tried to pay an invented payee (13, 10 and 9 of 302 episodes).
 - Counted only where the agent read the attack and could do the task,
-  attacks worked in 10% to 24% of cases without a defence; provenance-amount
-  still stopped all of them.
+  attacks worked in 10% to 24% of cases without a defence (20% for
+  GPT-OSS-120B); provenance-amount still stopped all of them.
 - Adaptive attacks that forge the payee's identity beat provenance-amount
   when the agent obeys (40 of 40 forged amounts); the recipient check still
   stops a forged new number. With Qwen2.5-32B a forged "correction" from the
@@ -188,6 +194,8 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   for Qwen2.5-32B) the agent had asked a question and received the
   simulated yes, and the attacker was paid later in the same episode (an
   order in time, not evidence that the question caused the payment).
+  GPT-OSS-120B asked in only 1 of 302 episodes without a defence, so none
+  of its successful attacks followed the simulated yes.
 - The original 114 cases reproduce: 10.0% / 3.8% / 6.2% attack success for
   3B / 7B / 14B, against 10.0% / 3.8% / 5.0% in the earlier 3-repeat run.
 
@@ -195,6 +203,7 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
 
 Synthetic data and one fictional wallet; a simulated user who always says
 yes (and answers any "?"); open models up to 32B (14B and 32B in 4-bit) plus
-one API model; Bangla and Banglish text reviewed by one native speaker so
+one API model (GPT-OSS-120B, low reasoning effort only); Bangla and
+Banglish text reviewed by one native speaker so
 far; a small normal-text set for detectors (54 texts, 19 in Bangla).
 Measurement caveats are in `docs/audit.md`.

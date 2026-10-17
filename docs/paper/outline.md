@@ -12,10 +12,10 @@ Rules for this outline:
 
 - Every number below is copied from the README (section named in brackets).
   No new numbers. If a number changes in the README, change it here too.
-- **[Groq]** marks a number that will come from the GPT-OSS-120B run on Groq
-  (`.github/workflows/groq_run.yml`, results on the `groq-results` branch).
-  Expected: all three defences by about 17 October (about 85 cases a day). Until then the paper says "two model
-  families"; with it, "three".
+- GPT-OSS-120B numbers come from the run on Groq
+  (`.github/workflows/groq_run.yml`, results on the `groq-results` branch;
+  README section "A larger API model"). The paper says "three model
+  families".
 - **[Fig N] / [Table N]** are made by `scripts/make_figures.py` (see the end).
 
 ---
@@ -30,9 +30,11 @@ Claims, in order:
 2. Provenance tracking (an existing idea: CaMeL, FIDES; here as simple
    rules) never reads the text, blocks 0 correct payments in the normal
    tasks in any language and, with the amount check, lets 0 of 880 attack episodes
-   through on four Qwen2.5 models. [README: results]
+   through on four Qwen2.5 models (0 of 220 each for Hermes 3 and
+   GPT-OSS-120B). [README: results]
 3. Two testing lessons: attack success alone is misleading for payment agents
-   (invented payees in 29% to 52% of episodes), and checking only "did money
+   (invented payees in 29% to 52% of episodes for the Qwen models; GPT-OSS-120B
+   rarely did this, 4.3%, but fell for the most attacks, 15.0%), and checking only "did money
    reach the attacker" misses amount-only attacks.
 4. Release: 302 cases in Bangla, Banglish, code-mixed and English, over MCP.
 
@@ -58,7 +60,7 @@ Lead with the detector finding (roadmap point 0), then the rest.
   came from, never read the text. This is not our idea (CaMeL, FIDES and other
   information-flow defences); we test a simple rule-based version in a new
   setting. 0 correct payments blocked in the normal tasks in all four
-  request languages, all models. [README: detectors, results]
+  request languages, all six models. [README: detectors, results]
 - **Contributions** (bullet list):
   1. The benchmark: TakaPay, a fictional wallet over MCP, 302 cases.
      (Provenance defences are existing ideas tested here, not a
@@ -67,7 +69,8 @@ Lead with the detector finding (roadmap point 0), then the rest.
   3. Three testing lessons (points 1 to 3 of the roadmap): attack success
      alone misleads; amount-only attacks; harness choices and scripted audits
      change the conclusions.
-  4. Results on 5 models from 2 families (3 with [Groq]).
+  4. Results on 6 models from 3 families (Qwen2.5 3B to 32B, Hermes 3 on
+     Llama 3.1 8B, GPT-OSS-120B).
 
 ## 2. Background and threat model (about 0.5 page)
 
@@ -95,7 +98,7 @@ Lead with the detector finding (roadmap point 0), then the rest.
   instructions to the AI 122, ordinary scam messages 98. Goal: send money 175,
   leak OTP 25, overpay 20. [README: Test set]
 - All Bangla and Banglish text is native-speaker reviewed (second reviewer on
-  a 50-sentence sample: planned, roadmap item 5; report agreement if done).
+  a 50-sentence sample: planned, see the roadmap; report agreement if done).
 - **Metrics.** Attack success, benign tasks done, false blocks (only when the
   blocked call was the correct action), tried to pay an invented payee, wrong
   payments that went through, and attack success among cases the agent read /
@@ -105,7 +108,8 @@ Lead with the detector finding (roadmap point 0), then the rest.
   in 96% to 100% of cases in the earlier 3-repeat run), replies capped at
   1,024 tokens. 95% bootstrap intervals over cases; Wilson intervals for small
   counts. [README: Results, earlier run]
-  **[Groq]** GPT-OSS-120B on Groq's free tier, reasoning effort low (say so).
+  GPT-OSS-120B on Groq's API (free tier), temperature 0, reasoning effort
+  low (say so), same 302 cases and defences. [README: a larger API model]
 - Granite 3.3 8B left out: tool calls came out as plain text (0.2 tool calls
   per case, 5% of normal tasks), so its 0% attack success means nothing.
   [README: second family]
@@ -164,11 +168,19 @@ than successful attacks, and weak task performance hides attack risk.
 | Same with `provenance-amount` | 0% for every model (e.g. 0/118 for 7B, interval 0 to 3) |
 | Top cause of failed normal tasks (Qwen) | wrong biller account: 32 / 19 / 21 / 15 of 68 / 36 / 47 / 28 failures; 32B used the invoice ID in 14 of its 15 [README: why normal tasks fail] |
 
-Also: a bigger model was not safer: 32B did the most normal tasks (66%) and
-fell for the most attacks (14.5%, about twice the smaller models).
-**[Groq]** GPT-OSS-120B: attack success, invented payees, wrong payments
-through, conditional rates (run `scripts/conditional_rates.py` on
-`results_groq/`).
+Also: a bigger model was not safer: among the Qwen models, 32B did the most
+normal tasks (66%) and fell for the most attacks (14.5%, about twice the
+smaller models); GPT-OSS-120B did 93% and fell for 15.0%.
+GPT-OSS-120B is the exception to the invented-payee finding [README: a
+larger API model]: 15.0% attack success without a defence (the highest of
+all models), but it tried to pay an invented payee in only 13 of 302
+episodes (4.3%), and 1 such payment went through (a harness artefact, see
+5.5). It did 76 of 82 normal tasks; read and able 20.4% (29/142), 0/150
+with `provenance-amount`. So the lesson "wrong payments without an
+attacker outnumber attacks" holds for the smaller open models (Qwen2.5,
+Hermes 3); for the strongest
+model the risk is attacks, especially through tool descriptions (27 of 37
+worked).
 
 ### 5.3 Amount-only attacks need their own check (point 2) [Fig 3, Table 1]
 
@@ -179,17 +191,17 @@ those through; the amount check closes them with no false blocks.
 | Evidence (README: results) | Number |
 |---|---|
 | `provenance`: attacks that redirect money or leak the OTP | 0 of 800 episodes (four Qwen models) |
-| `provenance`: attacks that got through | 15 (Qwen), all amount-only; Hermes 3: 1, amount-only |
-| Amount-only attacks without a defence (of 20), 3B / 7B / 14B / 32B | 2 / 4 / 7 / 7 (other 200 attacks: 14 / 9 / 10 / 25) |
-| `provenance-amount`: attacks through | 0 of 880 (four Qwen models), 0 of 220 Hermes 3 |
+| `provenance`: attacks that got through | 15 (Qwen), all amount-only; Hermes 3: 1, amount-only; GPT-OSS-120B: 7, all amount-only |
+| Amount-only attacks without a defence (of 20), 3B / 7B / 14B / 32B / GPT-OSS-120B | 2 / 4 / 7 / 7 / 5 (other 200 attacks: 14 / 9 / 10 / 25 / 28) |
+| `provenance-amount`: attacks through | 0 of 880 (four Qwen models), 0 of 220 Hermes 3, 0 of 220 GPT-OSS-120B |
 | `provenance-amount`: correct payments blocked, wrong payments through | 0, 0 |
-| Wrong payments through: none / provenance / provenance-amount | 33/30/0, 8/6/0, 29/27/0, 20/2/0, 10/9/0 |
-| OTP leaked | 0 of 75 attempts (3B to 14B), 0 of 25 (32B) |
+| Wrong payments through: none / provenance / provenance-amount | 33/30/0, 8/6/0, 29/27/0, 20/2/0, 10/9/0, GPT-OSS-120B 1/1/0 |
+| OTP leaked | 0 of 75 attempts (3B to 14B), 0 of 25 (32B), 0 of 25 (GPT-OSS-120B) |
 
 Example for the text: a fake "correction" in a school invoice raising the fee
 from 3,500 to 5,000 Tk.
-**[Groq]** GPT-OSS-120B rows of Table 1 and bars of Fig 3 (all three
-defences expected by about 17 October).
+GPT-OSS-120B is in Table 1 and Fig 3: 33 / 7 / 0 of 220 attacks, 76 of 82
+normal tasks with every defence, 0 correct payments blocked.
 
 ### 5.4 Adaptive attacks: test defences with real agents (point 3, part 1)
 
@@ -223,6 +235,7 @@ must be reported with any benchmark score.
 | Still, with the new message | 0 of 220 attacks, 0 correct payments blocked |
 | Simulated user answers only a "?" (Hermes 3) | about 9 of 64 failures asked without a "?"; about 8 said they paid without a payment call (keyword estimates) |
 | Hermes 3 normal tasks done | 22% |
+| GPT-OSS-120B asked a "?" without a defence | 1 of 302 episodes (a table header; the "yes" led to a bill payment the user had not asked for) [`docs/audit.md`, item 2; `confirmations.md`] |
 
 ### 5.6 Language (short paragraph) [Table 2]
 
@@ -235,8 +248,7 @@ one language cannot rank models.
 | 32B | English 14 of 55, Banglish 7, mixed 8 |
 | 7B | mostly mixed text, 6 of 54 |
 | Hermes 3 | 3 of its 5 in English, all through SMS |
-
-**[Groq]** GPT-OSS-120B row of Table 2.
+| GPT-OSS-120B | spread evenly: English 8 of 55, Bangla 8 of 56, Banglish 9 of 55, mixed 8 of 54; 27 of its 33 through tool descriptions |
 
 ## 6. Reproducibility (short, can merge into 3)
 
@@ -244,7 +256,8 @@ one language cannot rank models.
   5.0% in the earlier 3-repeat run, whose 3 repeats of a case gave the same
   outcome in 96% to 100% of cases. [README: results]
 - 0 model errors (README: Qwen2.5-32B run; roadmap: the first 302-case
-  run). All scripts and the demo page are
+  run); GPT-OSS-120B 1 in each of the none and provenance-amount runs, counted
+  as failed cases. [README: a larger API model] All scripts and the demo page are
   public (or anonymised, depending on STALA's rules; check in November).
 
 ## 7. Related work (about 0.5 page)
@@ -264,7 +277,7 @@ forged payee messages. Numbers only by section reference.
 
 - Synthetic data, one fictional wallet, a simulated user that says "yes" once.
 - Small open models on T4 GPUs (4-bit for 14B and 32B), 1 repeat; one strong
-  API model **[Groq]** with low reasoning effort.
+  API model (GPT-OSS-120B) with low reasoning effort only.
 - Normal detector texts are few (54; 19 Bangla), so intervals are wide.
 - `provenance-consistent` makes the user decide when the payee's messages
   disagree (1 of 56 adaptive correct payments went through).
@@ -315,9 +328,8 @@ Notes for the figure run:
   Put the older 32B runs in a separate folder and leave it out.
 - The adaptive runs (`results_adaptive/`) are not plotted; their numbers are
   small, so section 5.4 uses a table.
-- **[Groq]** Once `results_groq/` has `none` and `provenance-amount`, rerun
-  the command above: GPT-OSS-120B appears in Fig 2, Fig 3 and both tables
-  with no code change.
+- GPT-OSS-120B is included (pass `results_groq/` last; it has its own
+  model name, so nothing is replaced).
 
 ## Still to do before the draft
 
@@ -329,7 +341,11 @@ Notes for the figure run:
       docs/paper/figures`, where results_old holds 3B / 7B / 14B / Hermes 3,
       results the first 32B runs, results_new the new-message 32B runs and
       results_fixed the fixed provenance-consistent run (newest last).
-- [ ] [Groq] numbers into 5.2, 5.3, 5.6 and the abstract.
+- [x] GPT-OSS-120B numbers into 5.2, 5.3, 5.5, 5.6 and the abstract
+      (17 October). Figures rerun with the Kaggle runs (3B / 7B / 14B and
+      Hermes 3; the old-message 32B runs; the new-message 32B runs; the
+      fixed provenance-consistent run, in that order) plus `results_groq/`;
+      Table 1 and Table 2 match the README.
 - [x] Related work (section 7): `docs/paper/related_work.md`; check the
       starred references before submitting.
 - [x] First draft of sections 2 to 4: `docs/paper/draft_sections_2_4.md`
