@@ -98,7 +98,11 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   episode from its trace, list differences from scores.jsonl),
   `scripts/handcheck.py` (random episodes for hand checking ->
   `docs/handcheck.md`), `scripts/count_confirmations.py` (agent questions and
-  block messages -> `docs/paper/confirmations.md`). Findings: `docs/audit.md`.
+  block messages -> `docs/paper/confirmations.md`), `scripts/code_questions.py`
+  (keyword coding of those questions for payee, amount, source, risk, next
+  step -> `docs/paper/question_coding.md`; 50-question hand-check sample in
+  `docs/paper/question_sample.csv`, his Y/N column still empty).
+  Findings: `docs/audit.md`.
   `scripts/make_figures.py results/ [results_groq/] --detectors
   results_detectors/flags.jsonl` writes its figures and tables to
   `docs/paper/figures/` (figures need matplotlib).
