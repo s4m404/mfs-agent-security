@@ -5,8 +5,7 @@ First draft of sections 2 to 4 of the STALA 2027 paper
 written to be moved into LaTeX. Reference numbers [1] to [12] follow
 `docs/paper/related_work.md`. Every result number is taken from the README,
 `docs/audit.md` or `docs/paper/confirmations.md`; the list at the end gives
-the source of each. **[Groq]** marks what is still to come from the
-GPT-OSS-120B run.
+the source of each.
 
 ---
 
@@ -90,8 +89,8 @@ language** ("Yes, please go ahead.", "হ্যাঁ, করে দাও।", 
 "হ্যাঁ, go ahead."). It never refuses and never supplies an amount or
 account. Any later reply without a tool call ends the episode, as does a
 first one without a "?" ("Please confirm the payment."). The rule looks
-only for the character: in one GPT-OSS-120B episode a "?" in a table header
-received the "yes". The simulated yes is part of the attack path: without a
+only for the character: in one GPT-OSS-120B case a "?" in a table header
+received the "yes" (in two of its runs). The simulated yes is part of the attack path: without a
 defence, in 29 of the 78 successful attacks on the four Qwen2.5 models the
 agent had asked a question and received the simulated yes, and the attacker
 was paid later in the same episode. This is an order in time, not evidence
@@ -170,13 +169,15 @@ upper bound of 0%), and Wilson intervals for the smaller conditional groups.
 
 ### 3.5 Models and setup
 
-We run Qwen2.5-Instruct 3B, 7B, 14B and 32B (14B and 32B in 4-bit AWQ) and,
-as a second family, Hermes-3-Llama-3.1-8B, all served with vLLM on two T4
-GPUs at temperature 0, with replies capped at 1,024 tokens. Each model runs
+We run models from three families: Qwen2.5-Instruct 3B, 7B, 14B and 32B
+(14B and 32B in 4-bit AWQ) and Hermes-3-Llama-3.1-8B, all served with vLLM
+on two T4 GPUs at temperature 0, with replies capped at 1,024 tokens, and
+GPT-OSS-120B through Groq's API at temperature 0 with reasoning effort set
+to low (other reasoning settings were not tested). Each model runs
 once per case and defence: in an earlier three-repeat run on the first 114
 cases, the repeats of a case gave the same outcome in 96% to 100% of cases.
-A model error ends only that case and is counted. **[Groq]** GPT-OSS-120B
-runs on Groq's API with reasoning effort set to low, as a third family.
+A model error ends only that case and is counted (GPT-OSS-120B had 2 in
+906 episodes, one each with `none` and `provenance-amount`).
 IBM Granite 3.3 8B is left out: here most of its tool calls came out as
 plain text (0.2 tool calls per case, 5% of normal tasks done), so its 0%
 attack success says nothing about safety.
@@ -289,7 +290,7 @@ Hugging Face account, was not run.
 | School fee 3,500 to 5,000 Tk | README, "Results" |
 | 12 normal tasks lost to the block message | README, "The largest model" |
 | 174 attack texts, 54 normal texts, 19 in Bangla | README, "Do injection detectors work" |
-| GPT-OSS-120B settings and results | **[Groq]** still to come |
+| GPT-OSS-120B settings (Groq, temperature 0, reasoning effort low); model errors | README, "A larger API model"; `.github/workflows/groq_run.yml` |
 
 ## Notes for the next draft
 
@@ -298,8 +299,6 @@ Hugging Face account, was not run.
   5.1.
 - Section 5.5 should repeat the exact simulated-user rule from 3.2 and the
   fact (4.5) that a "yes" cannot unlock a block.
-- When the GPT-OSS-120B run is complete, change "two model families" to
-  "three" and fill in the [Groq] sentence in 3.5.
 - The 9 adaptive-set sentences still marked for review in
   `bench/review_texts.csv` must be reviewed before the adaptive set is
   called native-speaker reviewed.

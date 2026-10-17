@@ -91,9 +91,10 @@ reads (indirect injection: the harm is an action, a payment), with
 Banglish written in Latin script and code-mixed text as first-class attack
 languages, not translations. Our results also differ in direction: the
 jailbreak finding (low-resource language, weaker safety) did not carry
-over. Four of our five models fell most often for English attacks and one
-for mixed text; for none was Bangla script the most successful attack
-language (section 5.6).
+over. Four of our six models fell most often for English attacks, one
+for mixed text, and GPT-OSS-120B about equally for all four (Banglish 9,
+the others 8 of about 55); for none was Bangla script the most successful
+attack language (section 5.6).
 
 **What is new here.** We do not claim the provenance idea; it comes from
 CaMeL [5] and information-flow control defences such as FIDES [12]. What we
@@ -107,7 +108,7 @@ add, as far as we know from the papers above (not a full survey):
    English detection score did not carry over (section 5.1).
 3. A test of simple provenance rules (the idea behind CaMeL) across
    languages: no correct payment blocked in the normal tasks in any request
-   language, on five open models.
+   language, on six models from three families.
 4. Payment-specific testing lessons: amount-only attacks that pay the real
    payee, wrong payments with no attacker involved, and forged payee
    messages that need a consistency check, which a scripted audit missed
