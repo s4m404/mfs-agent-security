@@ -81,8 +81,12 @@ answers from GPT-4 79% of the time on AdvBench. Deng et al. [9] built
 MultiJail with native-speaker translations into nine languages, including
 Bengali as one of three low-resource languages, and found about three
 times as much unsafe output in low-resource languages. Wang et al. [10]
-(XSafety, 10 languages) found Bengali among the three least safe languages
-for the models they tested. Yoo et al. [11] showed that code-switched
+(XSafety, 10 languages including Bengali) found that every model they
+tested gave significantly more unsafe answers to non-English queries than
+to English ones. BanglaSafe [13], a Bengali benchmark of 879 prompts over
+17 culturally grounded harm categories, found that the register of a
+request (for example a formal newspaper framing) changed safety more than
+the switch from English to Bengali. Yoo et al. [11] showed that code-switched
 queries, which mix languages inside one prompt as real users do, draw out
 more unsafe behaviour than English ones. All of these study a user who
 attacks a chat model directly (jailbreaks: the harm is the text the model
@@ -137,8 +141,10 @@ Facts about other work from the references below; ours from the README.
 
 Checked on 7 October 2026 from arXiv listings, conference pages and
 author pages (abstracts were read through search results, not from the
-PDFs). Before submission, export the
-BibTeX from each paper's official page and check the starred items.
+PDFs); venues, author lists and Bengali coverage rechecked on 17 October
+2026. BibTeX for all of them, plus OWASP and the Bangladesh Bank figure,
+is in `docs/paper/references.bib` (written by hand; compare with each
+paper's official BibTeX before submitting).
 
 1. Kai Greshake, Sahar Abdelnabi, Shailesh Mishra, Christoph Endres,
    Thorsten Holz, Mario Fritz. *Not what you've signed up for: Compromising
@@ -153,22 +159,25 @@ BibTeX from each paper's official page and check the starred items.
    Marc Fischer, Florian Tramèr. *AgentDojo: A Dynamic Environment to
    Evaluate Prompt Injection Attacks and Defenses for LLM Agents.* NeurIPS
    2024 Datasets and Benchmarks Track. arXiv:2406.13352.
-4. \* Hanrong Zhang et al. *Agent Security Bench (ASB): Formalizing and
+4. Hanrong Zhang et al. *Agent Security Bench (ASB): Formalizing and
    Benchmarking Attacks and Defenses in LLM-based Agents.* ICLR 2025.
-   arXiv:2410.02644. (Cited only as one of [6]'s benchmarks; check the
-   full author list.)
-5. \* Edoardo Debenedetti, Ilia Shumailov, Tianqi Fan, Jamie Hayes,
+   arXiv:2410.02644. Authors (ICLR 2025 proceedings page): Hanrong Zhang,
+   Jingyuan Huang, Kai Mei, Yifei Yao, Zhenting Wang, Chenlu Zhan,
+   Hongwei Wang, Yongfeng Zhang.
+5. Edoardo Debenedetti, Ilia Shumailov, Tianqi Fan, Jamie Hayes,
    Nicholas Carlini, Daniel Fabian, Christoph Kern, Chongyang Shi, Andreas
    Terzis, Florian Tramèr. *Defeating Prompt Injections by Design.*
    arXiv:2503.18813 (v2, June 2025). The first author's page lists it at
-   IEEE SaTML 2026; check the venue and that the published version still
-   says 77% (an early summary quoted 67%, probably from v1).
+   IEEE SaTML 2026, but no accepted-papers listing confirmed it (17
+   October 2026), so cite the arXiv version. v2 says 77% of AgentDojo
+   tasks with provable security (84% undefended); v1 said 67%.
 6. Rishika Bhagwatkar, Kevin Kasa, Abhay Puri, Gabriel Huang, Irina Rish,
    Graham W. Taylor, Krishnamurthy Dj Dvijotham, Alexandre Lacoste.
    *Indirect Prompt Injections: Are Firewalls All You Need, or Stronger
    Benchmarks?* arXiv:2510.05244 (v1 October 2025, v2 March 2026). (The
    README and roadmap use the shorter title "Are Firewalls All You
-   Need?"; cite the full one.) \* Check whether v2 has a venue.
+   Need?"; cite the full one.) Venue: poster at the NeurIPS 2025 Lock-LLM
+   workshop (NeurIPS virtual site and OpenReview, October 2025).
 7. ProtectAI. *deberta-v3-base-prompt-injection-v2* model card, Hugging
    Face (Limitations: "does not ... handle non-English prompts").
    Cite as a footnote or URL.
@@ -180,8 +189,10 @@ BibTeX from each paper's official page and check the starred items.
    arXiv:2310.06474.
 10. Wenxuan Wang, Zhaopeng Tu, Chang Chen, Youliang Yuan, Jen-tse Huang,
     Wenxiang Jiao, Michael R. Lyu. *All Languages Matter: On the
-    Multilingual Safety of Large Language Models.* Findings of ACL 2024.
-    arXiv:2310.00905.
+    Multilingual Safety of Large Language Models.* Findings of ACL 2024
+    (ACL Anthology 2024.findings-acl.349). arXiv:2310.00905. Languages:
+    English, Chinese, Spanish, French, Bengali, Arabic, Hindi, Russian,
+    Japanese, German.
 11. Haneul Yoo, Yongjin Yang, Hwaran Lee. *Code-Switching Red-Teaming: LLM
     Evaluation for Safety and Multilingual Understanding.* ACL 2025 (long),
     pp. 13392-13413. arXiv:2406.15481.
@@ -189,6 +200,12 @@ BibTeX from each paper's official page and check the starred items.
     Russinovich, Ahmed Salem, Shruti Tople, Lukas Wutschitz, Santiago
     Zanella-Béguelin. *Securing AI Agents with Information-Flow Control.*
     arXiv:2505.23643 (v2, September 2025). (FIDES.)
+13. Naymul Islam, Nusrat Jahan Lia, Shubhashis Roy Dipta, Sabik Bin
+    Sultan, Abdullah Khan Zehady. *Register Shifts Break LLM Safety: A
+    Bengali Benchmark with Culturally Grounded Harms* (BanglaSafe).
+    arXiv:2608.22335, August 2026. Found by search on 17 October 2026 from
+    its arXiv and Hugging Face listings; read the PDF before citing the
+    numbers above.
 
 Also cited elsewhere in the paper (introduction): OWASP Top 10 for Agentic
 Applications (2026), already in the README.
@@ -201,6 +218,7 @@ Not checked yet; verify before citing.
   a prompting defence that does read the text.
 - tau-Bench (Yao et al., 2024): customer-service agents with a simulated
   user, relevant to our simulated-user harness lesson (section 5.5).
-- Bangla NLP safety or toxicity datasets, to support "Bangla safety work
-  covers chatbots, not agents" in the introduction. We have not yet found
-  a specific paper to cite; either find one or soften the sentence.
+- BanglaVeilGuard (arXiv:2608.21880, August 2026): cross-script safety
+  benchmark and guardrails for Bangla LLMs, including romanised Bangla.
+  Close to our detector finding (a guard across scripts); read it before
+  the final version and cite it if it tests Banglish inputs.
