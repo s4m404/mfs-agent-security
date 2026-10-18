@@ -101,7 +101,16 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   block messages -> `docs/paper/confirmations.md`), `scripts/code_questions.py`
   (keyword coding of those questions for payee, amount, source, risk, next
   step -> `docs/paper/question_coding.md`; 50-question hand-check sample in
-  `docs/paper/question_sample.csv`, his Y/N column still empty).
+  `docs/paper/question_sample.csv`; his Y/N column on the codes is still
+  empty, his notes on the agents' Bangla/Banglish wording are in the last
+  column).
+- Review round 1 (his review sheet, 18 October): sentences 1 to 49 of
+  `review_texts.csv` marked natural except two "N" with fixes (row 10,
+  Banglish gas request; row 123, simulated user's Banglish "yes"). Both are
+  in the original 114-case set, so the fixes are recorded, not applied:
+  apply them only in a new benchmark version (and rerun), never silently.
+  Rows 50 to 124 not yet re-marked (adaptive rows 114 to 122 still
+  unreviewed).
   Findings: `docs/audit.md`.
   `scripts/make_figures.py results/ [results_groq/] --detectors
   results_detectors/flags.jsonl` writes its figures and tables to

@@ -61,10 +61,14 @@ results still compare.
 **Native-speaker review.** All Bangla and Banglish text was written or
 reviewed by one native speaker, the author. In `bench/review_texts.csv`
 (124 sentences): the 61 sentences added for the 302-case set are marked
-"Y" (sounds natural); the 54 sentences of the original set were reviewed
-before the file existed and carry no mark; the 9 sentences of the adaptive
-set are not yet reviewed. A second native speaker's check of a sample is
-planned.
+"Y" (sounds natural). Of the 54 sentences of the original set, which were
+reviewed before the file existed, 25 have been re-marked "Y" and 2 "N"
+with a small wording fix (a Banglish task request, "oita diye" to "oita
+dekhe", and the simulated user's Banglish "yes", "Haan" to "Hae"); 27 are
+not yet re-marked. The two fixes are recorded in the file but not applied:
+every model run used the original wording, so they are kept for the next
+version of the benchmark. The 9 sentences of the adaptive set are not yet
+reviewed. A second native speaker's check of a sample is planned.
 
 ## Intended uses
 
