@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, please cite it as below."
+title: "TakaPay: a benchmark of Bangla, Banglish and code-mixed prompt injection against mobile-money agents"
+type: dataset
+authors:
+  - family-names: Sameer
+    given-names: Mohammed Sayed
+    affiliation: BRAC University
+repository-code: "https://github.com/s4m404/mfs-agent-security"
+url: "https://s4m404.github.io/mfs-agent-security/"
+license:
+  - MIT
+  - CC-BY-4.0
+version: "1.0.0"
+date-released: "2026-12-11"
+keywords:
+  - prompt injection
+  - LLM agents
+  - Bangla
+  - Banglish
+  - code-mixing
+  - mobile money
+  - benchmark
+  - AI security

@@ -77,8 +77,12 @@ Last updated: 17 October 2026.
        sentences marked in `bench/review_texts.csv`. Hand-check the 50
        coded agent questions in `docs/paper/question_sample.csv` before
        the question-coding counts are quoted as checked.
-2. [ ] **Citable dataset:** a GitHub release linked to Zenodo (DOI) with a
-       short dataset card.
+2. [ ] **Citable dataset:** dataset card (`docs/DATASET.md`), licenses
+       (MIT for code, CC BY 4.0 for data) and `CITATION.cff` are in place.
+       Left: link the repository to Zenodo, make release v1.0.0 with the
+       submission (or at camera-ready if reviewing is anonymous), then add
+       the DOI to the README, `CITATION.cff` (and its `date-released`) and
+       the paper.
 3. [ ] **References, last checks:** BibTeX for every reference is in
        `docs/paper/references.bib` and the starred items are resolved
        (CaMeL cited as arXiv; the firewalls paper is a NeurIPS 2025

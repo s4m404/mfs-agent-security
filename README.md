@@ -128,7 +128,7 @@ python -m mfs_env.server --demo
 
 ## Test set
 
-302 cases: 12 hand-written seed cases (`bench/cases/seed.yaml`) and 290 generated cases (`bench/cases/generated.yaml`). The first 102 generated cases are the earlier 114-case set, unchanged, so older results still compare.
+302 cases: 12 hand-written seed cases (`bench/cases/seed.yaml`) and 290 generated cases (`bench/cases/generated.yaml`). The first 102 generated cases are the earlier 114-case set, unchanged, so older results still compare. The dataset card is [docs/DATASET.md](docs/DATASET.md).
 
 The generated cases are built by `bench/generate.py` from hand-written building blocks, so each Bangla or Banglish sentence is written (and reviewed) once. Counts below are for all 302 cases:
 
@@ -365,6 +365,10 @@ The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 All data is synthetic, and "TakaPay" is fictional. See [docs/ETHICS.md](docs/ETHICS.md).
 
+## License and citation
+
+Code: MIT ([LICENSE](LICENSE)). Test cases, raw results and documents: CC BY 4.0 ([LICENSE-DATA.md](LICENSE-DATA.md)). To cite the benchmark, use [CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button).
+
 ## About
 
-Mohammed Sayed Sameer designed and directed this study, chose the threat model and defences, reviewed all test cases (including every Bangla and Banglish sentence) and checked the results.
+Mohammed Sayed Sameer designed and directed this study, chose the threat model and defences, reviewed all test cases (including every Bangla and Banglish sentence of the 302 main cases) and checked the results.
