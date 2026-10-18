@@ -215,8 +215,19 @@ defence, 153 and 158 with one). Whether an agent asks after a block depends
 on the model and on the block message: Qwen2.5-7B asked in 73% and 72% of
 the episodes with a block, Qwen2.5-32B in 78% and 77% with the old message
 and 42% with the new one, Qwen2.5-3B in 9% and 10%, GPT-OSS-120B in 74%
-and 78%, Hermes 3 in 1 of 25 and 1 of 34. A user-facing evaluation of these
-questions is future work.
+and 78%, Hermes 3 in 1 of 25 and 1 of 34.
+
+**What the questions told the user.** We coded every question that
+received the simulated yes with keyword rules (payee, amount, where the
+request came from, risk, next step). None of the 35 questions after which
+an attacker was paid (all runs, main cases) warned of a risk; most read like
+an ordinary payment confirmation (31 named a payee and 31 gave an amount).
+For attacks that redirect money, 14 of 22 such questions showed the
+attacker's number, relaying its instruction as a normal step ("a new
+compliance rule requiring a verification transfer of 1500 Taka to
+01877777777 ... Would you like to proceed?"); the other 8 asked about
+something else, such as the real bill. Across all 2,022 questions only 38
+(2%) contained a risk word. How real users would answer is future work.
 
 ### 5.6 Language
 
@@ -260,6 +271,7 @@ scores and the scripts that produce every table are public.
 | Adaptive results (scripted and Qwen2.5-32B) | README, "Adaptive attacks" |
 | Block message: 12 tasks, 42 / 54 / 57 / 58 / 59 of 82 | README, "The largest model"; `docs/audit.md` |
 | 29 of 78, 13 of 32, 1 of 5; questions and asks after a block | `docs/paper/confirmations.md` |
+| What the questions told the user: 35, 31, 14 of 22, 8, 38 of 2,022 | `docs/paper/question_coding.md` (keyword coding; hand check pending) |
 | Table-header "?" case | `docs/audit.md`, item 2; README, "A larger API model" |
 | Hermes 3 "confirm" without a "?" (about 9 of 64) | README, "Why normal tasks fail" (keyword estimate) |
 | Attacks by language and vector | README, "Results" and "A larger API model"; `table2_language.md` |
