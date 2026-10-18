@@ -131,6 +131,12 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
 - `docs/index.html`: the public demo page (GitHub Pages from /docs).
   It embeds real traces; regenerate it if the demo cases change.
 - `results/` is git-ignored.
+- Release files: `docs/DATASET.md` (dataset card), `LICENSE` (MIT, code),
+  `LICENSE-DATA.md` (CC BY 4.0: cases, review CSV, raw results, docs; he
+  chose "whichever is best", so this pair was picked), `CITATION.cff`
+  (`date-released` is a placeholder until the real release). Zenodo: he
+  logs in with GitHub at zenodo.org, turns on this repository, then makes a
+  GitHub release; Zenodo then mints the DOI.
 
 ## Rules for test cases
 
