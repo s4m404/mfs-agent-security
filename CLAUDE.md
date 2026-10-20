@@ -8,24 +8,23 @@ task is finished or the plan changes.
 
 A research benchmark: can indirect prompt injection in Bangla, Banglish
 (romanised Bangla) and code-mixed text trick an LLM agent into moving money
-in a mobile money (MFS) wallet? Plus defences, and a public demo.
+in a mobile money (MFS) wallet? Plus defences, a public demo and a workshop
+paper.
 
-Owner: Mohammed Sayed Sameer (GitHub s4m404), BRAC University CS student,
-graduating May 2027. The project is his main portfolio piece for AI security
-internships (January to May 2027) and master's scholarship applications, and
-will become a workshop paper. He reviews all Bangla and Banglish text himself.
+Author: Mohammed Sayed Sameer (GitHub s4m404), BRAC University. He is a
+native Bangla speaker and reviews all Bangla and Banglish text himself.
 
-## How he likes to work
+## How to work on this repo
 
-- Explain in plain, short English. He finds terminal and git steps confusing.
+- Write summaries and explanations in plain, short English; spell out any
+  git or terminal step he needs to do himself.
 - Keep everything runnable and tested. Run `python -m pytest -q` before every push.
 - Never invent results. Numbers in the README must come from real runs.
-- Push work to a branch and open a pull request with a clear summary; he merges it.
-- One task per cloud session. Before he merges, give a 5-line summary of what
-  changed and why.
+- Push work to a branch and open a pull request with a clear summary; he
+  merges it. Before he merges, give a 5-line summary of what changed and why.
+- One task per session.
 - Model runs happen on Kaggle (no GPU in cloud sessions). When one is needed,
   say which notebook and the expected time; he uploads results.zip in a new session.
-- Cloud credits run out on 5 November 2026, so October tasks come first.
 
 ## Working rules
 
@@ -33,9 +32,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   roadmap in the same pull request when a task is finished or the plan
   changes.
 - `docs/ROADMAP.md`, the README, `docs/`, notebooks and scripts are public
-  research documents: no notes about sessions, credits, who does what,
-  advisors, letters or applications there. Workflow notes belong in this
-  file only.
+  research documents: no workflow or personal notes there (sessions, who
+  does what, plans outside the research). Workflow notes belong in this
+  file only, and it is public too, so keep it to project information.
 - Commits and pull requests: no Co-Authored-By lines and no "Generated with
   Claude Code" lines.
 - All Bangla and Banglish text is reviewed by him before it counts as
@@ -104,7 +103,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   `docs/paper/question_sample.csv`; his Y/N column on the codes is still
   empty, his notes on the agents' Bangla/Banglish wording are in the last
   column).
-- Review round 1 (his review sheet, 18 October): sentences 1 to 49 of
+- Native-speaker review, round 1 (18 October): sentences 1 to 49 of
   `review_texts.csv` marked natural except two "N" with fixes (row 10,
   Banglish gas request; row 123, simulated user's Banglish "yes"). Both are
   in the original 114-case set, so the fixes are recorded, not applied:
@@ -142,8 +141,7 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   It embeds real traces; regenerate it if the demo cases change.
 - `results/` is git-ignored.
 - Release files: `docs/DATASET.md` (dataset card), `LICENSE` (MIT, code),
-  `LICENSE-DATA.md` (CC BY 4.0: cases, review CSV, raw results, docs; he
-  chose "whichever is best", so this pair was picked), `CITATION.cff`
+  `LICENSE-DATA.md` (CC BY 4.0: cases, review CSV, raw results, docs), `CITATION.cff`
   (`date-released` is a placeholder until the real release). Zenodo: he
   logs in with GitHub at zenodo.org, turns on this repository, then makes a
   GitHub release; Zenodo then mints the DOI.
