@@ -5,9 +5,9 @@ Banglish (Bangla written in Latin letters) and mixed Bangla-English can trick
 an AI agent into moving money in a mobile money wallet, and how well simple
 defences stop it. The agent runs a fictional bKash-style wallet ("TakaPay")
 through 9 tools; attacks are hidden in SMS messages, invoices and tool
-descriptions. 302 test cases, five open models (Qwen2.5 3B, 7B, 14B, 32B and
-Hermes 3 8B) and one larger API model (GPT-OSS-120B), from three model
-families.
+descriptions. 302 test cases, run on **six models from three families**:
+Qwen2.5 3B, 7B, 14B and 32B, Hermes 3 8B, and GPT-OSS-120B (the first five
+served on Kaggle GPUs, GPT-OSS-120B through an API).
 
 The defences tested are a keyword filter, two off-the-shelf injection
 detectors, and three variants of **provenance tracking**: a payment's
@@ -349,7 +349,7 @@ The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 - [x] Runs with 3 model sizes
 - [x] 3 repeats per setting, with confidence intervals
 - [x] Grow to about 100 cases: 114 in total (12 hand-written seed cases plus 102 generated)
-- [x] Native-speaker review of all Bangla and Banglish text (`bench/review_texts.csv`)
+- [ ] Native-speaker review of all Bangla and Banglish text (`bench/review_texts.csv`): in progress: 88 of 124 sentences marked (86 natural, 2 with small wording fixes); 27 sentences of the original set and the 9 of the adaptive set still to mark
 - [x] Grow to about 300 cases: 302 in total
 - [x] Provenance check for amounts as well as recipients (replay estimate done)
 - [x] Model run with the amount check (302 cases, 3 models)
@@ -371,4 +371,4 @@ Code: MIT ([LICENSE](LICENSE)). Test cases, raw results and documents: CC BY 4.0
 
 ## About
 
-Mohammed Sayed Sameer designed and directed this study, chose the threat model and defences, reviewed all test cases (including every Bangla and Banglish sentence of the 302 main cases) and checked the results.
+Mohammed Sayed Sameer designed and directed this study, chose the threat model and defences, reviewed all test cases and their Bangla and Banglish text (a second, sentence-by-sentence pass is in progress; see `bench/review_texts.csv`) and checked the results.
