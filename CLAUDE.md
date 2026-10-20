@@ -109,8 +109,9 @@ will become a workshop paper. He reviews all Bangla and Banglish text himself.
   Banglish gas request; row 123, simulated user's Banglish "yes"). Both are
   in the original 114-case set, so the fixes are recorded, not applied:
   apply them only in a new benchmark version (and rerun), never silently.
-  Rows 50 to 124 not yet re-marked (adaptive rows 114 to 122 still
-  unreviewed).
+  Status after round 1: 88 of 124 marked (86 Y, 2 N). Still blank: rows
+  52 to 69, 88 to 94, 113 and 124 (original set, 27) and 114 to 122
+  (adaptive set, 9).
   Findings: `docs/audit.md`.
   `scripts/make_figures.py results/ [results_groq/] --detectors
   results_detectors/flags.jsonl` writes its figures and tables to
