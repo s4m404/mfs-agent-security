@@ -74,9 +74,14 @@ Last updated: 17 October 2026.
 
 1. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
        Banglish sentences; report agreement. Review the 9 adaptive-set
-       sentences marked in `bench/review_texts.csv`. Hand-check the 50
-       coded agent questions in `docs/paper/question_sample.csv` before
-       the question-coding counts are quoted as checked.
+       sentences marked in `bench/review_texts.csv`, and re-mark the 27
+       original-set sentences still without a mark there (25 re-marked "Y"
+       and 2 "N" with small wording fixes so far; the fixes wait for the
+       next version, since every run used the original wording).
+       Hand-check the 50 coded agent questions in
+       `docs/paper/question_sample.csv` (does each of the six codes match
+       the question?) before the question-coding counts are quoted as
+       checked; notes on the agents' own wording are in its last column.
 2. [ ] **Citable dataset:** dataset card (`docs/DATASET.md`), licenses
        (MIT for code, CC BY 4.0 for data) and `CITATION.cff` are in place.
        Left: link the repository to Zenodo, make release v1.0.0 with the
