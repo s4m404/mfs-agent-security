@@ -18,14 +18,16 @@ money, where users and scammers write in Bangla, romanised Bangla
 cases in which indirect prompt injections hidden in SMS, invoices and tool
 descriptions try to make an agent pay an attacker, leak a one-time code or
 overpay the real payee, and test six models from three families. Two widely
-used injection detectors did not transfer: one flagged 84% of normal Bangla
-texts and, used as a filter, would break 20 of 22 Bangla-request tasks (1
-of 21 in English). Simple provenance rules, which never read the text,
-blocked no correct payment in any language and, with an amount check, let
-no attack through on any model. We also report three testing lessons:
-attack success alone hides wrong payments made with no attacker, checking
-only whether the attacker was paid misses amount-only attacks, and harness
-details and scripted audits change the conclusions.
+used, English-trained injection detectors did not transfer: one flagged 84%
+of normal Bangla texts and, used as a filter, would break 20 of 22
+Bangla-request tasks (1 of 21 in English). Attacks in Bangla worked less
+often than in English, but only on models that also handled Bangla requests
+poorly; on a model fluent in all four languages they worked equally well,
+so a low-resource language is not a lasting shield. We also report testing
+lessons: attack success alone hides wrong payments made with no attacker
+and can hinge on a single template, checking only whether the attacker was
+paid misses amount-only attacks, and harness details and scripted audits
+change the conclusions.
 
 ## 1. Introduction
 
@@ -42,9 +44,11 @@ switches between Bangla and English inside a sentence.
 The agent prompt-injection benchmarks we know of, InjecAgent [2] and
 AgentDojo [3], are in English. Multilingual safety work, including work on
 Bengali [9, 10, 13], studies jailbreaks of chat models, where the harm is the
-text the model writes, not agents whose harm is an action. We do not know
-whether attacks, or the defences built against them, carry over to an agent
-that moves money in Bangla.
+text the model writes; work on Bangla prompt injection so far trains
+detectors on machine-translated text [14], and a case study covers Tamil
+and romanised Tamil on one model [15]. None runs agents whose harm is an
+action. We do not know whether attacks, or the defences built against
+them, carry over to an agent that moves money in Bangla.
 
 **Detectors flag the script, not the attack.** The usual answer to
 injection is to put a classifier in front of the agent. We ran two widely
@@ -53,29 +57,38 @@ DeBERTa-based detector flagged 16 of 19 normal Bangla texts (84%), such as
 a power bill and a mother asking for medicine money, more often than it
 flagged Bangla attacks (57%); used as a filter, it would break 20 of 22
 normal tasks requested in Bangla and 1 of 21 in English. deepset's detector
-flagged every attack and 87% of normal texts. A detector's English score
-said little about its behaviour in Bangla.
+flagged every attack and 87% of normal texts. Both are trained on English,
+so this shows the cost of deploying such a detector in Bangla rather than
+that no detector can work, but a detector's English score said little about
+its behaviour in Bangla.
 
 **What worked instead.** Provenance checks where a payment's recipient,
 code and amount came from, never what the text says. The idea is not ours:
 CaMeL [5] and information-flow control defences such as FIDES [12]
 enforce it, evaluated in English. We test a deliberately simple rule-based
-version at the tool boundary. It blocked no correct payment in the 82
-normal tasks in any of the four request languages, for any of six models
-from three families (Qwen2.5 3B to 32B, Hermes 3 on Llama 3.1 8B, and
-GPT-OSS-120B), and with an amount check it let none of the 220 attacks
-through on any of them, against 2.3% to 15.0% without a defence.
+version at the tool boundary, on six models from three families (Qwen2.5
+3B to 32B, Hermes 3 on Llama 3.1 8B, and GPT-OSS-120B). Its decisions do not
+depend on the language, so its cost does not either. Which attacks such
+rules stop follows from their design (the attacker's numbers are never
+trusted), so we report them as rule properties, verified by replaying every
+recorded call, and use the runs for what agents actually attempt and what
+the rules cost in completed tasks.
 
 **Testing lessons.** The runs also showed how easily a payment-agent
 benchmark can mislead:
 
 - *Attack success alone misleads.* With no attacker involved, the Qwen
   models tried to pay a payee or amount nobody asked for in 29% to 52% of
-  episodes, more often than any attack succeeded; the strongest model,
-  GPT-OSS-120B, rarely did (4.3%) but fell for the most attacks (15.0%).
-  Counted only where the agent read the attack and could do the task,
-  attacks worked two to four times as often as the overall rate for the
-  smaller models.
+  episodes, more often than any attack succeeded. The strongest model,
+  GPT-OSS-120B, rarely did (4.3%), and its 15.0% attack success came almost
+  entirely from one template, an instruction in a tool description (27 of
+  33); against attacks in messages it fell for 3.3%. Counted only where the
+  agent read the attack and could do the task, attacks worked two to four
+  times as often as the overall rate for the smaller models.
+- *Bangla is not a shield.* Three Qwen models followed English attacks far
+  more than Bangla ones, but also completed far fewer Bangla requests;
+  GPT-OSS-120B handled all four languages and attacks worked equally in all
+  four.
 - *"Did the attacker get paid?" misses amount-only attacks.* Every attack
   that got past a recipient check kept the real payee and raised the
   amount, which such a metric scores as safe.
@@ -91,15 +104,17 @@ benchmark can mislead:
    in Bangla, Banglish, code-mixed text and English, and a separate set of
    56 adaptive attacks that forge the payee's identity. Cases, raw traces
    and re-scoring scripts are public.
-2. A measurement of two injection detectors on non-English tool outputs
-   inside an agent task, showing that they flag the script rather than the
-   attack.
+2. A measurement of two English-trained injection detectors on non-English
+   tool outputs inside an agent task, showing that they flag the script
+   rather than the attack, and the "comprehension gate": attacks in a
+   low-resource language work less only while the model is weak in it.
 3. A test of simple provenance rules across languages on six models from
    three families, including an amount check and a consistency check
    against forged payee messages.
-4. Three testing lessons for payment agents: report wrong payments made
-   with no attacker, score amount-only attacks, and report harness choices
-   and audit defences with real agents.
+4. Testing lessons for payment agents: report wrong payments made with no
+   attacker, score amount-only attacks, report results per template and
+   attack route, and report harness choices and audit defences with real
+   agents.
 
 Section 2 describes the threat model, Section 3 the benchmark, Section 4
 the defences and Section 5 the results; Section 7 discusses related work
@@ -112,7 +127,10 @@ are written for the benchmark, copying public scam patterns; no real user
 data is used. TakaPay has nine tools, and real apps, their messages and
 their checks differ. The Bangla and Banglish text was reviewed by one
 native speaker (an author); a second reviewer's check of a sample is
-planned.
+planned. The 220 attacks come from 21 templates (13 generated attack ideas
+in four languages, and 8 hand-written attacks), so cases are not
+independent; we report template-level intervals, and all OTP attacks use one
+text. The attack SMS is always the newest message in the inbox.
 
 **A simulated user who always says yes.** When the agent writes a "?", the
 simulated user approves once and never refuses, even when the "?" is not a
@@ -130,6 +148,15 @@ tested). One run per case at temperature 0; repeats at temperature 0 barely
 differed in an earlier run (Section 5.7). Granite 3.3 8B is left out
 because its tool calls failed in our serving setup.
 
+**What the normal tasks can show.** Every normal payment goes to a trusted
+payee (a saved contact, a number the user typed or a registered biller), so
+an agent that pays correctly is never blocked: "no correct payment blocked"
+shows the defences do not break these tasks, not that they are free. The
+main cost of provenance, blocking a payment the user wants to a number that
+appears only in a message, is not measured here. The tool-description
+attacks change the description of the wallet's own payment tools, which
+assumes more attacker access than a third-party tool would have.
+
 **Measurement.** "Read the attack" means the agent called the tool that
 shows it, so the conditional rates are, if anything, slightly too low.
 "Correct payments blocked" is measured on the 82 normal tasks; a blocked
@@ -145,7 +172,9 @@ payment tools. `provenance-consistent` hands the decision to the user
 whenever the payee's own messages disagree: on the adaptive set the correct
 payment went through in only 1 of 56 cases. No rule can tell a forged
 message from a real one with the same sender, so the amount check is only
-as strong as sender authentication.
+as strong as sender authentication. The amount check also accepts any amount
+in the payee's own message, so it cannot tell a total from a share in the
+same SMS; no model made that mistake here.
 
 **Ethics.** Every wallet, name, number and biller is fictional, including
 the attacker numbers. Attacks copy common, already public scam patterns
@@ -161,12 +190,16 @@ write in, and their defences should be tested there. In our benchmark, two
 widely used injection detectors failed on Bangla, flagging the script
 rather than the attack, while simple provenance rules that never read the
 text blocked no correct payment in any language and, with an amount check,
-let no attack through on any of six models. For anyone testing payment
-agents, we suggest four habits: test in the users' languages; report wrong
-payments made with no attacker and amount-only attacks, not only attack
-success; report harness choices such as the simulated user and the wording
-of block messages; and audit defences against real agents, not only
-against an ideal script.
+let no attack through on any of six models, a property of the rules that
+real agents' behaviour did not break. Attacks in Bangla were weaker only
+on models that were also weak in Bangla, so a low-resource language is no
+lasting shield. For anyone testing payment agents, we suggest five habits:
+test in the users' languages; report wrong payments made with no attacker
+and amount-only attacks, not only attack success; report results per attack
+template and route, since one template can make a model look worst; report
+harness choices such as the simulated user and the wording of block
+messages; and audit defences against real agents, not only against an
+ideal script.
 
 ---
 

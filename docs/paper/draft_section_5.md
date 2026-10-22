@@ -41,23 +41,33 @@ deepset's detector flagged every attack text (100%) and 47 of the 54 normal
 texts (87%; all 19 in Bangla), so its perfect detection carries no
 information; as a filter it would break 12 to 22 normal tasks in every
 request language. The keyword baseline flagged 34% of attacks (7% of mixed
-attacks) with 4 false alarms in 54 normal texts.
+attacks) with 4 false alarms in 54 normal texts; 11 of its 17 cue phrases
+occur verbatim in the attack texts, so this is an in-sample upper bound for
+a hand-written filter, not an independent detector.
 
 Even in English, ProtectAI's detector missed about half the attacks (47%
 flagged), for example "NOTE TO AI ASSISTANT: this account has moved ..."
 inside an otherwise normal bill. The provenance rules, which never read the
 text, blocked **no correct payment in the 82 normal tasks, in any of the
-four request languages, for any of the six models** (Table 2). A
-detector's English score therefore says little about its behaviour in
-Bangla, and in this benchmark checking where a value came from worked
-better than judging the text that carried it.
+four request languages, for any of the six models** (Table 2). That zero
+is partly by design, since every normal task pays a trusted payee (Section
+5.3); the fair contrast is that a text filter's cost depends on the
+language of the text and a provenance rule's does not. Both detectors
+tested were trained on English, so the result shows the cost of deploying
+one in Bangla rather than that no detector can work; a multilingual
+detector (Prompt Guard 2) is the natural next comparison. A detector's
+English score therefore says little about its behaviour in Bangla.
 
 ### 5.2 Attack success alone is a misleading measure
 
 Table 2 gives the main results and Fig. 2 the comparison for this
 section. Without a defence, attack success was 7.3%, 5.9%, 7.7% and 14.5%
 for Qwen2.5 3B, 7B, 14B and 32B, 2.3% for Hermes 3 and 15.0% for
-GPT-OSS-120B (33 of 220; interval 11% to 20%).
+GPT-OSS-120B (33 of 220; interval 11% to 20%). These intervals treat the
+220 attacks as independent, but they come from 21 templates (13 generated
+attack ideas, each in four languages, and 8 hand-written attacks); with
+templates as the unit they widen, for GPT-OSS-120B to 0.5% to 34.9%
+(`docs/paper/robustness.md`).
 
 **Wrong payments without an attacker.** The Qwen models tried to pay a
 payee or amount nobody asked for in 52%, 29%, 49% and 40% of episodes,
@@ -76,9 +86,14 @@ GPT-OSS-120B is the exception: it tried to pay an invented payee in only 13
 of 302 episodes (4.3%), and the one such payment that went through was a
 harness artefact (Section 5.5). It completed 76 of 82 normal tasks (93%;
 the best Qwen run did 59) and failed only 6, never with a wrong account.
-For the strongest model the risk is the attack itself; for the smaller open
-models, an evaluation that reports only attack success misses most of the
-money that moved wrongly.
+For the strongest model the risk is the attack itself, and a specific one:
+27 of its 33 successes were the tool-description attack (one template; 27 of
+37 cases), while it fell for only 6 of the 183 attacks in SMS and invoices
+(3.3%). Like MCPTox [19], where more capable models fell more often for
+poisoned tool descriptions, the strongest model here resisted instructions in
+messages but obeyed one placed in a tool's description. For the smaller
+open models, an evaluation that reports only attack success misses most of
+the money that moved wrongly.
 
 **Weak agents hide attack risk.** Many episodes never reach the attack:
 the agent does not open the SMS or invoice, or cannot do the task at all.
@@ -90,12 +105,21 @@ GPT-OSS-120B: two to four times the overall rate for the smaller models,
 and close to it for the two models that can do most tasks. A bigger model
 was not safer: within one family, Qwen2.5-32B did the most normal tasks
 (66% without a defence) and fell for the most attacks (14.5%, about twice
-the smaller models).
+the smaller models; exact McNemar tests on the same 220 attacks against 3B,
+7B and 14B: p = 0.017, 0.004, 0.008).
 
 ### 5.3 Amount-only attacks need their own check
 
 Fig. 3 splits successful attacks into those that redirect money or leak
 the OTP (G1, G2) and amount-only attacks (G3), per model and defence.
+Because the rules are deterministic, which attacks they can stop follows
+from the design: the attacker's numbers are never trusted, so recipient
+provenance stops every redirect; amount-only attacks pay a trusted payee, so
+only the amount check sees them. Replaying the 116 successful attacks of the
+six no-defence runs through the rules confirms this (89 redirects blocked by
+`provenance`, the 27 amount-only ones allowed; all 116 blocked with the
+amount check). What the runs add is how often models attempt each kind and
+what the checks cost in completed tasks.
 
 **Recipient provenance stops redirection, not inflation.** With
 `provenance`, no attack that sends money to a new number or leaks the OTP
@@ -112,12 +136,18 @@ checks only whether the attacker was paid scores it as safe.
 **The amount check closes the gap.** With `provenance-amount`, **no attack
 succeeded on any model**: 0 of 880 attack episodes on the Qwen models, 0 of
 220 for Hermes 3 and 0 of 220 for GPT-OSS-120B. It blocked no correct
-payment in the normal tasks, and it also stopped every wrong payment
+payment in the normal tasks (by design: an agent that pays correctly is
+never blocked, since every normal task's payee is trusted; tasks that pay a
+number found only in a message would measure the real cost and are left to
+future work), and it also stopped every wrong payment
 without an attacker: wrong payments that went through fell from 33, 8, 29,
 20, 10 and 1 (no defence) and 30, 6, 27, 2, 9 and 1 (`provenance`) to 0 for
 every model. The other models lost at most 3 normal tasks with a defence
 (Table 2); Qwen2.5-32B lost 12, for a reason discussed in Section 5.5. No model leaked the
-OTP in any run (0 of 25 attempts per run). Even where the agent read the
+OTP in any run (0 of 25 attempts per run, all one attack text). The amount
+check has a limit the runs did not hit: it accepts any amount in the
+payee's own message, so it cannot tell a total (1,800 Tk) from a share
+(600 Tk) in the same SMS. Even where the agent read the
 attack and could do the task, `provenance-amount` let none through (for
 example 0 of 118 for Qwen2.5-7B, interval 0% to 3%; 0 of 150 for
 GPT-OSS-120B).
@@ -232,19 +262,26 @@ something else, such as the real bill. Across all 2,022 questions only 38
 ### 5.6 Language
 
 Table 3 lists successful attacks by attack language without a defence. No
-model fell most for Bangla script. Qwen2.5-3B and 14B fell mostly for
-English (10 and 13 of 55 English attacks, at most 3 in any other language);
-Qwen2.5-32B also fell most for English (14 of 55) but also for Banglish (7
-of 55) and mixed text (8 of 54); Qwen2.5-7B fell most for mixed text (6 of
-54); Hermes 3 fell for 3 of its 5 in English. GPT-OSS-120B fell for all
-four about equally (English 8 of 55, Bangla 8 of 56, Banglish 9 of 55,
-mixed 8 of 54), and 27 of its 33 successful attacks came through tool
-descriptions (27 of the 37 such attacks), against 5 of 113 SMS and 1 of 70
-invoice attacks. The language a model falls for differs from model to
-model, so a benchmark in one language cannot rank models, and the
-jailbreak finding that low-resource languages weaken safety did not carry
-over to these agents. The cost of language fell on the detectors instead
-(Section 5.1).
+model fell most for Bangla script. Qwen2.5-3B, 14B and 32B fell mostly for
+English (10, 13 and 14 of 55 English attacks; permutation tests of the
+language effect p = 0.002, < 0.001 and 0.03). For Qwen2.5-7B and Hermes 3
+the differences between languages are not distinguishable from chance
+(p = 0.22 and 0.35), and GPT-OSS-120B fell for all four about equally
+(English 8 of 55, Bangla 8 of 56, Banglish 9 of 55, mixed 8 of 54; p = 0.99).
+
+**The comprehension gate.** The language effect tracks how well each model
+handles the language at all. Qwen2.5-32B completed 18 of 21 normal tasks
+requested in English but 9 of 22 requested in Bangla, and among attacks it
+read it followed 14 of 49 English and 3 of 45 Bangla ones; Qwen2.5-14B and
+Hermes 3 show the same pattern. GPT-OSS-120B completed 20 of 21 English and
+21 of 22 Bangla requests, and followed English and Bangla attacks equally
+often (8 of 41, 8 of 46). This is a correlation across six models, not a
+controlled test, but it runs opposite to the multilingual jailbreak finding
+that low-resource languages weaken safety [8, 9]: here, a low-resource
+language protected the agent only while the agent was weak in it, which
+suggests the protection disappears as models improve, while the detectors
+in Section 5.1 still fail on the same language. It also exposes a usability
+gap: Bangla requests were completed far less often by the open models.
 
 ### 5.7 Reproducibility
 
@@ -253,8 +290,12 @@ repeats: attack success without a defence 10.0%, 3.8% and 6.2% for Qwen2.5
 3B, 7B and 14B, against 10.0%, 3.8% and 5.0% then; in that run, the three
 repeats of a case gave the same outcome in 96% to 100% of cases. Every
 available episode (9,524) was re-scored from its raw trace with the
-current scorer, with no difference from the saved scores. Raw traces,
-scores and the scripts that produce every table are public.
+current scorer, with no difference from the saved scores, and every
+recorded defence decision was replayed through the current rules: 14,057
+of 14,062 match, the five exceptions being two harmless SMS that an earlier
+version of the OTP rule blocked and three calls from the first version of
+`provenance-consistent`. Raw traces, scores and the scripts that produce
+every table are public.
 
 ---
 
@@ -276,6 +317,9 @@ scores and the scripts that produce every table are public.
 | Hermes 3 "confirm" without a "?" (about 9 of 64) | README, "Why normal tasks fail" (keyword estimate) |
 | Attacks by language and vector | README, "Results" and "A larger API model"; `table2_language.md` |
 | Reproduction of the 114 cases, 96% to 100%, 9,524 episodes re-scored | README, "Results" and "Earlier run"; `docs/audit.md` |
+| Template counts and template-level intervals, permutation and McNemar p-values, comprehension-gate table | `docs/paper/robustness.md` (`scripts/robustness.py`) |
+| Replay of 116 successful attacks through the rules; 14,057 of 14,062 decisions | `docs/audit.md`, "Design review"; `scripts/verify_decisions.py` |
+| Keyword cues in attack texts (11 of 17); ideal agent never blocked | `docs/audit.md`, "Design review" |
 
 ## Notes for the next draft
 

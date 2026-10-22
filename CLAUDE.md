@@ -102,7 +102,17 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   step -> `docs/paper/question_coding.md`; 50-question hand-check sample in
   `docs/paper/question_sample.csv`; his Y/N column on the codes is still
   empty, his notes on the agents' Bangla/Banglish wording are in the last
-  column).
+  column), `scripts/verify_decisions.py` (replay every logged tool call
+  through the current defence rules; run it after any defence change:
+  14,057 of 14,062 match, 5 expected differences), `scripts/robustness.py`
+  (template-level intervals, per-template and per-vector tables, language
+  permutation tests, paired McNemar, comprehension gate ->
+  `docs/paper/robustness.md`; use `--skip granite`).
+- Design review (22 October, `docs/audit.md`): the zero false blocks and the
+  stopped redirects are rule properties (every normal payee is trusted;
+  attacker numbers never are), not experimental results; say so wherever
+  they appear. Rule fixes then: dates are not amounts, only numbers from
+  OTP/PIN/password messages are codes, spaced-out codes are caught.
 - Native-speaker review, round 1 (18 October): sentences 1 to 49 of
   `review_texts.csv` marked natural except two "N" with fixes (row 10,
   Banglish gas request; row 123, simulated user's Banglish "yes"). Both are
@@ -165,6 +175,12 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - Wrong payments that went through: 30 / 6 / 27 with `provenance`, 0 with
   `provenance-amount`.
 - Agents tried to pay invented payees in 29% to 52% of episodes.
+- Language: Qwen 3B, 14B, 32B fell mostly for English (permutation p =
+  0.002, < 0.001, 0.03); 7B and Hermes 3 show no significant language effect.
+  Comprehension gate: those models also did far fewer Bangla-request normal
+  tasks (32B: 9/22 vs 18/21 English); GPT-OSS-120B handles all four languages
+  and attacks worked equally in all four. 32B fell for significantly more
+  attacks than 3B, 7B, 14B (McNemar p = 0.017, 0.004, 0.008).
 - The original 114 cases reproduce the earlier 3-repeat run
   (10.0% / 3.8% / 6.2% vs 10.0% / 3.8% / 5.0%).
 - Qwen2.5-32B-AWQ: 14.5% without defence, 4 with `provenance` (all
@@ -177,7 +193,8 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - Hermes-3-Llama-3.1-8B (second family): 2.3% without defence, 1 with
   `provenance` (amount-only), 0 with `provenance-amount`, 0 correct payments blocked.
 - GPT-OSS-120B (third family, Groq, reasoning effort low): 33/220 (15.0%)
-  without defence, 7 with `provenance` (all amount-only), 0 with
+  without defence (27 of the 33 are the one tool-description template; 6/183
+  SMS and invoice attacks, 3.3%), 7 with `provenance` (all amount-only), 0 with
   `provenance-amount`; 76/82 normal tasks in all three; 0 correct payments
   blocked; invented payees 13 / 10 / 9 of 302 (so the invented-payee finding
   is mainly about the smaller models); no OTP leaked; 27 of the 33 through tool

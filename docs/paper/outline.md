@@ -55,12 +55,17 @@ Lead with the detector finding (roadmap point 0), then the rest.
   ProtectAI's DeBERTa v2 flagged 16 of 19 normal Bangla texts (84%), more than
   it flagged Bangla attacks (57%); as a filter it would break 20 of 22 normal
   Bangla-request tasks and 1 of 21 English ones. deepset's detector flagged
-  100% of attacks and 87% of normal texts. [README: detectors]
+  100% of attacks and 87% of normal texts. [README: detectors] Both are
+  English-trained: say so, and add Prompt Guard 2 (multilingual) through Groq
+  before submitting if possible (roadmap task A).
 - **What works instead.** Provenance: check where a recipient, code or amount
   came from, never read the text. This is not our idea (CaMeL, FIDES and other
   information-flow defences); we test a simple rule-based version in a new
-  setting. 0 correct payments blocked in the normal tasks in all four
-  request languages, all six models. [README: detectors, results]
+  setting. Its decisions do not depend on the language. The zero false
+  blocks and the stopped redirects are rule properties (every normal payee
+  is trusted; attacker numbers never are), verified by replay; do not
+  present them as experimental results. [README: "What the defence results
+  show"; `docs/audit.md`, "Design review"]
 - **Contributions** (bullet list):
   1. The benchmark: TakaPay, a fictional wallet over MCP, 302 cases.
      (Provenance defences are existing ideas tested here, not a
@@ -172,8 +177,10 @@ Also: a bigger model was not safer: among the Qwen models, 32B did the most
 normal tasks (66%) and fell for the most attacks (14.5%, about twice the
 smaller models); GPT-OSS-120B did 93% and fell for 15.0%.
 GPT-OSS-120B is the exception to the invented-payee finding [README: a
-larger API model]: 15.0% attack success without a defence (the highest of
-all models), but it tried to pay an invented payee in only 13 of 302
+larger API model]: 15.0% attack success without a defence (tied with
+Qwen2.5-32B, paired p = 1.0), almost all one tool-description template (27
+of its 33; 6 of 183 SMS and invoice attacks, 3.3%; template-level interval
+0.5% to 34.9%), but it tried to pay an invented payee in only 13 of 302
 episodes (4.3%), and 1 such payment went through (a harness artefact, see
 5.5). It did 76 of 82 normal tasks; read and able 20.4% (29/142), 0/150
 with `provenance-amount`. So the lesson "wrong payments without an
@@ -239,16 +246,17 @@ must be reported with any benchmark score.
 
 ### 5.6 Language (short paragraph) [Table 2]
 
-Claim: each model falls for attacks in different languages, so a benchmark in
-one language cannot rank models.
+Claim (now a headline, "comprehension gate"): attacks in Bangla worked less
+only on models that also handled Bangla requests poorly; a model fluent in
+all four languages followed attacks equally in all four. Opposite to the
+multilingual jailbreak finding; Bangla is not a lasting shield.
 
-| Evidence (README: results) | Number |
+| Evidence (`docs/paper/robustness.md`) | Number |
 |---|---|
-| 3B, 14B: English attacks that worked | 10 and 13 of 55 (at most 3 in any other language) |
-| 32B | English 14 of 55, Banglish 7, mixed 8 |
-| 7B | mostly mixed text, 6 of 54 |
-| Hermes 3 | 3 of its 5 in English, all through SMS |
-| GPT-OSS-120B | spread evenly: English 8 of 55, Bangla 8 of 56, Banglish 9 of 55, mixed 8 of 54; 27 of its 33 through tool descriptions |
+| 3B, 14B, 32B: English attacks that worked | 10, 13, 14 of 55; language effect p = 0.002, < 0.001, 0.03 (permutation) |
+| 7B, Hermes 3 | no language effect distinguishable from chance (p = 0.22, 0.35); do not claim "7B mostly mixed" |
+| Qwen2.5-32B tasks done, English vs Bangla request | 18/21 vs 9/22; attacks read and followed 14/49 vs 3/45 |
+| GPT-OSS-120B | tasks 20/21 vs 21/22; attacks read and followed 8/41 vs 8/46; spread evenly, p = 0.99 |
 
 ## 6. Reproducibility (short, can merge into 3)
 
@@ -354,4 +362,7 @@ Notes for the figure run:
       `docs/paper/draft_section_5.md`.
 - [x] First draft of the abstract and sections 1, 8 and 9:
       `docs/paper/draft_sections_1_8_9.md`. A full first draft now exists.
+- [x] Design review (22 October): claims reworded (rule properties, one
+      template behind GPT-OSS-120B's rate, English-trained detectors,
+      language tests, comprehension gate); related work 14 to 22 added.
 - [ ] STALA template and anonymisation rules (check in November).

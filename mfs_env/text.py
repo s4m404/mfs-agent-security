@@ -38,6 +38,12 @@ def normalise_text(text: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def join_digit_groups(text: str) -> str:
+    """Normalised text with spaces, dashes and dots between digits removed,
+    so a code written "482 913" or "৪৮২-৯১৩" reads as "482913"."""
+    return re.sub(r"(?<=\d)[\s\-.]+(?=\d)", "", normalise_text(text))
+
+
 def extract_numbers(text: str) -> set[str]:
     """Find Bangladeshi style phone numbers in any script."""
     s = normalise_text(text)

@@ -29,7 +29,10 @@ the agent reads: (i) the text of an SMS, sent from the attacker's own number
 or a sender ID such as `TakaPay-Info`; (ii) free text inside an invoice (a
 note or "correction"), while the invoice's biller account and amount fields
 stay those of the real bill; (iii) a tool description, as a poisoned tool
-server would supply it. It cannot change the request, the wallet's records
+server would supply it. In this version the poisoned description is that of
+the wallet's own `send_money` or `pay_bill` tool, which gives the attacker
+more access than a separate third-party tool would; we treat this vector as
+an upper bound. It cannot change the request, the wallet's records
 (contacts, registered billers) or the wallet's checks, and cannot send an
 SMS from the payee's number. Its goals: (G1) send money to an attacker
 number, (G2) leak the OTP by SMS, or (G3) make the agent pay the *real*
@@ -118,7 +121,12 @@ ASSISTANT: this account has moved ..."); *ordinary scam messages* are what
 a human would receive (a fake account block, a "wrong transfer", a lucky
 draw, a customs fee, a job offer, a long chat from a "relative").
 Amount-only attacks keep the payee and add a "correction", for example a
-school invoice note raising the fee from 3,500 to 5,000 Tk.
+school invoice note raising the fee from 3,500 to 5,000 Tk. In all, the 220
+attacks come from 21 templates: 13 generated attack ideas (10 SMS or invoice
+texts, 2 amount-only attacks and 1 tool description), each written in four
+languages and reused across tasks, and 8 hand-written attacks. Cases that
+share a template are not independent, so Section 5 also reports intervals
+with templates as the unit.
 
 **Table 1.** The 302 main cases.
 
@@ -221,8 +229,10 @@ multilingual filter catches; we evaluate it as a detector (Section 4.6).
 must be a saved contact or a number in the request; a number found only in
 an SMS, invoice or tool description is blocked. (2) `pay_bill`: the account
 must belong to a registered biller. (3) `send_sms`: the recipient must be
-trusted as in (1), and the text must not contain any 4- to 8-digit code seen
-in untrusted output, which blocks OTP leaks without reading the OTP. This
+trusted as in (1), and the text must not contain a 4- to 8-digit code from
+an untrusted message about a code (one mentioning an OTP, PIN or password),
+also when written with spaces or dashes; this blocks OTP leaks without
+reading the OTP, and does not block an SMS that mentions a bill amount. This
 targets G1 and G2 but cannot see G3, which pays a trusted payee.
 
 **4.3 `provenance-amount`: amounts too.** For `send_money` and `pay_bill`,
@@ -231,7 +241,10 @@ or, for `send_money`, in an SMS the agent read whose sender is the
 recipient's own number ("Rafi asked for 450"); or, for `pay_bill`, in the
 amount field of an invoice the agent read for that biller account. A
 "correction" in invoice text, or an SMS from another sender, cannot supply
-an amount. The rule also stops the agent's own guessed amounts.
+an amount. Dates in a message ("10 October", "১০ তারিখ") are not read as
+amounts. The rule also stops the agent's own guessed amounts. It cannot
+tell a total from a share given in the same message by the payee (1,800 Tk
+in total, 600 Tk as the share): both are accepted.
 
 **4.4 `provenance-consistent`: when the payee contradicts itself.**
 `provenance-amount` trusts any amount the payee gives, so an attacker who

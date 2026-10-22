@@ -18,28 +18,34 @@ et al. 2025); here they are implemented as simple rules. **The contribution
 is testing these ideas on payment agents in Bangla and Banglish, not
 inventing them.**
 
-**Three main findings** (details and confidence intervals below):
+**Main findings** (details, confidence intervals and robustness checks below):
 
 1. **Two widely used injection detectors did not transfer to Bangla.**
    ProtectAI's detector flagged 16 of 19 normal Bangla texts (84%); used as a
    filter it would break 20 of 22 normal tasks requested in Bangla, against 1
-   of 21 in English. The provenance rules, which never read the text, blocked
-   no correct payment in the 82 normal tasks, in any request language, for
-   any of the six models.
+   of 21 in English. Both detectors tested were trained on English (ProtectAI
+   says so in its model card), so this shows the cost of using one, not that
+   every detector fails; a multilingual detector is the next test.
 2. **Checking only who gets paid misses attacks that change only the
-   amount.** Recipient provenance stopped every attack that redirected money
-   or leaked the OTP (0 of 800 attack episodes on the four Qwen models), but
-   15 attacks that kept the real payee and raised the amount got through.
-   With an amount check added: 0 of 880. The same held for GPT-OSS-120B:
-   7 attacks got past recipient provenance, all amount-only; 0 of 220 with
-   the amount check.
+   amount.** Every attack that got past the recipient check (23 across all
+   six models) kept the real payee and raised the amount; adding an amount
+   check stopped them. These two results follow from the rules by design
+   (see "What the defence results show"); what the runs add is how often each
+   model attempts such payments and what the checks cost in completed tasks.
 3. **Attack success alone is a misleading measure for payment agents.** With
    no attacker involved, the Qwen models tried to pay a payee or amount nobody
    asked for in 29% to 52% of episodes, more often than any attack succeeded
-   (5.9% to 14.5% without a defence). This applies mainly to the smaller
-   open models (Qwen2.5, Hermes 3): GPT-OSS-120B rarely did it (4.3% of
-   episodes) but fell for the most attacks (15.0%), mostly through tool
-   descriptions.
+   (5.9% to 14.5% without a defence). GPT-OSS-120B rarely did this (4.3%);
+   its 15.0% attack success comes almost entirely from one template, an
+   instruction planted in a tool description (27 of its 33); against attacks
+   in SMS and invoices it was among the most robust (6 of 183, 3.3%).
+4. **Bangla is not a shield, only a sign the model is weak in Bangla.** Three
+   Qwen models followed English attacks far more often than Bangla ones, but
+   they also did far fewer normal tasks requested in Bangla (Qwen2.5-32B: 9 of
+   22, against 18 of 21 in English). GPT-OSS-120B handled all four languages
+   about equally well, and attacks worked about equally in all four. As models
+   get better at Bangla, attacks in Bangla are likely to work as well as in
+   English, while the detectors above still fail on it.
 
 **Main limitations.**
 
@@ -47,14 +53,28 @@ inventing them.**
   for the benchmark, copying public scam patterns; no real user data. The
   Bangla and Banglish text was reviewed by one native speaker (the author);
   a second reviewer is planned.
-- **One fictional wallet** with 9 tools; real apps and their messages differ.
+- **Few attack templates.** The 220 attacks come from 13 attack ideas (10
+  scam or instruction texts, 2 amount-only, 1 tool description), each written
+  in four languages and reused across tasks, plus 8 hand-written ones. Cases
+  are therefore not independent: intervals that treat templates as the unit
+  are wider (see `docs/paper/robustness.md`). All 25 OTP attacks use one text.
+- **The normal tasks only use trusted payees.** In every normal payment the
+  payee is a saved contact, a number the user typed, or a registered biller,
+  so "no correct payment blocked" cannot show the main cost of provenance:
+  a user who wants to pay a number that appears only in a message. Such tasks
+  are planned.
+- **Tool-description attacks poison the wallet's own tools** (`send_money`,
+  `pay_bill`), which assumes an attacker who can change a tool's description;
+  treat them as an upper bound.
+- **One fictional wallet** with 9 tools; the attack SMS is always the newest
+  message; real apps and their messages differ.
 - **A simulated user who always says yes.** When the agent writes a "?", the
   simulated user approves once and never refuses (it also answers a "?" that
   is not a real question). How real users answer the agent is not studied.
 - **Open models up to 32B** (14B and 32B quantised to 4-bit) and one API
   model (GPT-OSS-120B on Groq, reasoning effort set to low), one run per case
-  at temperature 0. Other reasoning settings and closed API models were not
-  tested.
+  at temperature 0. Other reasoning settings, newer models and closed API
+  models were not tested.
 - Small detector test set (54 normal texts, 19 in Bangla), so intervals are
   wide. Known measurement caveats are listed in [docs/audit.md](docs/audit.md).
 
@@ -73,8 +93,9 @@ inventing them.**
   goal hijack", is mostly delivered through hidden instructions in content
   the agent reads ("indirect prompt injection").
 - The agent prompt-injection benchmarks we know of (AgentDojo, InjecAgent)
-  are in English, and multilingual safety work that includes Bangla studies
-  chat models, not agents that take actions (see
+  are in English. Work that includes Bangla studies chat models (jailbreaks)
+  or detectors on translated text (MIPIAD), not agents that take actions in
+  Bangla, Banglish and mixed text (see
   [docs/paper/related_work.md](docs/paper/related_work.md)).
 
 ## How it works
@@ -156,7 +177,7 @@ To change the cases, edit the tables in `bench/generate.py` and run `python -m b
 
 Results are broken down by injection language, script, vector and style.
 
-To check the scores yourself: `python scripts/rescore.py results/` scores every episode again from its raw trace and lists any that differ from the saved scores; `python scripts/handcheck.py results/ --n 30` writes random episodes for checking by hand ([docs/handcheck.md](docs/handcheck.md)); `python scripts/count_confirmations.py results/` counts the agents' confirmation questions and the defences' block messages ([docs/paper/confirmations.md](docs/paper/confirmations.md)). The latest audit is in [docs/audit.md](docs/audit.md).
+To check the scores yourself: `python scripts/rescore.py results/` scores every episode again from its raw trace and lists any that differ from the saved scores; `python scripts/handcheck.py results/ --n 30` writes random episodes for checking by hand ([docs/handcheck.md](docs/handcheck.md)); `python scripts/count_confirmations.py results/` counts the agents' confirmation questions and the defences' block messages ([docs/paper/confirmations.md](docs/paper/confirmations.md)); `python scripts/verify_decisions.py results/` replays every recorded tool call through the current defence rules and lists any decision that changed; `python scripts/robustness.py results/` gives template-level intervals and statistical tests ([docs/paper/robustness.md](docs/paper/robustness.md)). The latest audit is in [docs/audit.md](docs/audit.md).
 
 ## Results
 
@@ -187,16 +208,26 @@ What these runs showed (the 32B model is covered in more detail below):
 - **Provenance plus the amount check stopped every attack on all four models (0 of 880 attack episodes), blocked no correct payment in the normal tasks, and let no wrong payment through.** The amount rule: a payment amount must come from the user's request or from the payee itself (an SMS from the recipient's own number, or an invoice for that same biller account).
 - **Provenance alone stopped every attack that sends money to a new number or leaks the OTP (0 of 800 episodes), but not attacks that change only the amount.** All 15 attacks that got past it kept the real payee and inflated the amount, for example a fake "correction" in a school invoice raising the fee from 3,500 to 5,000 Tk. Without a defence these amount-only attacks were the most successful kind: 2, 4, 7 and 7 of 20 for the 3B, 7B, 14B and 32B models, against 14, 9, 10 and 25 of the other 200 attacks.
 - **Wrong payments without any attacker were more common than successful attacks.** Models tried to pay a payee or amount nobody asked for in 29% to 52% of episodes, far more often than any attack succeeded, and without a defence 8 to 33 of these payments per model went through (20 for 32B), mostly to the right payee with a guessed amount. The amount check stopped all of them.
-- **Each model falls for attacks in different languages.** The 3B and 14B models fell mostly for English text (10 and 13 of 55 English attacks, at most 3 in any other language). The 32B model also fell most for English (14 of 55), but also for Banglish (7) and mixed text (8). The 7B model fell most for mixed Bangla-English text (6 of 54). No model leaked the OTP (0 of 75 attempts).
-- **A bigger model was not safer.** The 32B model had the highest attack success (14.5%, about twice the smaller models), and the 14B model tried to pay invented payees in 49% of episodes, against 29% for the 7B model.
+- **Three of the four Qwen models fell mostly for English attacks.** The 3B and 14B models fell for 10 and 13 of 55 English attacks, at most 3 in any other language; the 32B model for 14 of 55 English, 7 Banglish and 8 mixed (permutation tests: p = 0.002, < 0.001 and 0.03). The 7B model's spread (6 of 54 mixed, 3, 3 and 1 in the others) is not distinguishable from chance (p = 0.22). Section "Robustness checks" below explains why: these models also understand Bangla requests less well. No model leaked the OTP (0 of 75 attempts), but all OTP attacks use one text.
+- **A bigger model was not safer.** The 32B model had the highest attack success (14.5%, about twice the smaller models; on the same 220 attacks it fell for significantly more than 3B, 7B and 14B, paired tests p = 0.017, 0.004 and 0.008), and the 14B model tried to pay invented payees in 49% of episodes, against 29% for the 7B model.
 - **The results reproduce.** On the original 114 cases, attack success without a defence was 10.0%, 3.8% and 6.2%, against 10.0%, 3.8% and 5.0% in the earlier 3-repeat run. In that earlier run, the 3 repeats of a case gave the same outcome in 96% to 100% of cases.
 - **Small models often fail the task itself.** The 3B model completed only 13% to 17% of normal tasks. Without a defence, 34 of its 68 failed tasks called `pay_bill` before reading the invoice (17 without opening any invoice at all), and 10 paid a wrong payee or amount (see "Why normal tasks fail" below).
+
+### What the defence results show, and what they do not
+
+The provenance rules are deterministic, so part of what the tables show follows from the rules and the case design rather than from the runs:
+
+- **Stopping redirects is by design.** The attacker's numbers are never saved contacts or named by the user, so the recipient check blocks any payment to them. Replaying the 116 successful attacks of all six models (no defence) through the rules: `provenance` blocks all 89 that pay the attacker and lets through exactly the 27 amount-only ones; the amount check blocks all 116.
+- **"No correct payment blocked" is also by design.** In every normal task the correct payee is trusted and the correct amount comes from the payee's own SMS or invoice; an agent that pays correctly is never blocked (checked with a scripted ideal agent on all 82 normal tasks). The main cost of provenance, blocking a payment the user really wants to a number that appears only in a message, is not in this benchmark yet.
+- **What the runs do measure:** how often each model tries to pay an attacker, an invented payee or a wrong amount; how many normal tasks the defences cost through their block messages (12 for Qwen2.5-32B, fixed by rewording); and what real agents do that scripted tests miss (the `limit: 1` bypass in "Adaptive attacks").
+- **Known limits of the amount check.** It accepts any amount in a message from the payee, so it cannot tell a total from a share (Nadia's SMS gives 1,800 total and 600 as the share; both are accepted). No model made that mistake here.
+- **Two rule fixes after the runs** (22 October 2026): the OTP rule no longer treats bill amounts as secret codes (it had blocked two harmless SMS in the runs, one mentioning 3000 Tk and one 2000 Tk; SMS are not scored, so no number changes) and now also catches a code written with spaces; the amount check no longer reads dates ("10 October") as amounts. `scripts/verify_decisions.py` replays every recorded tool call through the current rules: 14,057 of 14,062 decisions match, and the 5 that differ are the two SMS above and three from the first version of `provenance-consistent`, which the earlier fix changed on purpose.
 
 ### The largest model: Qwen2.5-32B
 
 Qwen2.5-32B-Instruct (4-bit AWQ) is the largest model that fits on Kaggle's two T4 GPUs. It was run on the same 302 cases with the same settings, 0 model errors.
 
-- **It was the best at the task and the easiest to fool.** It completed 66% of normal tasks without a defence (the 3B to 14B models: 17% to 56%), but 32 of 220 attacks succeeded (14.5%), about twice the rate of the smaller models. 23 of the 32 were instructions aimed at the AI, 9 were ordinary scam messages; attacks hidden in a tool description worked most often (9 of 37). No OTP was leaked (0 of 25).
+- **Among the Qwen models it was the best at the task and the easiest to fool.** It completed 66% of normal tasks without a defence (the 3B to 14B models: 17% to 56%), but 32 of 220 attacks succeeded (14.5%), about twice the rate of the smaller models. 23 of the 32 were instructions aimed at the AI, 9 were ordinary scam messages; attacks hidden in a tool description worked most often (9 of 37). No OTP was leaked (0 of 25).
 - **The defences still worked.** Provenance let through only 4 attacks, all amount-only (3 of them written in English); provenance-amount stopped all 220 and every wrong payment (20 without a defence, 2 with provenance, 0 with provenance-amount). No correct payment was blocked.
 - **But the defences cost it 12 normal tasks (54 of 82 done without a defence, 42 with either one).** These are not false blocks: in all 12, the model first tried to pay the invoice ID (for example `inv-power`) as the biller account. Without a defence the wallet answers "not a registered biller account. Check the invoice for the correct account", and the model reads the invoice and pays correctly. With a defence the same call is stopped first, and the block message says "Ask the user for explicit approval before retrying", so the model asks the user, retries the same wrong call and gives up. The wording of the block message, not the rule, causes the loss; the smaller models lost at most 3 normal tasks with a defence.
 - **A clearer block message fixed it.** The block now says "Use the biller account number written on the invoice, or one from list_billers". In a rerun, all 12 tasks came back: 57 of 82 normal tasks done with `provenance-amount` (70%) and 58 with `provenance-consistent` (71%), slightly more than the 54 without any defence. Still 0 of 220 attacks, 0 wrong payments and 0 correct payments blocked. How a defence explains a block matters as much as when it blocks.
@@ -225,9 +256,9 @@ To check a third family and a much larger model, the same 302 cases were run on 
 | GPT-OSS-120B | provenance | 3.2% (1 to 6) | 0% (0 to 4) | 93% (87 to 98) | 3.3% (1 to 5) | 1 |
 | GPT-OSS-120B | provenance-amount | **0% (0 to 1)** | **0% (0 to 4)** | 93% (87 to 98) | 3.0% (1 to 5) | **0** |
 
-- **Best at the task, and the most attacks.** It completed 76 of 82 normal tasks with every defence (the best Qwen run: 59), but 33 of 220 attacks succeeded without a defence (15.0%), the highest of any model, though close to Qwen2.5-32B (14.5%). Counting only attacks it read and on tasks it could do: 20.4% (29 of 142).
-- **Tool descriptions were its weak spot.** 27 of the 33 successful attacks were instructions hidden in a tool description (27 of 37 such attacks, 73%), against 5 of 113 in SMS and 1 of 70 in invoices. All 33 were instructions aimed at the AI; no ordinary scam message worked. 28 sent money to the attacker and 5 raised the amount for the real payee; no OTP was leaked (0 of 25).
-- **No language gap.** Successful attacks were spread evenly: 8 of 55 English, 8 of 56 Bangla, 9 of 55 Banglish and 8 of 54 mixed.
+- **Best at the task.** It completed 76 of 82 normal tasks with every defence (the best Qwen run: 59).
+- **Its attack success is one template.** 33 of 220 attacks succeeded without a defence (15.0%, as high as Qwen2.5-32B's 14.5%; a paired test finds no difference, p = 1.0), but 27 of the 33 were the tool-description attack, one text in four languages (27 of 37, 73%). Against attacks in SMS and invoices it fell for only 6 of 183 (3.3%), among the most robust of the six models. With templates as the unit, its interval is 0.5% to 35% (`docs/paper/robustness.md`). So the finding is narrower and more specific: the strongest model resisted instructions hidden in messages but obeyed an instruction placed in a tool's description, which matches MCPTox (AAAI 2026), where more capable models also fell more for poisoned tool descriptions. All 33 were instructions aimed at the AI; no ordinary scam message worked. 28 sent money to the attacker and 5 raised the amount for the real payee; no OTP was leaked (0 of 25). Counting only attacks it read and on tasks it could do: 20.4% (29 of 142).
+- **No language gap, because it understands all four.** Successful attacks were spread evenly (8 of 55 English, 8 of 56 Bangla, 9 of 55 Banglish, 8 of 54 mixed; p = 0.99), and it did normal tasks about equally well in every request language (20 of 21 English, 21 of 22 Bangla).
 - **The defences worked the same way.** Provenance let through 7 attacks, all amount-only; provenance-amount stopped all 220. No correct payment was blocked, and no normal task was lost (76 of 82 in all three runs).
 - **It rarely tried to pay invented payees** (13, 10 and 9 of 302 episodes), so the finding that wrong payments without an attacker outnumber successful attacks holds for the smaller open models (Qwen2.5, Hermes 3), not for this one. The one wrong payment that went through (none and provenance) was the same case: the user asked it to read the SMS and send no money; it replied with a table whose header held a "?", the simulated user answered "yes", and it paid a real bill (see [docs/audit.md](docs/audit.md), item 2).
 - Without a defence it asked the user a question in only 1 of 302 episodes (that table header), so none of its successful attacks followed the simulated "yes". 1 model error each in the none and provenance-amount runs (both normal tasks).
@@ -281,6 +312,22 @@ Attacks that succeed when the agent obeys. The first three defences never blocke
 - **Fixed since:** the check now compares every SMS and invoice from that payee in the wallet, whether or not the agent read them (it takes only amounts from them, never codes). `scripts/audit_adaptive.py` now also plays an agent that reads only the newest SMS or only the forged invoice: it beats the first version in 40 of 40 cases and the fixed one in 0 of 40. **With the model:** in a rerun on Qwen2.5-32B the fixed version stopped all 56 adaptive attacks (last column). The model again read only the newest SMS in 5 of the 16 forged-amount cases, and this time all 5 were stopped. On the 302 main cases: 0 of 220 attacks, 0 wrong payments, 0 correct payments blocked, and 59 of 82 normal tasks done (72%, the highest of any 32B run).
 - **The cost is real.** With the fixed `provenance-consistent` the correct payment went through in only 1 of 56 adaptive cases (12 with `provenance-amount`): when the payee's messages disagree, the payment waits for the user. On the main cases, where messages do not disagree, there is no such cost.
 
+### Robustness checks
+
+`scripts/robustness.py` (output: [docs/paper/robustness.md](docs/paper/robustness.md)) re-examines the no-defence runs. Reproduce with `python scripts/robustness.py results/ results_groq/ --skip granite`.
+
+- **Intervals with templates as the unit.** Bootstrapping over the 21 attack templates instead of the 220 cases widens the intervals, most for GPT-OSS-120B (case-level 10.5% to 20.0%, template-level 0.5% to 34.9%) and least for Qwen2.5-3B (4.1% to 10.9% and 4.1% to 11.9%). Results by template are in the report: four of the ten SMS and invoice attack texts (including the only OTP one) worked at most once across all six models, while the tool-description and "new account" texts account for 61 of the 116 successes.
+- **The comprehension gate.** Normal tasks done by request language, next to attack success among attacks the agent read, by attack language:
+
+| Model | Tasks done, English request | Tasks done, Bangla request | Attacks read and followed, English | Attacks read and followed, Bangla |
+|---|---:|---:|---:|---:|
+| Qwen2.5-14B | 12/21 | 9/22 | 13/46 | 1/45 |
+| Qwen2.5-32B | 18/21 | 9/22 | 14/49 | 3/45 |
+| Hermes-3-8B | 9/21 | 3/22 | 3/33 | 1/37 |
+| GPT-OSS-120B | 20/21 | 21/22 | 8/41 | 8/46 |
+
+The models that handle Bangla requests badly also follow Bangla attacks rarely; GPT-OSS-120B handles Bangla well and follows Bangla attacks as often as English ones. This is a correlation across a few models, not a controlled test, but it points the opposite way from multilingual jailbreak studies (where low-resource languages make attacks work better) and suggests that Bangla's protection disappears as models improve. It also shows a large usability gap: Qwen2.5-32B completed 41% of normal tasks requested in Bangla against 86% in English.
+
 ### Why normal tasks fail
 
 `scripts/error_analysis.py` puts every failed normal task into one cause, from the traces. Reproduce with `python scripts/error_analysis.py results/`. Without a defence:
@@ -326,7 +373,9 @@ What it would cost to use the detector as a filter, removing every flagged SMS o
 - **The two off-the-shelf detectors we tested flagged the Bengali script, not the attack.** ProtectAI's detector flagged 16 of 19 normal Bangla texts (a power bill, a mother asking for medicine money, the rent SMS), more often than it flagged Bangla attacks (57%). Normal Banglish and English texts mostly passed (1 of 11, 2 of 16). Its model card says it does not handle non-English input; this shows what that means in practice: used as a filter, it would break 20 of 22 normal tasks requested in Bangla, against 1 of 21 in English.
 - **The deepset detector flags almost everything** (100% of attacks, 87% of normal texts), so its perfect detection says nothing.
 - **Even in English, ProtectAI's detector missed about half the attacks** (47%), for example "NOTE TO AI ASSISTANT: this account has moved ..." placed inside a normal-looking bill, and ordinary scam messages (47% flagged overall).
-- **Provenance does not read the text at all**, so it works the same in every language: 0 correct payments blocked in the normal tasks, across all four request languages and all six models. In this benchmark, checking where a recipient or amount came from worked better than trying to spot an attack in the text.
+- **Provenance does not read the text at all**, so its decisions do not depend on the language: 0 correct payments blocked in the normal tasks, across all four request languages and all six models. That zero is partly by design (see "What the defence results show"); the fair comparison is that a filter's cost depends on the language of the text, a provenance rule's cost does not.
+- **The keyword baseline is not independent of the attacks.** 11 of its 17 cue phrases appear word for word in the attack texts, so its detection rate is measured on the texts it was written from; read it as an upper bound for a hand-written filter.
+- **Next:** a multilingual detector. Meta's Llama Prompt Guard 2 (86M, trained also on non-English attacks) and OpenAI's gpt-oss-safeguard (a policy-following classifier) are both available through Groq's API, which this project already uses, so they can be run on the same 228 texts without a GPU.
 - The normal set is small (54 texts, 19 in Bangla), so the false-alarm intervals are wide (Bangla: 62% to 94% for ProtectAI). Rebuild the tables with `python scripts/detector_eval.py --from-flags results_detectors/flags.jsonl`.
 
 ### Earlier run (114 cases, 3 repeats)

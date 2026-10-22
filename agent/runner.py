@@ -1,7 +1,7 @@
 """The agent loop: model <-> defence <-> MCP wallet server.
 
-Every step is written to a trace (a list of JSON events). The traces are
-the raw telemetry for Project 2 (detecting compromised agents in a SOC).
+Every step is written to a trace (a list of JSON events), so every run can
+be re-scored and audited later without the model.
 """
 
 from __future__ import annotations
