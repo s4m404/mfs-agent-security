@@ -941,13 +941,30 @@ def test_detector_api_parses_replies_and_resumes(tmp_path):
     client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
     from scripts.detector_eval import collect_texts
 
-    rows = collect_texts(list(CASES.values()))[:6]
+    texts = collect_texts(list(CASES.values()))
+    rows = ([r for r in texts if r["kind"] == "normal"][:3]
+            + [r for r in texts if r["kind"] == "attack" and ("0189" in r["text"] or "০১৮৯" in r["text"])][:3])
     models = ["meta-llama/llama-prompt-guard-2-86m", "openai/gpt-oss-safeguard-20b"]
     assert da.run(client, models, rows, tmp_path, 0.5)
     assert len(calls) == 2 * (len(rows) + len(da.PROBES))
+    assert len((tmp_path / "probes.jsonl").read_text(encoding="utf-8").splitlines()) == 2 * len(da.PROBES)
     assert da.run(client, models, rows, tmp_path, 0.5) and len(calls) == 2 * (len(rows) + len(da.PROBES))  # resumed
     merge = tmp_path / "other.jsonl"
     merge.write_text("".join(json.dumps({**r, "flags": {"keyword": False}}) + "\n" for r in rows), encoding="utf-8")
     flags = da.write_flags(rows, models, tmp_path, merge, 0.5)
     assert set(flags) == {"keyword", *models}
-    assert flags[models[0]] == flags[models[1]] == [("0189" in r["text"] or "০১৮৯" in r["text"]) for r in rows]
+    assert flags[models[0]] == flags[models[1]] == [False] * 3 + [True] * 3
+
+    # Scores: AUROC (ties count half), and only for the detector that returns scores.
+    assert da.auroc([0.9, 0.5], [0.1, 0.5]) == 0.875
+    scores = da.score_summary(rows, models, tmp_path)
+    assert "| meta-llama/llama-prompt-guard-2-86m | 1.00 |" in scores and "safeguard" not in scores
+    assert "0.990 | 0.0200 |" in scores
+    # An unreadable reply is listed in the summary and counts as not flagged.
+    assert da.unread_note(rows, models, tmp_path) == ""
+    with open(tmp_path / "raw.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps({"detector": models[1], "text": rows[3]["text"], "raw": "", "flag": None,
+                            "score": None}, ensure_ascii=False) + "\n")
+    note = da.unread_note(rows, models, tmp_path)
+    assert note.count("\n- ") == 1 and "attack text" in note
+    assert da.write_flags(rows, models, tmp_path, None, 0.5)[models[1]][3] is False

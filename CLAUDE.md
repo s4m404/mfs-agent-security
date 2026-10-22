@@ -123,7 +123,7 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   (adaptive set, 9).
   Findings: `docs/audit.md`.
   `scripts/make_figures.py results/ [results_groq/] --detectors
-  results_detectors/flags.jsonl` writes its figures and tables to
+  results_detectors_api/flags.jsonl` (all five detectors) writes its figures and tables to
   `docs/paper/figures/` (figures need matplotlib).
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
@@ -153,8 +153,10 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   replies kept in `raw.jsonl`), results to `results_detectors_api/` on
   `groq-results`, merged with the Kaggle detector flags (ProtectAI, deepset,
   keyword) into one `flags.jsonl` / `summary.md`. The safeguard POLICY was
-  written for this benchmark (an upper bound for a policy filter). Not run
-  yet as of 22 October.
+  written for this benchmark (an upper bound for a policy filter). Done 22
+  October (456 replies); later scheduled runs make no API calls and only
+  rebuild `summary.md`. `--summary-only` rebuilds the tables from
+  `raw.jsonl` without a key.
 - `docs/index.html`: the public demo page (GitHub Pages from /docs).
   It embeds real traces; regenerate it if the demo cases change.
 - `results/` is git-ignored.
@@ -223,8 +225,13 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - Detectors (`scripts/detector_eval.py`, 174 attack / 54 normal texts): keyword
   34% / 7% false alarms; ProtectAI DeBERTa v2 59% / 39%, but 84% of normal
   Bangla texts flagged (as a filter it would break 20 of 22 Bangla-request
-  normal tasks, 1 of 21 English); deepset 100% / 87%. Prompt Guard not run
-  (needs a Hugging Face account).
+  normal tasks, 1 of 21 English); deepset 100% / 87%. Through Groq
+  (`scripts/detector_api.py`): Llama Prompt Guard 2 86M 0% / 0% at
+  threshold 0.5 (highest attack score 0.15; it targets explicit jailbreak
+  phrasing; AUROC 0.89 only as a secondary number); gpt-oss-safeguard-20b
+  with our policy (upper bound) 93% / 15%, no language gap, 12 of 82 normal
+  tasks broken (family money requests, the OTP SMS), missed all 12
+  amount-only attacks; 1 empty reply counted as not flagged.
 - Error analysis (`scripts/error_analysis.py`, all six models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after
