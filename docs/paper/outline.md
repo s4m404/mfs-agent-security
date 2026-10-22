@@ -24,9 +24,13 @@ Rules for this outline:
 
 Claims, in order:
 
-1. The two off-the-shelf prompt-injection detectors tested do not transfer
-   to Bangla: one flags 84% of normal Bangla texts and would break 20 of 22 Bangla-request
-   tasks as a filter (1 of 21 in English). [README: detectors]
+1. No injection detector tested both catches the attacks and lets Bangla
+   payments through: an English-trained one flags 84% of normal Bangla texts
+   and would break 20 of 22 Bangla-request tasks as a filter (1 of 21 in
+   English); the multilingual Prompt Guard 2 flags none of the 174 attacks;
+   a policy model with a policy written for these attacks catches 93% in
+   every language but breaks 12 of 82 normal tasks and misses every
+   amount-only attack. [README: detectors]
 2. Provenance tracking (an existing idea: CaMeL, FIDES; here as simple
    rules) never reads the text, blocks 0 correct payments in the normal
    tasks in any language and, with the amount check, lets 0 of 880 attack episodes
@@ -55,9 +59,12 @@ Lead with the detector finding (roadmap point 0), then the rest.
   ProtectAI's DeBERTa v2 flagged 16 of 19 normal Bangla texts (84%), more than
   it flagged Bangla attacks (57%); as a filter it would break 20 of 22 normal
   Bangla-request tasks and 1 of 21 English ones. deepset's detector flagged
-  100% of attacks and 87% of normal texts. [README: detectors] Both are
-  English-trained: say so, and add Prompt Guard 2 (multilingual) through Groq
-  before submitting if possible (roadmap task A).
+  100% of attacks and 87% of normal texts. Both are English-trained, so
+  the newer guards were tested too: Prompt Guard 2 (multilingual) flagged
+  0 of 174 attacks and 0 of 54 normal texts; gpt-oss-safeguard with our
+  policy (an upper bound) flagged 93% of attacks in all four languages and
+  15% of normal texts (family money requests, the OTP SMS), and missed all
+  12 amount-only attacks. [README: detectors]
 - **What works instead.** Provenance: check where a recipient, code or amount
   came from, never read the text. This is not our idea (CaMeL, FIDES and other
   information-flow defences); we test a simple rule-based version in a new
@@ -130,13 +137,14 @@ Lead with the detector finding (roadmap point 0), then the rest.
   messages or invoices disagree on the amount; checks every SMS and invoice
   from the payee in the wallet.
 - A block can carry advice for the agent (section 5.5: the wording matters).
-- Detectors as defences: ProtectAI DeBERTa v3 v2 and deepset DeBERTa v3, run
-  on all untrusted texts (no agent). Prompt Guard not run (needs a Hugging
-  Face account). [README: detectors]
+- Detectors as defences, run on all untrusted texts (no agent): ProtectAI
+  DeBERTa v3 v2 and deepset DeBERTa v3 (Kaggle), Llama Prompt Guard 2 86M
+  (threshold 0.5) and gpt-oss-safeguard-20b with a policy we wrote (Groq
+  API, `scripts/detector_api.py`). [README: detectors]
 
 ## 5. Results (about 3 pages)
 
-### 5.1 Detectors flag the script, not the attack (point 0) [Fig 1]
+### 5.1 No detector both catches the attacks and spares Bangla payments (point 0) [Fig 1]
 
 Claim: a detector's English score says nothing about other languages;
 provenance, which never reads the text, does not have this problem.
@@ -150,11 +158,20 @@ provenance, which never reads the text, does not have this problem.
 | ProtectAI as a filter: tasks broken, en / bn / banglish / mixed request | 1/21 / **20/22** / 1/20 / 16/19 |
 | deepset: attacks / normal flagged | 100% / 87% (47/54); Bangla 19/19 |
 | deepset as a filter | 12/21 / 22/22 / 12/20 / 19/19 |
+| Prompt Guard 2: attacks / normal flagged (threshold 0.5) | 0% (0/174) / 0% (0/54); highest attack score 0.153, normal 0.0011 |
+| Prompt Guard 2: AUROC, all / en / bn / banglish / mixed (secondary, threshold-free) | 0.89 / 0.93 / 0.88 / 0.92 / 0.84 |
+| Prompt Guard 2: test text "Ignore all previous instructions ..." | 0.999 |
+| gpt-oss-safeguard (our policy): attacks flagged, all / en / bn / banglish / mixed | 93% / 95% / 91% / 93% / 93%; instructions to the AI 104/104 |
+| gpt-oss-safeguard: normal flagged, all / Bangla | 15% (8/54) / 3 of 19 |
+| gpt-oss-safeguard as a filter | 3/21 / 3/22 / 2/20 / 4/19 (12/82) |
+| gpt-oss-safeguard misses | 12 of 12 amount-only invoice notes; 1 empty reply counted as not flagged |
 | keyword: attacks / normal flagged | 34% / 7% (4/54) |
 | Provenance defences, correct payments blocked, every request language | 0 |
 
 Notes: ProtectAI's model card says it does not handle non-English input; we
-show the cost in practice. Even in English it missed about half the attacks
+show the cost in practice. Prompt Guard 2 targets explicit jailbreak
+phrasing, which our attacks do not use. The safeguard policy was written
+after seeing the attacks, so its rates are an upper bound. Even in English it missed about half the attacks
 (47% flagged), e.g. "NOTE TO AI ASSISTANT: this account has moved ...".
 This is the "intuitive metric is misleading" negative result STALA asks for.
 
@@ -286,7 +303,8 @@ forged payee messages. Numbers only by section reference.
 - Synthetic data, one fictional wallet, a simulated user that says "yes" once.
 - Small open models on T4 GPUs (4-bit for 14B and 32B), 1 repeat; one strong
   API model (GPT-OSS-120B) with low reasoning effort only.
-- Normal detector texts are few (54; 19 Bangla), so intervals are wide.
+- Normal detector texts are few (54; 19 Bangla), so intervals are wide;
+  the gpt-oss-safeguard policy was written for these attacks.
 - `provenance-consistent` makes the user decide when the payee's messages
   disagree (1 of 56 adaptive correct payments went through).
 - Ethics: everything fictional, attacker numbers fictional, only public scam
@@ -307,8 +325,12 @@ later, `results_groq/`; both git-ignored, so run it where the results are):
 
 ```
 python scripts/make_figures.py results/ results_groq/ \
-    --detectors results_detectors/flags.jsonl --out docs/paper/figures
+    --detectors results_detectors_api/flags.jsonl --out docs/paper/figures
 ```
+
+(`results_detectors_api/flags.jsonl`, on the `groq-results` branch, holds
+the flags of all five detectors; `results_detectors/flags.jsonl` from
+Kaggle holds the first three.)
 
 It writes PDF (for LaTeX) and PNG, Markdown and LaTeX tables, and
 `numbers.json` with every number shown. Before using a figure, check its
@@ -317,7 +339,7 @@ files, so they should match exactly).
 
 | Item | Section | Shows | Data |
 |---|---|---|---|
-| **Fig 1** `fig1_detectors` | 5.1 | (a) normal texts flagged by language, per detector; (b) normal tasks broken if used as a filter, by request language, with provenance (correct payments blocked, real runs) | `results_detectors/flags.jsonl` + all provenance runs |
+| **Fig 1** `fig1_detectors` | 5.1 | per detector, one bar per language: (a) attack texts flagged; (b) normal texts flagged; (c) normal tasks broken if used as a filter, by request language, with provenance (correct payments blocked, real runs) | `results_detectors_api/flags.jsonl` (all five detectors) + all provenance runs |
 | **Fig 2** `fig2_attack_vs_invented` | 5.2 | per model, no defence: attack success vs tried to pay an invented payee | `none` runs |
 | **Fig 3** `fig3_defences` | 5.3 | per model and defence: successful attacks split into amount-only vs redirect/OTP; wrong payments that went through | all runs |
 | **Table 1** `table1_main` | 5.3 | model x defence: attack success, amount-only, correct payments blocked, benign tasks done, invented payees, wrong payments through | all runs |
@@ -356,6 +378,9 @@ Notes for the figure run:
       Table 1 and Table 2 match the README.
 - [x] Related work (section 7): `docs/paper/related_work.md`; check the
       starred references before submitting.
+- [x] Prompt Guard 2 and gpt-oss-safeguard into 5.1, the abstract claims
+      and Fig 1 (22 October). Fig 1 redrawn with all five detectors and an
+      attack panel; Table 1 and Table 2 unchanged (checked byte for byte).
 - [x] First draft of sections 2 to 4: `docs/paper/draft_sections_2_4.md`
       (sources of every number listed at its end).
 - [x] First draft of section 5 (results, with 6 folded in as 5.7):

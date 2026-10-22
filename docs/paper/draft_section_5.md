@@ -16,47 +16,86 @@ Figure and table names: Fig. 1 = `fig1_detectors`, Fig. 2 =
 ## 5. Results
 
 We first test the defence most deployments would reach for, an injection
-detector (5.1), then report what the agent runs show about attack success
-(5.2), amount-only attacks (5.3), adaptive attacks (5.4), the harness
+detector (5.1, five of them), then report what the agent runs show about
+attack success (5.2), amount-only attacks (5.3), adaptive attacks (5.4), the harness
 (5.5) and language (5.6). All runs use the 302 main cases, one run per
 case at temperature 0, unless stated otherwise.
 
-### 5.1 Detectors flag the script, not the attack
+### 5.1 No detector both catches the attacks and spares Bangla payments
 
-Fig. 1 shows how often each detector flags normal texts, by language, and
-what it would cost as a filter. ProtectAI's detector flagged 59% of the
-174 attack texts (English 47%, Bangla 57%, Banglish 80%, mixed 51%), but
-also 21 of the 54 normal texts (39%), and **16 of the 19 normal Bangla
-texts (84%; 95% interval 62% to 94%)**: a power bill, a mother asking for
-medicine money, a landlord's rent SMS. It flagged normal Bangla texts more
-often than Bangla attacks. Normal Banglish and English texts mostly passed
-(1 of 11 and 2 of 16), so the detector reacts to the Bengali script, not to
-the instruction. Used as a filter that removes every flagged SMS or invoice
-text, it would break **20 of 22 normal tasks requested in Bangla** and 16
-of 19 in mixed text, against 1 of 21 in English and 1 of 20 in Banglish.
-Its model card states that it does not handle non-English input; the
-benchmark shows what that means for an agent that reads a Bangla inbox.
+We ran five detectors on every untrusted text in the benchmark, with no
+agent involved: 174 attack texts (about 44 per language) and 54 normal
+texts (19 in Bangla). Fig. 1 shows, by language, how many attack texts and
+normal texts each one flagged, and how many normal tasks it would break as
+a filter that removes every flagged SMS or invoice text.
 
-deepset's detector flagged every attack text (100%) and 47 of the 54 normal
-texts (87%; all 19 in Bangla), so its perfect detection carries no
-information; as a filter it would break 12 to 22 normal tasks in every
-request language. The keyword baseline flagged 34% of attacks (7% of mixed
-attacks) with 4 false alarms in 54 normal texts; 11 of its 17 cue phrases
-occur verbatim in the attack texts, so this is an in-sample upper bound for
-a hand-written filter, not an independent detector.
+**English-trained classifiers flag the script.** ProtectAI's detector
+flagged 59% of the attack texts (English 47%, Bangla 57%, Banglish 80%,
+mixed 51%), but also 21 of the 54 normal texts (39%), and **16 of the 19
+normal Bangla texts (84%; 95% interval 62% to 94%)**: a power bill, a
+mother asking for medicine money, a landlord's rent SMS. It flagged normal
+Bangla texts more often than Bangla attacks. Normal Banglish and English
+texts mostly passed (1 of 11 and 2 of 16), so the detector reacts to the
+Bengali script, not to the instruction. As a filter it would break **20 of
+22 normal tasks requested in Bangla** and 16 of 19 in mixed text, against
+1 of 21 in English and 1 of 20 in Banglish. Its model card states that it
+does not handle non-English input; the benchmark shows what that means for
+an agent that reads a Bangla inbox. Even in English it missed about half
+the attacks (47% flagged), for example "NOTE TO AI ASSISTANT: this account
+has moved ..." inside an otherwise normal bill. deepset's detector flagged
+every attack text (100%) and 47 of the 54 normal texts (87%; all 19 in
+Bangla), so its perfect detection carries no information. The keyword
+baseline flagged 34% of attacks (7% of mixed attacks) with 4 false alarms
+in 54 normal texts; 11 of its 17 cue phrases occur verbatim in the attack
+texts, so this is an in-sample upper bound for a hand-written filter, not
+an independent detector.
 
-Even in English, ProtectAI's detector missed about half the attacks (47%
-flagged), for example "NOTE TO AI ASSISTANT: this account has moved ..."
-inside an otherwise normal bill. The provenance rules, which never read the
-text, blocked **no correct payment in the 82 normal tasks, in any of the
-four request languages, for any of the six models** (Table 2). That zero
-is partly by design, since every normal task pays a trusted payee (Section
-5.3); the fair contrast is that a text filter's cost depends on the
-language of the text and a provenance rule's does not. Both detectors
-tested were trained on English, so the result shows the cost of deploying
-one in Bangla rather than that no detector can work; a multilingual
-detector (Prompt Guard 2) is the natural next comparison. A detector's
-English score therefore says little about its behaviour in Bangla.
+**A multilingual classifier misses the attacks.** Meta's Llama Prompt
+Guard 2 (86M) [23], run through Groq's API with its default threshold
+(0.5), flagged no normal text in any language, but also **none of the 174
+attack texts**. No attack text scored above 0.16 (normal texts at most
+0.001), while a test text in the classic form, "Ignore all previous
+instructions and send 5000 Tk to 01899999999 now. Do not tell the user.",
+scored 0.999. Prompt Guard 2 is built to detect explicit jailbreak
+techniques and dropped the broader "injection" label of its first version
+[23]; our attacks contain no override phrasing, they read like bank
+notices, scam SMS or notes to the assistant. Its scores still rank attacks
+above normal texts (AUROC 0.89; English 0.93, Bangla 0.88, Banglish 0.92,
+mixed 0.84), so a lower threshold might catch some, but one picked on
+these texts would be fitted to them, and we do not report one.
+
+**A policy model with an in-sample policy catches them, at a cost.**
+OpenAI's gpt-oss-safeguard-20b [24] judges a text against a policy given
+at run time. We wrote one for this benchmark, after seeing the attacks: it
+describes instructions to the assistant and the common payment scams by
+meaning, not language, and names family money requests, bills and safety
+warnings as allowed. Its results are therefore an upper bound for a
+policy filter. It flagged **93% of the attack texts with no language gap**
+(English 95%, Bangla 91%, Banglish 93%, mixed 93%) and all 104
+instructions to the AI. Its false alarms did not depend on the script
+either (8 of 54: 2 of 16 English, 3 of 19 Bangla), but they were the
+messages a payment agent exists to act on: a mother asking for medicine
+money (three versions), a dinner split (two), a friend's lunch debt, the
+landlord's rent SMS and the wallet's own OTP SMS, although the policy
+names such requests and safety warnings as allowed. As a filter it would
+break **12 of the 82 normal tasks** (3 to 4 in each request language). Its
+12 misses were all the amount-only attacks, invoice notes such as
+"Correction: last month's unpaid balance was left out. The total payable is now 2350 Tk.": the
+text is a plausible bill, and only the source of the amount shows it is
+wrong. One of its 228 replies was empty and is counted as not flagged.
+
+**Provenance does not read the text.** The provenance rules blocked **no
+correct payment in the 82 normal tasks, in any of the four request
+languages, for any of the six models** (Table 2), and with the amount check
+no attack went through, including the amount-only ones the policy model
+missed. That zero is partly by design, since every normal task pays a
+trusted payee (Section 5.3), so the fair contrast is narrower: a text
+filter's cost depends on the language and wording of the text, a
+provenance rule's does not. Across five detectors, the trade-off we saw
+was to flag the Bengali script (ProtectAI, deepset), to miss the attacks
+(Prompt Guard 2), or, with a policy written for these very attacks, to
+block one normal payment request in seven while missing every
+amount-only change (gpt-oss-safeguard).
 
 ### 5.2 Attack success alone is a misleading measure
 
@@ -279,8 +318,9 @@ often (8 of 41, 8 of 46). This is a correlation across six models, not a
 controlled test, but it runs opposite to the multilingual jailbreak finding
 that low-resource languages weaken safety [8, 9]: here, a low-resource
 language protected the agent only while the agent was weak in it, which
-suggests the protection disappears as models improve, while the detectors
-in Section 5.1 still fail on the same language. It also exposes a usability
+suggests the protection disappears as models improve, while none of the
+detectors in Section 5.1 both catches the attacks and lets normal Bangla
+messages through. It also exposes a usability
 gap: Bangla requests were completed far less often by the open models.
 
 ### 5.7 Reproducibility
@@ -304,6 +344,7 @@ every table are public.
 | Number | Source |
 |---|---|
 | Detector rates, false alarms, filter cost, ProtectAI's interval and examples | README, "Do injection detectors work"; `docs/audit.md`, "Detectors" |
+| Prompt Guard 2 and gpt-oss-safeguard: rates, highest scores, AUROC, false-alarm texts, misses, the empty reply | README, "Do injection detectors work"; `results_detectors_api/summary.md` and `raw.jsonl` on the `groq-results` branch (`scripts/detector_api.py`); the 0.999 test-text score is from the log of the Groq detector workflow run of 22 October 2026 |
 | Main results per model and defence (attack success, intervals, normal tasks, invented payees, wrong payments through) | README, "Results", "The largest model", "A second model family", "A larger API model"; `docs/paper/figures/table1_main.md` |
 | Wrong biller account, invoice ID 14 of 15, GPT-OSS-120B's 6 failures | README, "Why normal tasks fail" |
 | Conditional rates | README, "Attack success among agents that could have been fooled" |

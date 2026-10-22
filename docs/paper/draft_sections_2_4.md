@@ -272,17 +272,25 @@ the biller account number written on the invoice, or one from
 list_billers"; Section 5.5 reports the effect (12 normal tasks for
 Qwen2.5-32B).
 
-**4.6 Injection detectors (comparison).** We also test two widely used open
-injection classifiers, ProtectAI's DeBERTa v3 (v2) [7] and deepset's
-DeBERTa v3, with the keyword filter. They run on the benchmark's untrusted
-texts with no agent: 174 distinct attack texts (about 44 per language) and
+**4.6 Injection detectors (comparison).** We also test five detectors: the
+keyword filter; two widely used open injection classifiers, ProtectAI's
+DeBERTa v3 (v2) [7] and deepset's DeBERTa v3, both trained on English;
+Meta's Llama Prompt Guard 2 (86M) [23], a multilingual classifier, flagging
+a text when its score is above 0.5; and OpenAI's gpt-oss-safeguard-20b
+[24], which judges a text against a policy given at run time (reasoning
+effort low). We wrote that policy for this benchmark: it describes
+instructions to the assistant and the common payment scams by meaning, not
+language, and names family money requests, bills and safety warnings as
+allowed. Since it was written after seeing the attacks, its results are an
+upper bound for a policy filter. The last two run through Groq's API; every
+raw reply is kept. All five run on the benchmark's untrusted texts with no
+agent: 174 distinct attack texts (about 44 per language) and
 54 normal texts (genuine bills and SMS from the normal tasks, 19 in
 Bangla). We report the share flagged by language and a filter cost: normal
 tasks that would lose a text they need if every flagged SMS or invoice were
 removed, by request language. This cost comes from the texts, not agent
 runs, so it is shown beside, not equated with, provenance's correct
-payments blocked in real runs. Meta's Prompt Guard, which requires a
-Hugging Face account, was not run.
+payments blocked in real runs.
 
 ---
 

@@ -80,7 +80,14 @@ message cost Qwen2.5-32B 12 normal tasks), and we add a dimension their
 evaluation does not cover: language. Off-the-shelf injection classifiers
 are trained on English (ProtectAI's model card [7] says the model does not
 handle non-English prompts); we measure what that costs in practice and
-find the detector reacts to Bengali script itself (section 5.1). This
+find the detector reacts to Bengali script itself (section 5.1). Newer
+guards are multilingual or policy-driven: Meta's Prompt Guard 2, part of
+LlamaFirewall [23], targets explicit jailbreak techniques and dropped its
+predecessor's broader injection label, and gpt-oss-safeguard [24] classifies
+text against a policy written at run time. We test both (section 5.1): the
+first misses our attacks, which contain no override phrasing; the second,
+with a policy we wrote for these attacks, catches most of them in every
+language but also flags real family payment requests. This
 matches two known problems: guard models over-flag harmless text that
 contains trigger words (InjecGuard's NotInject set [20]), and guardrails
 lose accuracy on multilingual and code-switched input [21]. For Bangla
@@ -136,9 +143,11 @@ add, as far as we know from the papers above (not a full survey):
    [15] covers one model and eight scenarios),
    with Bangla, Banglish (romanised) and code-mixed attacks and user
    requests, native-speaker reviewed, on tools that move money.
-2. A measurement of two injection detectors on non-English tool outputs
-   inside an agent task: they flagged the script, not the attack, so an
-   English detection score did not carry over (section 5.1).
+2. A measurement of five injection detectors on non-English tool outputs
+   inside an agent task: the English-trained ones flagged the script, not
+   the attack; the multilingual Prompt Guard 2 missed every attack; a
+   policy model caught most attacks but flagged real payment requests and
+   missed amount-only changes (section 5.1).
 3. A test of simple provenance rules (the idea behind CaMeL) across
    languages: no correct payment blocked in the normal tasks in any request
    language, on six models from three families.
@@ -163,11 +172,12 @@ Facts about other work from the references below; ours from the README.
 | Firewalls [6] | Defence + benchmark critique | Tool inputs and outputs | English | 4 benchmarks | The benchmarks' own | LLM minimizer and sanitizer |
 | Multilingual jailbreaks [8-11] | Attacks on chat models | User prompt (direct) | Many, incl. Bengali [9, 10] | None (text only) | Harmful text | Mostly safety tuning or prompting |
 | MIPIAD [14] | Detector | Translated BIPIA texts | English, Bangla (machine-translated) | None (detection only) | Classification | Fine-tuned Qwen classifier + TF-IDF ensemble |
+| LlamaFirewall [23] | Guardrail system | User input, agent reasoning, code | Mainly English; Prompt Guard 2 86M multilingual | AgentDojo (to check) | Detection and attack success | Prompt Guard 2, AlignmentCheck, CodeShield |
 | Tamil/Tanglish study [15] | Case study | Injected content | English, Tamil, Tanglish | One model, 8 scenarios | Manual | Visible reasoning as a monitor |
 | FinVault [16] | Benchmark | Several, incl. prompt injection | (not checked) | Financial agents, sandboxed | Environment state | Existing defences |
 | APort Vault [17] | Benchmark (CTF replay) | User-written attacks on a live payment agent | English | Payment agent | Transfers made | Deterministic authorization layer |
 | MCPTox [19] | Benchmark | Poisoned MCP tool descriptions | English | 45+ real MCP servers | Action taken | (Measurement) |
-| **This work** | Benchmark + defences | SMS, invoices, tool descriptions | Bangla, Banglish, code-mixed, English | Mobile-money wallet over MCP (9 tools) | Environment state | Keyword, detectors, 3 provenance variants |
+| **This work** | Benchmark + defences | SMS, invoices, tool descriptions | Bangla, Banglish, code-mixed, English | Mobile-money wallet over MCP (9 tools) | Environment state | Keyword, 4 detectors, 3 provenance variants |
 
 ---
 
@@ -265,8 +275,17 @@ paper's official BibTeX before submitting).
     authors and venue.)
 22. \* *BabelArena: A Large-Scale Multilingual Benchmark for LLM Agents.*
     arXiv:2609.23490, September 2026. (Check the author list.)
+23. \* Sahana Chennabasappa, Cyrus Nikolaidis, Daniel Song, David Molnar,
+    et al. (Joshua Saxe, corresponding). *LlamaFirewall: An Open Source
+    Guardrail System for Building Secure AI Agents.* arXiv:2505.03574, May
+    2025. Introduces Prompt Guard 2 (jailbreak detector, 86M and 22M) and
+    AlignmentCheck. Also cite Meta's Llama Prompt Guard 2 model card for
+    the dropped "injection" label. (Check the full author list.)
+24. \* OpenAI. *Technical Report: Research Preview of gpt-oss-safeguard.*
+    October 2025. Open-weight 120B and 20B models that classify content
+    against a policy supplied at inference time. Cite as a report or URL.
 
-References 14 to 22 were found on 22 October 2026 through search results
+References 14 to 24 were found on 22 October 2026 through search results
 (abstracts and listing pages, not the PDFs); read each before citing its
 numbers.
 

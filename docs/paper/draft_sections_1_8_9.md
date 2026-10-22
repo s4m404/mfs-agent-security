@@ -17,10 +17,13 @@ money, where users and scammers write in Bangla, romanised Bangla
 (Banglish) and code-mixed text. We release TakaPay, a benchmark of 302
 cases in which indirect prompt injections hidden in SMS, invoices and tool
 descriptions try to make an agent pay an attacker, leak a one-time code or
-overpay the real payee, and test six models from three families. Two widely
-used, English-trained injection detectors did not transfer: one flagged 84%
-of normal Bangla texts and, used as a filter, would break 20 of 22
-Bangla-request tasks (1 of 21 in English). Attacks in Bangla worked less
+overpay the real payee, and test six models from three families. No
+injection detector we tested both caught the attacks and let Bangla
+payments through: an English-trained one flagged 84% of normal Bangla texts
+(as a filter, breaking 20 of 22 Bangla-request tasks, 1 of 21 in English),
+the multilingual Prompt Guard 2 flagged none of the 174 attacks, and a
+policy model given a policy written for these attacks caught 93% but
+blocked real family payment requests and missed every amount-only attack. Attacks in Bangla worked less
 often than in English, but only on models that also handled Bangla requests
 poorly; on a model fluent in all four languages they worked equally well,
 so a low-resource language is not a lasting shield. We also report testing
@@ -50,17 +53,23 @@ and romanised Tamil on one model [15]. None runs agents whose harm is an
 action. We do not know whether attacks, or the defences built against
 them, carry over to an agent that moves money in Bangla.
 
-**Detectors flag the script, not the attack.** The usual answer to
-injection is to put a classifier in front of the agent. We ran two widely
-used open detectors on every untrusted text in our benchmark. ProtectAI's
-DeBERTa-based detector flagged 16 of 19 normal Bangla texts (84%), such as
-a power bill and a mother asking for medicine money, more often than it
-flagged Bangla attacks (57%); used as a filter, it would break 20 of 22
-normal tasks requested in Bangla and 1 of 21 in English. deepset's detector
-flagged every attack and 87% of normal texts. Both are trained on English,
-so this shows the cost of deploying such a detector in Bangla rather than
-that no detector can work, but a detector's English score said little about
-its behaviour in Bangla.
+**Detectors flag the script or miss the attack.** The usual answer to
+injection is to put a classifier in front of the agent. We ran five
+detectors on every untrusted text in our benchmark. ProtectAI's
+DeBERTa-based detector, trained on English, flagged 16 of 19 normal Bangla
+texts (84%), such as a power bill and a mother asking for medicine money,
+more often than it flagged Bangla attacks (57%); used as a filter, it would
+break 20 of 22 normal tasks requested in Bangla and 1 of 21 in English.
+deepset's detector flagged every attack and 87% of normal texts. Meta's
+multilingual Prompt Guard 2 flagged no normal text but also none of the 174
+attacks: it looks for explicit jailbreak phrasing, and payment scams do not
+need any. gpt-oss-safeguard, a model that follows a written policy, caught
+93% of the attacks in every language when given a policy we wrote for
+them, but flagged 15% of normal texts, mostly family and friends asking
+for money, and missed every attack that only raises a bill's amount. A
+detector's English score said little about its behaviour in Bangla, and
+the one that worked across languages still judged the wording, not where
+the payee and amount came from.
 
 **What worked instead.** Provenance checks where a payment's recipient,
 code and amount came from, never what the text says. The idea is not ours:
@@ -104,9 +113,11 @@ benchmark can mislead:
    in Bangla, Banglish, code-mixed text and English, and a separate set of
    56 adaptive attacks that forge the payee's identity. Cases, raw traces
    and re-scoring scripts are public.
-2. A measurement of two English-trained injection detectors on non-English
-   tool outputs inside an agent task, showing that they flag the script
-   rather than the attack, and the "comprehension gate": attacks in a
+2. A measurement of five injection detectors on non-English tool outputs
+   inside an agent task, showing that the English-trained ones flag the
+   script rather than the attack, a multilingual one misses the attacks
+   and a policy model blocks real payment requests, and the
+   "comprehension gate": attacks in a
    low-resource language work less only while the model is weak in it.
 3. A test of simple provenance rules across languages on six models from
    three families, including an amount check and a consistency check
@@ -164,6 +175,9 @@ correct payment in an attack case shows up as lower utility under attack.
 An unwanted SMS is scored as harm only if it contains the OTP. The detector
 filter cost is computed from the texts, not from agent runs, and the normal
 detector set is small (54 texts, 19 in Bangla), so its intervals are wide.
+We wrote the policy for gpt-oss-safeguard after seeing the attacks, so its
+detection rate is an upper bound; Prompt Guard 2 was run at its default
+threshold only.
 
 **What the defences cost.** The provenance rules approximate provenance by
 matching values (numbers, accounts, amounts) against trusted sources; they
@@ -186,9 +200,11 @@ provider first.
 ## 9. Conclusion
 
 Payment agents will read inboxes written in the languages their users
-write in, and their defences should be tested there. In our benchmark, two
-widely used injection detectors failed on Bangla, flagging the script
-rather than the attack, while simple provenance rules that never read the
+write in, and their defences should be tested there. In our benchmark, no
+injection detector both caught the attacks and let Bangla payments
+through: English-trained ones flagged the script rather than the attack, a
+multilingual one missed the attacks, and a policy model blocked real
+family payment requests, while simple provenance rules that never read the
 text blocked no correct payment in any language and, with an amount check,
 let no attack through on any of six models, a property of the rules that
 real agents' behaviour did not break. Attacks in Bangla were weaker only
@@ -209,6 +225,7 @@ ideal script.
 |---|---|
 | 239 million mobile money accounts; OWASP Top 10 for Agentic Applications (2026) | README, "Why this matters"; Bangladesh Bank data for January 2025 (`references.bib`) |
 | Detector rates: 16 of 19, 84%, 57%, 20 of 22, 1 of 21, deepset 100% / 87% | README, "Do injection detectors work"; `draft_section_5.md`, 5.1 |
+| Prompt Guard 2 0 of 174; gpt-oss-safeguard 93%, 15%, amount-only misses | README, "Do injection detectors work"; `results_detectors_api/summary.md` on `groq-results` |
 | 0 correct payments blocked, any language, six models; 0 attacks with the amount check; 2.3% to 15.0% without a defence | README, main results, Hermes 3 and GPT-OSS-120B sections; `draft_section_5.md`, 5.1 and 5.3 |
 | Invented payees 29% to 52% (Qwen), 4.3% and 15.0% (GPT-OSS-120B); two to four times when read and able | README, "Results", "A larger API model", conditional rates |
 | 12 normal tasks; 29 of 78; newest-only SMS | README, "The largest model", "Adaptive attacks"; `docs/paper/confirmations.md` |

@@ -38,7 +38,10 @@ Last updated: 22 October 2026.
   repeats showed that repeats at temperature 0 barely differ.
 - **Detectors.** ProtectAI DeBERTa v2, deepset DeBERTa and the keyword
   baseline on all 174 attack and 54 normal texts, by language
-  (`scripts/detector_eval.py`, `notebooks/kaggle_detectors.ipynb`).
+  (`scripts/detector_eval.py`, `notebooks/kaggle_detectors.ipynb`); Llama
+  Prompt Guard 2 (86M) and gpt-oss-safeguard-20b on the same texts through
+  Groq's API (`scripts/detector_api.py`, raw replies in
+  `results_detectors_api/` on the `groq-results` branch).
 - **Analyses.** Attack success among cases where the agent read the attack
   and could do the task (`scripts/conditional_rates.py`); one cause per
   failed normal task (`scripts/error_analysis.py`); adaptive-attack audit
@@ -82,15 +85,14 @@ Last updated: 22 October 2026.
 From the design review of 22 October 2026 (`docs/audit.md`), in order of
 value for the paper:
 
-A. [ ] **A multilingual detector.** Meta's Llama Prompt Guard 2 (86M,
-       trained also on non-English attacks) and OpenAI's gpt-oss-safeguard
-       (policy-following classifier) on the 228 detector texts through
-       Groq's API: script `scripts/detector_api.py` and workflow
-       `.github/workflows/groq_detectors.yml` are ready (results to
-       `results_detectors_api/` on the `groq-results` branch, merged with
-       the earlier detectors into one table). Left: run the workflow, then
-       add the results to the README and section 5.1. Without it, the
-       detector result only covers English-trained detectors.
+A. [x] **A multilingual detector** (done 22 October). Llama Prompt Guard
+       2 (86M) flagged 0 of 174 attacks and 0 of 54 normal texts at its
+       default threshold (it targets explicit jailbreak phrasing; AUROC
+       0.89, reported as secondary). gpt-oss-safeguard-20b with a policy
+       written for this benchmark (an upper bound) flagged 93% of attacks
+       with no language gap, 15% of normal texts (12 of 82 normal tasks
+       broken as a filter), and missed all 12 amount-only attacks. In the
+       README, section 5.1, the outline and Fig 1.
 B. [ ] **Normal tasks whose payee appears only in a message** (about 25:
        "pay the electrician whose number is in this SMS", a courier's
        delivery charge, a new tutor), so the benchmark measures provenance's
@@ -156,12 +158,14 @@ benchmark or assurance interpretation is misleading".
 
 **Framing** (every point backed by the README numbers):
 
-0. The two off-the-shelf injection detectors tested do not transfer to
-   Bangla: ProtectAI's flags 84% of normal Bangla texts, so an English
-   detection score says nothing about other languages. Both are
-   English-trained; task A tests a multilingual one. Provenance rules never
-   read the text, so their cost does not depend on the language (their zero
-   false blocks here is by design, see task B).
+0. No detector tested both catches the attacks and lets Bangla payments
+   through: ProtectAI's (English-trained) flags 84% of normal Bangla texts,
+   so an English detection score says nothing about other languages; the
+   multilingual Prompt Guard 2 flags none of the attacks; gpt-oss-safeguard
+   with a policy written for these attacks catches 93% in every language
+   but breaks 12 of 82 normal tasks and misses every amount-only attack.
+   Provenance rules never read the text, so their cost does not depend on
+   the language (their zero false blocks here is by design, see task B).
 1. Attack success alone is misleading for payment agents: the smaller open
    models (Qwen2.5, Hermes 3) made wrong payments with no attacker involved
    (invented payees, guessed amounts) more often than any attack succeeded.
@@ -265,10 +269,16 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   payee worked in 11 of 16 cases without a defence; the fixed
   provenance-consistent stopped all 56 adaptive attacks, at the cost of
   holding most adaptive-case correct payments for the user.
-- The two detectors tested failed on Bangla: ProtectAI's flagged 16 of 19
-  normal Bangla texts (as a filter it would break 20 of 22 Bangla-request
-  tasks, 1 of 21 English) and caught only 47% of English attacks; deepset's
-  flagged 87% of all normal texts.
+- The two English-trained detectors failed on Bangla: ProtectAI's flagged
+  16 of 19 normal Bangla texts (as a filter it would break 20 of 22
+  Bangla-request tasks, 1 of 21 English) and caught only 47% of English
+  attacks; deepset's flagged 87% of all normal texts. The multilingual
+  Prompt Guard 2 flagged none of the 174 attacks (highest score 0.15; an
+  explicit "Ignore all previous instructions ..." text scored 0.999).
+  gpt-oss-safeguard with our policy (an upper bound) caught 93% in all four
+  languages but flagged family money requests and the OTP SMS (8 of 54
+  normal texts; 12 of 82 tasks broken) and missed all 12 amount-only
+  attacks, which the provenance amount check stops.
 - The simulated user's automatic "yes" is part of the attack path: in 29 of
   the 78 successful attacks on the four Qwen models (no defence; 13 of 32
   for Qwen2.5-32B) the agent had asked a question and received the
@@ -294,5 +304,6 @@ always the newest message; a simulated user who always says
 yes (and answers any "?"); open models up to 32B (14B and 32B in 4-bit) plus
 one API model (GPT-OSS-120B, low reasoning effort only); Bangla and
 Banglish text reviewed by one native speaker so
-far; a small normal-text set for detectors (54 texts, 19 in Bangla).
+far; a small normal-text set for detectors (54 texts, 19 in Bangla), and a
+policy for gpt-oss-safeguard written after seeing the attacks.
 Measurement caveats are in `docs/audit.md`.

@@ -127,6 +127,19 @@ language (ProtectAI 1/21, 20/22, 1/20, 16/19), and the sentence figures
 (Bangla attacks flagged 57%, normal Banglish 1 of 11 and English 2 of 16,
 ordinary scam messages 47%).
 
+The Groq detectors (22 October): `scripts/detector_api.py --summary-only`
+rebuilds `flags.jsonl` and `summary.md` from the saved replies
+(`results_detectors_api/raw.jsonl`, 456 rows: 228 texts x 2 detectors)
+with the same flags and the same tables as the workflow wrote, and adds a
+score table (Prompt Guard 2: AUROC 0.89, highest attack score 0.153,
+highest normal score 0.0011) and a list of unreadable replies (one: an
+empty gpt-oss-safeguard reply to a normal Banglish text, counted as not
+flagged). Checked by hand in `raw.jsonl`: all 12 gpt-oss-safeguard misses
+are the amount-only "Correction" invoice texts, and its 8 false alarms are
+three versions of a mother asking for medicine money, two dinner splits, a
+lunch debt, the rent SMS and the OTP SMS. Figure 1 was redrawn from the
+merged flags; Table 1 and Table 2 came out byte for byte the same.
+
 ## Mismatch found and corrected
 
 - **Forged invoices:** the README said the model "opened the second invoice
@@ -248,7 +261,9 @@ the case files are exactly what the models saw.
    word for word in the attack texts.
 7. **Both detectors are English-trained** (ProtectAI's model card says so),
    so the detector result shows the cost of using one in Bangla; a
-   multilingual detector is needed for a general claim.
+   multilingual detector is needed for a general claim. (Done 22 October:
+   Prompt Guard 2 and gpt-oss-safeguard; see "Detectors" above and the
+   README.)
 8. **Tool-description attacks poison the wallet's own tools** (`send_money`,
    `pay_bill`); that is an upper bound on what a third-party tool could do.
 9. **The attack SMS is always the newest message** in the inbox.

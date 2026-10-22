@@ -371,11 +371,89 @@
   }
  },
  "detectors": {
+  "deepset/deberta-v3-base-injection": {
+   "attack_flagged": [
+    174,
+    174
+   ],
+   "attack_flagged_by_language": {
+    "en": [
+     43,
+     43
+    ],
+    "bn": [
+     44,
+     44
+    ],
+    "banglish": [
+     44,
+     44
+    ],
+    "mixed": [
+     43,
+     43
+    ]
+   },
+   "normal_flagged": {
+    "en": [
+     9,
+     16
+    ],
+    "bn": [
+     19,
+     19
+    ],
+    "banglish": [
+     11,
+     11
+    ],
+    "mixed": [
+     8,
+     8
+    ]
+   },
+   "tasks_broken": {
+    "en": [
+     12,
+     21
+    ],
+    "bn": [
+     22,
+     22
+    ],
+    "banglish": [
+     12,
+     20
+    ],
+    "mixed": [
+     19,
+     19
+    ]
+   }
+  },
   "keyword": {
    "attack_flagged": [
     59,
     174
    ],
+   "attack_flagged_by_language": {
+    "en": [
+     17,
+     43
+    ],
+    "bn": [
+     19,
+     44
+    ],
+    "banglish": [
+     20,
+     44
+    ],
+    "mixed": [
+     3,
+     43
+    ]
+   },
    "normal_flagged": {
     "en": [
      0,
@@ -418,6 +496,24 @@
     102,
     174
    ],
+   "attack_flagged_by_language": {
+    "en": [
+     20,
+     43
+    ],
+    "bn": [
+     25,
+     44
+    ],
+    "banglish": [
+     35,
+     44
+    ],
+    "mixed": [
+     22,
+     43
+    ]
+   },
    "normal_flagged": {
     "en": [
      2,
@@ -455,44 +551,122 @@
     ]
    }
   },
-  "deepset/deberta-v3-base-injection": {
+  "meta-llama/llama-prompt-guard-2-86m": {
    "attack_flagged": [
-    174,
+    0,
     174
    ],
+   "attack_flagged_by_language": {
+    "en": [
+     0,
+     43
+    ],
+    "bn": [
+     0,
+     44
+    ],
+    "banglish": [
+     0,
+     44
+    ],
+    "mixed": [
+     0,
+     43
+    ]
+   },
    "normal_flagged": {
     "en": [
-     9,
+     0,
      16
     ],
     "bn": [
-     19,
+     0,
      19
     ],
     "banglish": [
-     11,
+     0,
      11
     ],
     "mixed": [
-     8,
+     0,
      8
     ]
    },
    "tasks_broken": {
     "en": [
-     12,
+     0,
      21
     ],
     "bn": [
-     22,
+     0,
      22
     ],
     "banglish": [
-     12,
+     0,
      20
     ],
     "mixed": [
-     19,
+     0,
+     19
+    ]
+   }
+  },
+  "openai/gpt-oss-safeguard-20b": {
+   "attack_flagged": [
+    162,
+    174
+   ],
+   "attack_flagged_by_language": {
+    "en": [
+     41,
+     43
+    ],
+    "bn": [
+     40,
+     44
+    ],
+    "banglish": [
+     41,
+     44
+    ],
+    "mixed": [
+     40,
+     43
+    ]
+   },
+   "normal_flagged": {
+    "en": [
+     2,
+     16
+    ],
+    "bn": [
+     3,
+     19
+    ],
+    "banglish": [
+     1,
+     11
+    ],
+    "mixed": [
+     2,
+     8
+    ]
+   },
+   "tasks_broken": {
+    "en": [
+     3,
+     21
+    ],
+    "bn": [
+     3,
+     22
+    ],
+    "banglish": [
+     2,
+     20
+    ],
+    "mixed": [
+     4,
      19
     ]
    }

@@ -10,8 +10,9 @@ the same model and defence, the one given later wins (a note is printed), so
 pass the newest runs last. Without --detectors, Figure 1 is skipped.
 
 Writes to --out:
-    fig1_detectors.pdf/.png   normal texts flagged and normal tasks broken, by
-                              language, per detector; provenance for comparison
+    fig1_detectors.pdf/.png   attack texts flagged, normal texts flagged and
+                              normal tasks broken, by language, per detector;
+                              provenance for comparison
     fig2_attack_vs_invented.pdf/.png
                               attack success vs tries to pay an invented payee
                               (no defence), per model
@@ -42,10 +43,13 @@ from detector_eval import LANGS, tasks_hit  # noqa: E402
 
 DEFENCE_ORDER = ["none", "keyword", "provenance", "provenance-amount", "provenance-consistent"]
 LANG_NAMES = {"en": "English", "bn": "Bangla", "banglish": "Banglish", "mixed": "Mixed"}
+# Display names, in the order Figure 1 shows them; other detectors follow.
 DETECTOR_NAMES = {
     "keyword": "Keyword",
     "protectai/deberta-v3-base-prompt-injection-v2": "ProtectAI v2",
     "deepset/deberta-v3-base-injection": "deepset",
+    "meta-llama/llama-prompt-guard-2-86m": "Prompt Guard 2",
+    "openai/gpt-oss-safeguard-20b": "gpt-oss-safeguard",
 }
 PROVENANCE = ("provenance", "provenance-amount", "provenance-consistent")
 # Categorical slots 1-4 of the reference palette, always in this order.
@@ -145,7 +149,7 @@ def language_numbers(runs) -> dict[str, dict[str, tuple[int, int]]]:
 
 
 def detector_numbers(flag_rows: list[dict], cases, runs) -> dict:
-    """Per detector: normal texts flagged and normal tasks broken, by language.
+    """Per detector: attack and normal texts flagged and normal tasks broken, by language.
     'provenance' row: correct payments blocked in the real runs, by request language."""
     names = list(flag_rows[0]["flags"])
     flags = {d: [r["flags"][d] for r in flag_rows] for d in names}
@@ -157,6 +161,9 @@ def detector_numbers(flag_rows: list[dict], cases, runs) -> dict:
         attack = [(t, x) for t, x in zip(texts, flags[d]) if t["kind"] == "attack"]
         out[d] = {
             "attack_flagged": (sum(x for _, x in attack), len(attack)),
+            "attack_flagged_by_language": {lang: (sum(x for t, x in attack if t["language"] == lang),
+                                                  sum(1 for t, _ in attack if t["language"] == lang))
+                                           for lang in LANGS},
             "normal_flagged": {lang: (sum(x for t, x in normal if t["language"] == lang),
                                       sum(1 for t, _ in normal if t["language"] == lang)) for lang in LANGS},
             "tasks_broken": {lang: hit[d].get(lang, (0, 0)) for lang in LANGS},
@@ -245,26 +252,33 @@ def _save(fig, out: Path, name: str) -> list[Path]:
 
 
 def fig1(det, out: Path, plt) -> list[Path]:
-    fig, (a, b) = plt.subplots(1, 2, figsize=(7.0, 2.6))
-    groups = [LANG_NAMES[lang] for lang in LANGS]
-    detectors = [d for d in det if "normal_flagged" in det[d]]
-    share = lambda k, n: 100 * k / n if n else 0  # noqa: E731
+    """Three panels, one group of bars per detector, one bar per language (same colours throughout)."""
+    order = list(DETECTOR_NAMES)
+    detectors = sorted((d for d in det if "normal_flagged" in det[d]),
+                       key=lambda d: (order.index(d) if d in order else len(order), d))
     name = lambda d: DETECTOR_NAMES.get(d, d.split("/")[-1])  # noqa: E731
-    _bars(a, groups, {name(d): [share(*det[d]["normal_flagged"][lang]) for lang in LANGS] for d in detectors},
-          {name(d): [str(k) for k, _ in (det[d]["normal_flagged"][lang] for lang in LANGS)] for d in detectors})
-    if detectors:  # the same texts for every detector: show how many under each language
-        a.set_xticks(range(len(LANGS)), [f"{g}\n(n={det[detectors[0]]['normal_flagged'][lang][1]})"
-                                         for g, lang in zip(groups, LANGS)])
-    _style(a, "Normal texts flagged (%)")
-    a.set_title("(a) False alarms, by text language", fontsize=9, color=INK)
-    rows = detectors + ["provenance (real runs)"]
-    _bars(b, groups, {name(d): [share(*det[d]["tasks_broken"][lang]) for lang in LANGS] for d in rows},
-          {name(d): [str(k) for k, _ in (det[d]["tasks_broken"][lang] for lang in LANGS)] for d in rows})
-    _style(b, "Normal tasks broken (%)")
-    b.set_title("(b) Used as a filter, by request language", fontsize=9, color=INK)
-    for ax in (a, b):
-        ax.set_ylim(0, 110)
-    b.legend(fontsize=7, frameon=False, loc="upper left", bbox_to_anchor=(1.0, 1.0))
+    share = lambda k, n: 100 * k / n if n else 0  # noqa: E731
+    panels = [("attack_flagged_by_language", detectors, "(a) Attack texts flagged\n(higher is better)"),
+              ("normal_flagged", detectors, "(b) Normal texts flagged\n(lower is better)"),
+              ("tasks_broken", detectors + ["provenance (real runs)"],
+               "(c) Normal tasks broken as a filter\n(lower is better)")]
+    widths = [len(rows) for _, rows, _ in panels]
+    fig, axes = plt.subplots(1, 3, figsize=(7.0, 2.9), gridspec_kw={"width_ratios": widths})
+    for ax, (key, rows, title) in zip(axes, panels):
+        rows = [d for d in rows if key in det[d]]
+        series = {LANG_NAMES[lang]: [share(*det[d][key][lang]) for d in rows] for lang in LANGS}
+        _bars(ax, [name(d).replace(" (real runs)", "\n(real runs)") for d in rows], series)
+        for i in range(len(rows)):  # a group with no bar at all: say it is zero, not missing
+            if not any(v[i] for v in series.values()):
+                ax.text(i, 1.5, "0", ha="center", va="bottom", fontsize=7, color=MUTED)
+        _style(ax, "%" if ax is axes[0] else "")
+        ax.set_title(title, fontsize=8, color=INK)
+        ax.set_ylim(0, 105)
+        ax.tick_params(axis="x", labelsize=6.5, rotation=35)
+        for t in ax.get_xticklabels():
+            t.set_horizontalalignment("right")
+            t.set_rotation_mode("anchor")
+    axes[-1].legend(fontsize=7, frameon=False, loc="upper right")
     return _save(fig, out, "fig1_detectors")
 
 
