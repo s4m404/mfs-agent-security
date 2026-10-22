@@ -1,7 +1,8 @@
 # Audit of the scoring and the reported numbers
 
 First pass 9 October 2026; full check from the raw Kaggle traces 10 October
-2026; the three finished GPT-OSS-120B runs checked 17 October 2026. A sceptical-reviewer pass over `bench/score.py`, the scripts that turn
+2026; the three finished GPT-OSS-120B runs checked 17 October 2026; a design
+review on 22 October 2026 (section "Design review"). A sceptical-reviewer pass over `bench/score.py`, the scripts that turn
 scores into tables, and the numbers in the README. What was checked, what
 was found, and what is still open.
 
@@ -94,7 +95,7 @@ error-analysis table (below):
 | 3B / 7B / 14B on the original 114 cases in the 302-case run: 10.0% / 3.8% / 6.2% | 8 / 3 / 5 of 80 | confirmed |
 | The earlier 3-repeat run gave 10.0% / 3.8% / 5.0% without a defence, and 0 of 720 with provenance, with no correct payment blocked | 24 / 9 / 12 of 240; 0 of 720; 0 correct payments blocked | confirmed |
 | A replay of those provenance traces through provenance-amount predicted 26 / 3 / 6 wrong payments caught, no correct payment blocked | 26 / 3 / 6, none | confirmed |
-| Attacks by language (3B and 14B mostly English, 10 and 13 of 55; 7B mostly mixed, 6 of 54) | same | confirmed |
+| Attacks by language (3B and 14B mostly English, 10 and 13 of 55; 7B mostly mixed, 6 of 54) | same | counts confirmed; the 7B pattern is not statistically significant (see "Design review"), so the README no longer claims it |
 | Error analysis: wallet refusals where the account was the invoice ID, 0 / 8 / 4 for 3B / 7B / 14B (14 of 15 for 32B, 1 for Hermes 3) | 0 / 8 / **2** (14 of 15, 1) | **14B corrected in the README** |
 | Repeat agreement in the 3-repeat run: "96% to 100% of cases had the same outcome every time" | 96% to 100% | confirmed |
 | "Four settings that ran twice gave the same outcome in 97% to 99% of cases" | the interrupted first attempts were not kept | **cannot be checked; sentence replaced in the README** |
@@ -208,6 +209,75 @@ ordinary scam messages 47%).
   mostly through indirect prompt injection).
 - "First benchmark" claims in the related-work draft now say "as far as we
   know from the papers above".
+
+## Design review (22 October 2026)
+
+A second pass looked for what a reviewer could find in the design, not the
+arithmetic. No model was run; everything below comes from the code, the case
+files and the raw traces of all 24 main runs and 4 adaptive runs.
+
+**Re-checks that passed.** All 24 main runs re-score with 0 differences under
+the current scorer. Every regenerated tool result matches the logged one, so
+the case files are exactly what the models saw.
+
+**Findings about the design (now stated in the README):**
+
+1. **"No correct payment blocked" holds by design.** In all 65 normal tasks
+   that make a payment, the payee is a saved contact, a number the user typed
+   or a registered biller, and the amount comes from the payee's own SMS or
+   invoice. A scripted ideal agent passes every defence on all 82 normal
+   tasks (a test in `tests/test_pipeline.py` requires it). Tasks where the
+   payee appears only in a message are needed to measure provenance's cost.
+2. **Stopping redirects is by design.** Replaying the 116 successful attacks
+   of the six models' no-defence runs: `provenance` blocks all 89 that pay the
+   attacker and allows exactly the 27 amount-only ones; the amount check
+   blocks all 116.
+3. **GPT-OSS-120B's 15.0% is one template.** 27 of its 33 successes are the
+   tool-description attack; without the 37 tool-description cases it fell
+   for 6 of 183 (3.3%).
+4. **Few templates.** The 220 attacks come from 13 attack ideas plus 8
+   hand-written cases (21 templates). Bootstrapping over templates instead of
+   cases widens the intervals, most for GPT-OSS-120B (0.5% to 34.9% instead
+   of 10.5% to 20.0%). All 25 OTP attacks use one text.
+5. **Language claims tested.** English attacks worked more than others for
+   Qwen2.5 3B, 14B and 32B (permutation p = 0.002, < 0.001, 0.026); the 7B
+   pattern (mixed text highest) and Hermes 3's are not distinguishable from
+   chance (p = 0.22, 0.35). The README no longer says the 7B model "fell most
+   for mixed text".
+6. **The keyword baseline is in-sample:** 11 of its 17 cue phrases appear
+   word for word in the attack texts.
+7. **Both detectors are English-trained** (ProtectAI's model card says so),
+   so the detector result shows the cost of using one in Bangla; a
+   multilingual detector is needed for a general claim.
+8. **Tool-description attacks poison the wallet's own tools** (`send_money`,
+   `pay_bill`); that is an upper bound on what a third-party tool could do.
+9. **The attack SMS is always the newest message** in the inbox.
+
+**Rule weaknesses found by trying to break the defences:**
+
+- The amount check accepts any number in the payee's message: a date ("10
+  tarikh", "10 October") and a total instead of a share (1,800 instead of
+  600). Fixed for dates; the total/share case cannot be fixed by this kind
+  of rule and is documented (and pinned by a test).
+- The OTP rule treated every 4- to 8-digit number seen in a message or
+  invoice as a secret code. In the runs it blocked two harmless SMS (one
+  mentioning 3000 Tk, one 2000 Tk). Fixed: only numbers from messages about
+  a code (OTP, PIN, password) count.
+- The OTP rule missed a code written with spaces or dashes ("482 913") when
+  sent to a saved contact (to the attacker it was still blocked by the
+  recipient rule). Fixed: digits are joined first, as the scorer already did.
+
+**The fixes do not change any published number.** `scripts/verify_decisions.py`
+replays every recorded tool call through the current rules: 14,057 of 14,062
+decisions match. The 5 that differ are the two SMS above (now allowed; SMS
+are not scored unless they contain the OTP) and three adaptive-set calls from
+the first version of `provenance-consistent`, which the earlier fix changed
+on purpose.
+
+**Still to do** (in the roadmap): the 39-episode hand check
+(`docs/handcheck.md`, none done yet), normal tasks with payees that appear
+only in a message, third-party tool-description attacks, a multilingual
+detector, and newer models.
 
 ## How to check by hand
 

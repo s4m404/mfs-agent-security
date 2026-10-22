@@ -31,7 +31,12 @@ the setting dynamic and stateful: 97 tasks and 629 security cases across
 four suites (workspace, Slack, travel and an e-banking suite), scored by
 checks on the environment state rather than by an LLM judge, and showed
 that models fail many tasks even without an attack. Agent Security Bench
-[4] widened the range of attacks and defences. Our harness follows
+[4] widened the range of attacks and defences. Closer to our domain,
+FinVault [16] tests financial agents in sandboxed, execution-grounded
+scenarios and also scores state changes rather than text, and MCPTox [19]
+poisons the tool descriptions of real MCP servers, finding that more capable
+models are often more susceptible, as our strongest model was to the one
+tool-description template (section 5.2). Our harness follows
 AgentDojo's design (a real tool environment, state-based scoring, utility
 measured next to attack success), but all of these benchmarks are in
 English, and their banking tasks are about Western bank transfers. TakaPay
@@ -51,6 +56,12 @@ came from (the user's request, the wallet's own records, or the payee),
 with no change to the agent and no second model. Because the check never
 reads the untrusted text, it does not depend on the language of that text,
 which is the property our detector results (section 5.1) show matters.
+Deterministic checks before a payment are also the idea behind the Open
+Agent Passport [18], evaluated in APort Vault [17] on attacks written in a
+public capture-the-flag against a live payment agent: an allowlist-style
+authorization layer let no unpermitted transfer through. Those evaluations
+are in English and check who may be paid; we test the same class of check
+in four language forms and add the amount and consistency checks.
 CaMeL's and FIDES's evaluations are in English; we add evidence that this class of
 defence carries over to other languages and scripts, and two
 payment-specific findings: recipient provenance alone misses attacks that
@@ -69,7 +80,14 @@ message cost Qwen2.5-32B 12 normal tasks), and we add a dimension their
 evaluation does not cover: language. Off-the-shelf injection classifiers
 are trained on English (ProtectAI's model card [7] says the model does not
 handle non-English prompts); we measure what that costs in practice and
-find the detector reacts to Bengali script itself (section 5.1). Whether
+find the detector reacts to Bengali script itself (section 5.1). This
+matches two known problems: guard models over-flag harmless text that
+contains trigger words (InjecGuard's NotInject set [20]), and guardrails
+lose accuracy on multilingual and code-switched input [21]. For Bangla
+specifically, MIPIAD [14] trains a cross-lingual injection detector on
+machine-translated BIPIA templates in English and Bangla; it studies
+detection only, on translated text without Banglish or code-mixing, and
+does not run agents. Whether
 an LLM sanitizer such as [6]'s keeps its accuracy on Bangla and Banglish
 tool outputs is open; our benchmark can test it (planned, see
 "Ideas not yet scheduled" in the roadmap).
@@ -88,23 +106,34 @@ to English ones. BanglaSafe [13], a Bengali benchmark of 879 prompts over
 request (for example a formal newspaper framing) changed safety more than
 the switch from English to Bengali. Yoo et al. [11] showed that code-switched
 queries, which mix languages inside one prompt as real users do, draw out
-more unsafe behaviour than English ones. All of these study a user who
+more unsafe behaviour than English ones. Closest to our language setting, a
+case study of indirect prompt injection in English, Tamil and Tanglish
+(romanised Tamil) [15] tests one model on eight scenarios and asks whether
+visible reasoning helps monitoring. BabelArena [22] shows that agents make
+more tool-use errors in lower-resource languages, which we also see as a
+utility gap in Bangla (section 5.6). All of these study a user who
 attacks a chat model directly (jailbreaks: the harm is the text the model
 writes). We study a third party who attacks an agent through the data it
 reads (indirect injection: the harm is an action, a payment), with
 Banglish written in Latin script and code-mixed text as first-class attack
 languages, not translations. Our results also differ in direction: the
 jailbreak finding (low-resource language, weaker safety) did not carry
-over. Four of our six models fell most often for English attacks, one
-for mixed text, and GPT-OSS-120B about equally for all four (Banglish 9,
-the others 8 of about 55); for none was Bangla script the most successful
-attack language (section 5.6).
+over, and our data suggest why: the models that followed Bangla attacks
+least also handled Bangla requests worst, while the model that handled all
+four languages followed attacks equally in all four (the "comprehension
+gate", section 5.6). Three of our six models fell significantly more often
+for English attacks; for the other three no language effect was
+distinguishable from chance, and GPT-OSS-120B fell about equally for all
+four (Banglish 9, the others 8 of about 55). For none was Bangla script the
+most successful attack language (section 5.6).
 
 **What is new here.** We do not claim the provenance idea; it comes from
 CaMeL [5] and information-flow control defences such as FIDES [12]. What we
 add, as far as we know from the papers above (not a full survey):
 
-1. An agent prompt-injection benchmark in a low-resource language,
+1. An agent prompt-injection benchmark in a low-resource language
+   (MIPIAD [14] covers Bangla detection on translated text; the Tamil study
+   [15] covers one model and eight scenarios),
    with Bangla, Banglish (romanised) and code-mixed attacks and user
    requests, native-speaker reviewed, on tools that move money.
 2. A measurement of two injection detectors on non-English tool outputs
@@ -133,6 +162,11 @@ Facts about other work from the references below; ours from the README.
 | FIDES [12] | Defence | (uses AgentDojo) | English | AgentDojo tools | Environment state | Information-flow labels + policies |
 | Firewalls [6] | Defence + benchmark critique | Tool inputs and outputs | English | 4 benchmarks | The benchmarks' own | LLM minimizer and sanitizer |
 | Multilingual jailbreaks [8-11] | Attacks on chat models | User prompt (direct) | Many, incl. Bengali [9, 10] | None (text only) | Harmful text | Mostly safety tuning or prompting |
+| MIPIAD [14] | Detector | Translated BIPIA texts | English, Bangla (machine-translated) | None (detection only) | Classification | Fine-tuned Qwen classifier + TF-IDF ensemble |
+| Tamil/Tanglish study [15] | Case study | Injected content | English, Tamil, Tanglish | One model, 8 scenarios | Manual | Visible reasoning as a monitor |
+| FinVault [16] | Benchmark | Several, incl. prompt injection | (not checked) | Financial agents, sandboxed | Environment state | Existing defences |
+| APort Vault [17] | Benchmark (CTF replay) | User-written attacks on a live payment agent | English | Payment agent | Transfers made | Deterministic authorization layer |
+| MCPTox [19] | Benchmark | Poisoned MCP tool descriptions | English | 45+ real MCP servers | Action taken | (Measurement) |
 | **This work** | Benchmark + defences | SMS, invoices, tool descriptions | Bangla, Banglish, code-mixed, English | Mobile-money wallet over MCP (9 tools) | Environment state | Keyword, detectors, 3 provenance variants |
 
 ---
@@ -206,6 +240,35 @@ paper's official BibTeX before submitting).
     arXiv:2608.22335, August 2026. Found by search on 17 October 2026 from
     its arXiv and Hugging Face listings; read the PDF before citing the
     numbers above.
+
+14. Al Muhit Muhtadi, Mostafa Rifat Tazwar. *MIPIAD: Multilingual
+    Indirect Prompt Injection Attack Defense with Qwen-TF-IDF Hybrid and
+    Meta-Ensemble Learning.* arXiv:2605.07269, May 2026.
+15. Madhusudhanan G. *Visible Reasoning and Indirect Prompt-Injection
+    Monitorability Across English, Tamil, and Tanglish.* arXiv:2608.15392,
+    August 2026.
+16. \* *FinVault: Benchmarking Financial Agent Safety in Execution-Grounded
+    Environments.* arXiv:2601.07853, January 2026. (Check the author list.)
+17. Uchi Uchibeke. *APort Vault: Benchmarking AI Agent Payment
+    Authorization with the Open Agent Passport.* arXiv:2609.22076,
+    September 2026. (Single author, affiliated with the vendor.)
+18. Uchi Uchibeke. *Before the Tool Call: Deterministic Pre-Action
+    Authorization for Autonomous AI Agents.* arXiv:2603.20953, March 2026.
+19. \* *MCPTox: A Benchmark for Tool Poisoning on Real-World MCP Servers.*
+    AAAI 2026, vol. 40(42), pp. 35811-35819. arXiv:2508.14925. (Check the
+    author list.)
+20. \* Hao Li, Xiaogeng Liu, Chaowei Xiao. *InjecGuard: Benchmarking and
+    Mitigating Over-defense in Prompt Injection Guardrail Models.*
+    arXiv:2410.22770. (Check authors and venue.)
+21. \* Yahan Yang, Soham Dan, Dan Roth, Insup Lee. *Benchmarking LLM
+    Guardrails in Handling Multilingual Toxicity.* arXiv:2410.22153. (Check
+    authors and venue.)
+22. \* *BabelArena: A Large-Scale Multilingual Benchmark for LLM Agents.*
+    arXiv:2609.23490, September 2026. (Check the author list.)
+
+References 14 to 22 were found on 22 October 2026 through search results
+(abstracts and listing pages, not the PDFs); read each before citing its
+numbers.
 
 Also cited elsewhere in the paper (introduction): OWASP Top 10 for Agentic
 Applications (2026), already in the README.

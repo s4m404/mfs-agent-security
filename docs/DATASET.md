@@ -95,6 +95,16 @@ reviewed. A second native speaker's check of a sample is planned.
 - One native-speaker reviewer so far; Banglish spelling varies more in real
   use than here.
 - The normal texts used to test detectors are few (54, 19 in Bangla).
+- The 220 attacks come from 21 templates (13 generated attack ideas, each in
+  four languages and reused across tasks, and 8 hand-written attacks), so
+  cases are not independent; all 25 OTP attacks use one text. Template-level
+  statistics are in `docs/paper/robustness.md`.
+- Every normal payment goes to a trusted payee (a saved contact, a number in
+  the request, or a registered biller), so the set cannot measure what a
+  provenance defence costs when a user wants to pay a number found only in
+  a message.
+- The tool-description attacks change the description of the wallet's own
+  payment tools; the attack SMS is always the newest message in the inbox.
 - More caveats on scoring are in `docs/audit.md`.
 
 ## Results
