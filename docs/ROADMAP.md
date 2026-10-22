@@ -82,12 +82,15 @@ Last updated: 22 October 2026.
 From the design review of 22 October 2026 (`docs/audit.md`), in order of
 value for the paper:
 
-A. [ ] **A multilingual detector.** Run Meta's Llama Prompt Guard 2 (86M,
+A. [ ] **A multilingual detector.** Meta's Llama Prompt Guard 2 (86M,
        trained also on non-English attacks) and OpenAI's gpt-oss-safeguard
        (policy-following classifier) on the 228 detector texts through
-       Groq's API, as a job in the GitHub workflow that already holds the
-       key. Without it, the detector result only covers English-trained
-       detectors.
+       Groq's API: script `scripts/detector_api.py` and workflow
+       `.github/workflows/groq_detectors.yml` are ready (results to
+       `results_detectors_api/` on the `groq-results` branch, merged with
+       the earlier detectors into one table). Left: run the workflow, then
+       add the results to the README and section 5.1. Without it, the
+       detector result only covers English-trained detectors.
 B. [ ] **Normal tasks whose payee appears only in a message** (about 25:
        "pay the electrician whose number is in this SMS", a courier's
        delivery charge, a new tutor), so the benchmark measures provenance's

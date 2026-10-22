@@ -1,0 +1,86 @@
+# Runs two API-hosted injection detectors on the benchmark's 228 untrusted
+# texts through Groq: Meta's Llama Prompt Guard 2 (86M, trained on English and
+# non-English attacks) and OpenAI's gpt-oss-safeguard (a policy-following
+# classifier). Results join the earlier detector table (ProtectAI, deepset,
+# keyword) and are saved to the `groq-results` branch in results_detectors_api/.
+#
+# Uses the same GROQ_API_KEY repository secret as the Groq model run.
+# Start it by hand: Actions > Groq detector run > Run workflow. If the daily
+# limit stops it, the scheduled runs continue where it stopped; once every
+# text is done, a run makes no API calls.
+
+name: Groq detector run
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: groq-detectors
+  cancel-in-progress: false
+
+env:
+  BASE_URL: https://api.groq.com/openai/v1
+  DETECTORS: meta-llama/llama-prompt-guard-2-86m openai/gpt-oss-safeguard-20b
+  OUT: results_detectors_api
+  RESULTS_BRANCH: groq-results
+  # The earlier detector run (Kaggle), merged in so one table holds every detector.
+  KAGGLE_FLAGS: 2026-10-06_detectors/results_detectors/flags.jsonl
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Get the results saved so far and the earlier detector flags
+        env:
+          REPO_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        run: |
+          if git ls-remote --exit-code --heads "$REPO_URL" "$RESULTS_BRANCH" >/dev/null; then
+            git clone --quiet --branch "$RESULTS_BRANCH" --single-branch "$REPO_URL" /tmp/saved
+            if [ -d "/tmp/saved/$OUT" ]; then cp -r "/tmp/saved/$OUT" .; fi
+          else
+            mkdir -p /tmp/saved && (cd /tmp/saved && git init --quiet -b "$RESULTS_BRANCH" && git remote add origin "$REPO_URL")
+          fi
+          git fetch --quiet --depth 1 "$REPO_URL" kaggle-results
+          git show "FETCH_HEAD:$KAGGLE_FLAGS" > /tmp/kaggle_flags.jsonl
+          wc -l /tmp/kaggle_flags.jsonl
+
+      - name: Run the detectors (stops cleanly at the daily limit)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ]; then echo "Add the GROQ_API_KEY repository secret first."; exit 1; fi
+          set +e
+          python scripts/detector_api.py --base-url "$BASE_URL" --api-key-env GROQ_API_KEY \
+            --detectors $DETECTORS --out "$OUT" --merge-flags /tmp/kaggle_flags.jsonl
+          code=$?
+          if [ $code -eq 3 ]; then echo "Daily limit reached; the next run continues."; exit 0; fi
+          exit $code
+
+      - name: Save results to the ${{ env.RESULTS_BRANCH }} branch
+        if: always()
+        run: |
+          if [ ! -d "$OUT" ]; then echo "Nothing to save"; exit 0; fi
+          rm -rf "/tmp/saved/$OUT" && cp -r "$OUT" /tmp/saved/
+          cd /tmp/saved
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "No new results"; exit 0; fi
+          wc -l "$OUT"/raw.jsonl
+          git commit --quiet -m "Groq detector results, $(date -u '+%Y-%m-%d %H:%M') UTC"
+          git push --quiet origin "$RESULTS_BRANCH"

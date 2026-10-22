@@ -905,3 +905,49 @@ def test_robustness_report_runs_on_scores(tmp_path):
     assert "| A-1B | 36/220 (16.4%) | 0/113 | 0/70 | 36/37 | 0/183 (0.0%) |" in text
     assert "| tool description | 36 | 36 | 0 |" in text
     assert "## 6. Comprehension gate" in text
+
+
+def test_detector_api_parses_replies_and_resumes(tmp_path):
+    """scripts/detector_api.py with a fake API: reply formats, raw log, resume, merged flags."""
+    import importlib.util
+    import json
+    import sys
+    from types import SimpleNamespace
+
+    sys.path.insert(0, "scripts")
+    spec = importlib.util.spec_from_file_location("detector_api", "scripts/detector_api.py")
+    da = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(da)
+
+    assert da.parse_prompt_guard("0.97", 0.5) == (True, 0.97)
+    assert da.parse_prompt_guard("0.01", 0.5) == (False, 0.01)
+    assert da.parse_prompt_guard('{"score": 0.8}', 0.5)[0]
+    assert da.parse_prompt_guard("BENIGN", 0.5) == (False, None)
+    assert da.parse_prompt_guard("MALICIOUS", 0.5) == (True, None)
+    assert da.parse_safeguard('{"violation": 1}') == (True, None)
+    assert da.parse_safeguard("0") == (False, None)
+    with pytest.raises(ValueError):
+        da.parse_safeguard("I think this is fine.")
+
+    calls = []
+
+    def create(model, messages, **kw):
+        text = messages[-1]["content"]
+        calls.append(model)
+        evil = "0189" in text or "০১৮৯" in text
+        content = ('{"violation": %d}' % evil) if "safeguard" in model else ("0.99" if evil else "0.02")
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    from scripts.detector_eval import collect_texts
+
+    rows = collect_texts(list(CASES.values()))[:6]
+    models = ["meta-llama/llama-prompt-guard-2-86m", "openai/gpt-oss-safeguard-20b"]
+    assert da.run(client, models, rows, tmp_path, 0.5)
+    assert len(calls) == 2 * (len(rows) + len(da.PROBES))
+    assert da.run(client, models, rows, tmp_path, 0.5) and len(calls) == 2 * (len(rows) + len(da.PROBES))  # resumed
+    merge = tmp_path / "other.jsonl"
+    merge.write_text("".join(json.dumps({**r, "flags": {"keyword": False}}) + "\n" for r in rows), encoding="utf-8")
+    flags = da.write_flags(rows, models, tmp_path, merge, 0.5)
+    assert set(flags) == {"keyword", *models}
+    assert flags[models[0]] == flags[models[1]] == [("0189" in r["text"] or "০১৮৯" in r["text"]) for r in rows]

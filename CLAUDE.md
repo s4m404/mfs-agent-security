@@ -147,6 +147,14 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.
   `scripts/check_api.py` checks a key and model with one tool call first.
   `run_bench.py --extra-body` passes API settings (`reasoning_effort: low`).
+- `.github/workflows/groq_detectors.yml` + `scripts/detector_api.py`: Llama
+  Prompt Guard 2 (86M) and gpt-oss-safeguard-20b on the 228 detector texts
+  through Groq (manual start, then every 6 hours until done; resumes; raw
+  replies kept in `raw.jsonl`), results to `results_detectors_api/` on
+  `groq-results`, merged with the Kaggle detector flags (ProtectAI, deepset,
+  keyword) into one `flags.jsonl` / `summary.md`. The safeguard POLICY was
+  written for this benchmark (an upper bound for a policy filter). Not run
+  yet as of 22 October.
 - `docs/index.html`: the public demo page (GitHub Pages from /docs).
   It embeds real traces; regenerate it if the demo cases change.
 - `results/` is git-ignored.
