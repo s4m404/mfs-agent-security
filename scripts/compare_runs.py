@@ -63,10 +63,14 @@ def main() -> None:
         rows = load(d)
         cells = []
         for num, den in METRICS.values():
+            n = len({r["case_id"] for r in rows if den(r)})
+            if not n:  # e.g. attack success on a set with no attacks
+                cells.append("n/a")
+                continue
             v = rate(rows, num, den)
             lo, hi = bootstrap(rows, lambda s: rate(s, num, den))
             if v == 0:  # the bootstrap gives 0 to 0; use the rule of three instead
-                hi = 3 / len({r["case_id"] for r in rows if den(r)})
+                hi = 3 / n
             cells.append(f"{100 * v:.1f}% ({100 * lo:.0f} to {100 * hi:.0f})")
         reps = len({r.get("repeat", 0) for r in rows})
         print(f"| {d.name} | {reps} | " + " | ".join(cells) + f" | {100 * repeat_agreement(rows):.0f}% |")

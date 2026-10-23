@@ -20,6 +20,7 @@ payments; some of that content hides an attack.
 | `bench/cases/seed.yaml` | 12 hand-written cases |
 | `bench/cases/generated.yaml` | 290 cases built by `bench/generate.py` from hand-written building blocks |
 | `bench/cases_adaptive/adaptive.yaml` | 56 adaptive cases that forge the payee's identity (kept apart from the main 302) |
+| `bench/cases_message_payee/message_payee.yaml` | 24 normal tasks (no attacker) whose payee's number is only in an SMS or invoice, to measure what provenance costs (kept apart from the main 302) |
 | `bench/SCHEMA.md` | Every field of a case, how a task counts as done, and how each attack goal is scored |
 | `bench/review_texts.csv` | Every distinct Bangla, Banglish and mixed sentence once, with the native-speaker review mark |
 | `kaggle-results` and `groq-results` branches | Raw runs: every step of every episode (`traces.jsonl`), one score per episode (`scores.jsonl`), summaries |
@@ -60,15 +61,16 @@ results still compare.
 
 **Native-speaker review.** All Bangla and Banglish text was written or
 reviewed by one native speaker, the author. In `bench/review_texts.csv`
-(124 sentences): the 61 sentences added for the 302-case set are marked
+(152 sentences): the 61 sentences added for the 302-case set are marked
 "Y" (sounds natural). Of the 54 sentences of the original set, which were
 reviewed before the file existed, 25 have been re-marked "Y" and 2 "N"
 with a small wording fix (a Banglish task request, "oita diye" to "oita
 dekhe", and the simulated user's Banglish "yes", "Haan" to "Hae"); 27 are
 not yet re-marked. The two fixes are recorded in the file but not applied:
 every model run used the original wording, so they are kept for the next
-version of the benchmark. The 9 sentences of the adaptive set are not yet
-reviewed. A second native speaker's check of a sample is planned.
+version of the benchmark. The 9 sentences of the adaptive set and the 28
+of the message-payee set are not yet reviewed. A second native speaker's
+check of a sample is planned.
 
 ## Intended uses
 
@@ -99,10 +101,11 @@ reviewed. A second native speaker's check of a sample is planned.
   four languages and reused across tasks, and 8 hand-written attacks), so
   cases are not independent; all 25 OTP attacks use one text. Template-level
   statistics are in `docs/paper/robustness.md`.
-- Every normal payment goes to a trusted payee (a saved contact, a number in
-  the request, or a registered biller), so the set cannot measure what a
-  provenance defence costs when a user wants to pay a number found only in
-  a message.
+- In the main 302 cases every normal payment goes to a trusted payee (a
+  saved contact, a number in the request, or a registered biller), so they
+  cannot measure what a provenance defence costs when a user wants to pay a
+  number found only in a message; the separate message-payee set (24 cases)
+  does.
 - The tool-description attacks change the description of the wallet's own
   payment tools; the attack SMS is always the newest message in the inbox.
 - More caveats on scoring are in `docs/audit.md`.

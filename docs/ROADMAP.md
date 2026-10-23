@@ -45,7 +45,8 @@ Last updated: 22 October 2026.
 - **Analyses.** Attack success among cases where the agent read the attack
   and could do the task (`scripts/conditional_rates.py`); one cause per
   failed normal task (`scripts/error_analysis.py`); adaptive-attack audit
-  with scripted agents (`scripts/audit_adaptive.py`); replay of recorded
+  with scripted agents (`scripts/audit_adaptive.py`); message-payee audit
+  (`scripts/audit_message_payee.py`); replay of recorded
   traces through another defence (`scripts/replay_defence.py`).
 - **Defence fixes found by real runs.** A clearer block message for a wrong
   biller account (Qwen2.5-32B had lost 12 normal tasks to the old one);
@@ -93,10 +94,20 @@ A. [x] **A multilingual detector** (done 22 October). Llama Prompt Guard
        with no language gap, 15% of normal texts (12 of 82 normal tasks
        broken as a filter), and missed all 12 amount-only attacks. In the
        README, section 5.1, the outline and Fig 1.
-B. [ ] **Normal tasks whose payee appears only in a message** (about 25:
-       "pay the electrician whose number is in this SMS", a courier's
-       delivery charge, a new tutor), so the benchmark measures provenance's
-       real cost. Scripted agents first, then one short model run.
+B. [ ] **Normal tasks whose payee appears only in a message.** Cases and
+       scripted audit done: 24 cases in `bench/cases_message_payee/` (six
+       payees in four request languages: the payee's own SMS, a saved
+       contact's SMS, a courier company's SMS, an invoice from a payee that
+       is not a registered biller). With a scripted ideal agent
+       (`scripts/audit_message_payee.py`) every provenance variant blocks
+       all 24 correct payments, and the simulated "yes" does not unblock
+       them; with the number typed by the user, `provenance` allows all 24
+       and the amount check still blocks the 12 whose amount came from a
+       third party. Left: the native-speaker review of the 28 new sentences
+       (rows 125 to 152 of `bench/review_texts.csv`) and the model run: five
+       open models on Kaggle (`notebooks/kaggle_run.ipynb`, about 1.5
+       hours) and GPT-OSS-120B through the Groq workflow (automatic, into
+       `results_groq_message_payee/`).
 C. [ ] **Third-party tool-description attacks:** put the poisoned
        description on a separate tool (for example a bill-reminder server)
        instead of the wallet's own `send_money` / `pay_bill`, and rerun the
@@ -165,7 +176,9 @@ benchmark or assurance interpretation is misleading".
    with a policy written for these attacks catches 93% in every language
    but breaks 12 of 82 normal tasks and misses every amount-only attack.
    Provenance rules never read the text, so their cost does not depend on
-   the language (their zero false blocks here is by design, see task B).
+   the language (their zero false blocks in the main set is by design; on
+   payees named only in a message they block every correct payment, see
+   task B).
 1. Attack success alone is misleading for payment agents: the smaller open
    models (Qwen2.5, Hermes 3) made wrong payments with no attacker involved
    (invented payees, guessed amounts) more often than any attack succeeded.
@@ -298,7 +311,8 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
 ## Known limitations
 
 Synthetic data and one fictional wallet; 220 attacks from 21 templates (all
-OTP attacks one text); normal tasks with trusted payees only (task B);
+OTP attacks one text); normal tasks in the main set with trusted payees
+only (the separate message-payee set measures the cost, task B);
 tool-description attacks on the wallet's own tools (task C); the attack SMS
 always the newest message; a simulated user who always says
 yes (and answers any "?"); open models up to 32B (14B and 32B in 4-bit) plus

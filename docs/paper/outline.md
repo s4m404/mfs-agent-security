@@ -71,7 +71,10 @@ Lead with the detector finding (roadmap point 0), then the rest.
   setting. Its decisions do not depend on the language. The zero false
   blocks and the stopped redirects are rule properties (every normal payee
   is trusted; attacker numbers never are), verified by replay; do not
-  present them as experimental results. [README: "What the defence results
+  present them as experimental results. Its real cost: on 24 normal tasks
+  whose payee is named only in a message it blocks every correct payment
+  (scripted; 12 still blocked by the amount check when the user types the
+  number). [README: "What the defence results show"] [README: "What the defence results
   show"; `docs/audit.md`, "Design review"]
 - **Contributions** (bullet list):
   1. The benchmark: TakaPay, a fictional wallet over MCP, 302 cases.
@@ -226,6 +229,15 @@ Example for the text: a fake "correction" in a school invoice raising the fee
 from 3,500 to 5,000 Tk.
 GPT-OSS-120B is in Table 1 and Fig 3: 33 / 7 / 0 of 220 attacks, 76 of 82
 normal tasks with every defence, 0 correct payments blocked.
+
+Then the cost (message-payee set, 24 normal tasks, `scripts/audit_message_payee.py`):
+
+| Evidence | Number |
+|---|---|
+| Correct payments blocked, number only in the message: provenance / provenance-amount / provenance-consistent | 24/24 / 24/24 / 24/24 (scripted ideal agent) |
+| Still blocked after the agent asks and the simulated user says yes | 24/24 for each |
+| Correct payments blocked, number also typed by the user | 0/24 / 12/24 / 12/24 (the 12: amount from a contact or the courier company) |
+| Model runs (tasks done without a defence; what agents say after a block) | to add |
 
 ### 5.4 Adaptive attacks: test defences with real agents (point 3, part 1)
 

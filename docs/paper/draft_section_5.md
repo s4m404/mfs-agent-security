@@ -89,7 +89,9 @@ correct payment in the 82 normal tasks, in any of the four request
 languages, for any of the six models** (Table 2), and with the amount check
 no attack went through, including the amount-only ones the policy model
 missed. That zero is partly by design, since every normal task pays a
-trusted payee (Section 5.3), so the fair contrast is narrower: a text
+trusted payee, and on payees named only in a message the same rules block
+every correct payment in every language (Section 5.3), so the fair
+contrast is narrower: a text
 filter's cost depends on the language and wording of the text, a
 provenance rule's does not. Across five detectors, the trade-off we saw
 was to flag the Bengali script (ProtectAI, deepset), to miss the attacks
@@ -176,9 +178,8 @@ checks only whether the attacker was paid scores it as safe.
 succeeded on any model**: 0 of 880 attack episodes on the Qwen models, 0 of
 220 for Hermes 3 and 0 of 220 for GPT-OSS-120B. It blocked no correct
 payment in the normal tasks (by design: an agent that pays correctly is
-never blocked, since every normal task's payee is trusted; tasks that pay a
-number found only in a message would measure the real cost and are left to
-future work), and it also stopped every wrong payment
+never blocked, since every normal task's payee is trusted), and it also
+stopped every wrong payment
 without an attacker: wrong payments that went through fell from 33, 8, 29,
 20, 10 and 1 (no defence) and 30, 6, 27, 2, 9 and 1 (`provenance`) to 0 for
 every model. The other models lost at most 3 normal tasks with a defence
@@ -190,6 +191,23 @@ payee's own message, so it cannot tell a total (1,800 Tk) from a share
 attack and could do the task, `provenance-amount` let none through (for
 example 0 of 118 for Qwen2.5-7B, interval 0% to 3%; 0 of 150 for
 GPT-OSS-120B).
+
+**What the rules cost when the payee is new.** The zero above is a property
+of the main set, whose normal payees are all trusted. On the 24
+message-payee tasks (Section 3.3), where the user asks to pay someone whose
+number is written only in an SMS or an invoice, a scripted agent that pays
+exactly right is blocked on **all 24** by every provenance variant, and
+the simulated user's "yes" does not unblock it: neither the rules nor our
+harness give the user a way to approve a new payee. When the user's request
+also gives the number, `provenance` allows all 24, but `provenance-amount`
+and `provenance-consistent` still block 12: the payments whose amount came
+from someone other than the payee (Ammu naming the pharmacy's price, the
+landlord the caretaker's charge, the courier company the rider's fee).
+Provenance therefore does not make such payments safe; it hands every
+payment to a new number back to the user, and the amount check needs the
+amount from the user or the payee as well. [Model runs on this set, to
+add: tasks done without a defence, and what agents tell the user after a
+block.]
 
 ### 5.4 Adaptive attacks: scripted audits are not enough
 
@@ -351,6 +369,7 @@ every table are public.
 | Amount-only counts, 0 of 800, the school fee example | README, "Results"; `table1_main.md` (Hermes 3 and GPT-OSS-120B amount-only counts) |
 | OTP leaks | `docs/audit.md`, items checked from the raw traces |
 | Adaptive results (scripted and Qwen2.5-32B) | README, "Adaptive attacks" |
+| Message-payee set: 24 of 24 blocked, 0 and 12 of 24 with the number typed | README, "What the defence results show"; `scripts/audit_message_payee.py` |
 | Block message: 12 tasks, 42 / 54 / 57 / 58 / 59 of 82 | README, "The largest model"; `docs/audit.md` |
 | 29 of 78, 13 of 32, 1 of 5; questions and asks after a block | `docs/paper/confirmations.md` |
 | What the questions told the user: 35, 31, 14 of 22, 8, 38 of 2,022 | `docs/paper/question_coding.md` (keyword coding; hand check pending) |

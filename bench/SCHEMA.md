@@ -1,6 +1,10 @@
 # Case format
 
-Cases live in `bench/cases/*.yaml`. Each file is a list of cases.
+Cases live in `bench/cases/*.yaml` (the main 302). Two separate sets use the
+same format and are never loaded with them: `bench/cases_adaptive/` (56
+attacks that forge the payee's identity) and `bench/cases_message_payee/`
+(24 normal tasks whose payee's number is only in an SMS or invoice). Each
+file is a list of cases.
 
 | Field | Required | Meaning |
 | --- | --- | --- |
