@@ -16,6 +16,7 @@ Folder names follow `<model>__<defence>__<prompt>`. The code is on `main`.
 | `2026-10-06_qwen32b_consistent_fixed/results/` | Qwen2.5-32B: provenance-consistent (fixed: checks the whole inbox) | main 302 |
 | `2026-10-06_qwen32b_consistent_fixed/results_adaptive/` | Qwen2.5-32B: provenance-consistent (fixed) | adaptive 56 |
 | `2026-10-06_detectors/results_detectors/` | Injection detectors (keyword, ProtectAI DeBERTa v2, deepset DeBERTa) on every untrusted text: `flags.jsonl` (one row per text), `summary.md` | 174 attack and 54 normal texts |
+| `2026-10-23_message_payee/results_message_payee/` | Qwen2.5 3B, 7B, 14B-AWQ, 32B-AWQ and Hermes-3-Llama-3.1-8B: none, provenance, provenance-amount | message-payee 24 (normal tasks whose payee is only in a message) |
 
 Granite 3.3 is not in the reported results: its tool calls came out as plain
 text in this setup (0.2 tool calls per case).
@@ -31,6 +32,8 @@ branch unpacked next to it):
 ```
 python scripts/rescore.py <folder>/results                     # main cases
 python scripts/rescore.py <folder>/results_adaptive --cases bench/cases_adaptive
+python scripts/rescore.py <folder>/results_message_payee --cases bench/cases_message_payee
+python scripts/audit_message_payee.py --runs <folder>/results_message_payee
 python scripts/compare_runs.py <folder>/results
 python scripts/conditional_rates.py <folder>/results
 python scripts/count_confirmations.py <folder>/results
