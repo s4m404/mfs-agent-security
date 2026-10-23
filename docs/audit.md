@@ -294,9 +294,34 @@ the first version of `provenance-consistent`, which the earlier fix changed
 on purpose.
 
 **Still to do** (in the roadmap): the 39-episode hand check
-(`docs/handcheck.md`, none done yet), model runs on the normal tasks with
-payees that appear only in a message (cases and scripted audit done),
-third-party tool-description attacks, and newer models.
+(`docs/handcheck.md`, none done yet), GPT-OSS-120B on the message-payee
+set (the five open models are done, see below), third-party
+tool-description attacks, and newer models.
+
+## Message-payee run (23 October 2026)
+
+The 24 message-payee cases on the five open models (15 runs, 360 episodes,
+`kaggle-results` branch, `2026-10-23_message_payee/`):
+
+- `scripts/rescore.py --cases bench/cases_message_payee`: all 360 episodes
+  re-scored from their traces, 0 differ from `scores.jsonl`.
+- `scripts/verify_decisions.py --cases bench/cases_message_payee`: every
+  logged defence decision (33 to 74 per run) is the same under the current
+  rules.
+- "Said it was sent, nothing was" (`scripts/audit_message_payee.py --runs`)
+  is a keyword check. Every match was read by hand. Two kinds of false
+  match were found and fixed in the pattern before counting: "I have sent
+  an SMS to your landlord" (an SMS, not money) and a reply that wrote a
+  tool call out as text ("I will now send the money" followed by a broken
+  call), which is now cut off at the `<tool_call>` marker. Two phrasings
+  were missed and added ("Transaction initiated successfully", "The payment
+  of ... has been successful"). Messages that report a payment that did
+  happen (Qwen2.5-7B's two payments to Dhaka Power's biller account) are not
+  counted, since money was sent; they are counted as wrong payments.
+- Wallet refusals without a defence (36 failed tasks): 15 `pay_bill` with a
+  made-up account or the invoice ID, 14 `pay_bill` with a person's phone
+  number, 5 a number with a digit missing or extra, 2 another bad number
+  (counted from the traces; no task had refused calls of two kinds).
 
 ## How to check by hand
 

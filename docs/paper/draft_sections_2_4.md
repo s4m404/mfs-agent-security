@@ -202,8 +202,8 @@ Qwen2.5-32B also with `provenance-consistent` and a revised block message
 agents (one obeys every attack, one ignores it, one reads only the newest
 SMS or only the forged invoice). The message-payee set is run with a
 scripted agent that pays exactly right, with the number only in the
-message and with the number also typed in the request [model runs to be
-added].
+message and with the number also typed in the request, and with the five
+open models under `none`, `provenance` and `provenance-amount`.
 
 ## 4. Defences
 

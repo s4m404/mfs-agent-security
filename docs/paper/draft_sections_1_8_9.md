@@ -164,9 +164,10 @@ payee (a saved contact, a number the user typed or a registered biller), so
 an agent that pays correctly is never blocked: "no correct payment blocked"
 shows the defences do not break these tasks, not that they are free. On a
 separate set of 24 normal tasks whose payee appears only in an SMS or an
-invoice, every provenance variant blocks every correct payment of a
-scripted agent (Section 5.3); a real deployment needs a way for the user to
-approve a new payee, which our harness does not model. The tool-description
+invoice, every provenance variant blocks every correct payment, for a
+scripted agent and for all five open models (Section 5.3); a real
+deployment needs a way for the user to approve a new payee, which our
+harness does not model, and an agent that reports the block honestly. The tool-description
 attacks change the description of the wallet's own payment tools, which
 assumes more attacker access than a third-party tool would have.
 
