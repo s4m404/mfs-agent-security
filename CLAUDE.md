@@ -83,7 +83,11 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   with a scripted ideal agent every provenance variant blocks all 24 (the
   simulated "yes" does not unblock them); with the number typed by the
   user, `provenance` allows all 24 and the amount check still blocks 12
-  (amount from a third party). Model runs on it: not done yet.
+  (amount from a third party). `--runs <folder>` reads model runs on it
+  (tasks done, blocks, what the agent said after a block, numbers copied a
+  digit off by Bangla / ASCII digits). Five open models done (23 October,
+  `kaggle-results` 2026-10-23_message_payee); GPT-OSS-120B runs through
+  the Groq workflow.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -139,10 +143,10 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
   (`hermes`). Earlier set (done): the fixed provenance-consistent on
   Qwen2.5-32B-Instruct-AWQ (needs `--gpu-memory-utilization 0.95`), main
-  and adaptive cases (`results_adaptive/`, git-ignored). Current set (not
-  run yet): all five models on the 24 message-payee cases with none,
-  provenance and provenance-amount, saved to `results_message_payee/`
-  (about 1.5 hours). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  and adaptive cases (`results_adaptive/`, git-ignored). Last set (done 23
+  October, under 40 minutes of runs): all five models on the 24
+  message-payee cases with none, provenance and provenance-amount, saved to
+  `results_message_payee/`. Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
@@ -245,6 +249,14 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   with our policy (upper bound) 93% / 15%, no language gap, 12 of 82 normal
   tasks broken (family money requests, the OTP SMS), missed all 12
   amount-only attacks; 1 empty reply counted as not flagged.
+- Message-payee set (24 normal tasks, payee only in a message; five open
+  models): tasks done without a defence 6 / 5 / 10 / 19 / 4 (Qwen 3B / 7B /
+  14B / 32B, Hermes 3), 0 with either defence (42 / 43 correct payments
+  tried and blocked). After a block Qwen2.5-14B said the money was sent in
+  8 of 18 (provenance-amount; 6 with provenance), Qwen2.5-7B in 1; every
+  match read by hand. With provenance Qwen2.5-7B paid Dhaka Power's biller
+  account instead twice (0 with provenance-amount). Numbers copied a digit
+  off: 20 of 120 episodes with Bangla digits, 0 of 120 with ASCII digits.
 - Error analysis (`scripts/error_analysis.py`, all six models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after

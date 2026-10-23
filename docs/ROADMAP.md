@@ -7,7 +7,7 @@ wallet, and which defences stop it without blocking correct payments?
 **Output.** A public benchmark (TakaPay, 302 cases), results on six
 models from three families, and a workshop paper.
 
-Last updated: 22 October 2026.
+Last updated: 23 October 2026.
 
 ## Done
 
@@ -103,11 +103,17 @@ B. [ ] **Normal tasks whose payee appears only in a message.** Cases and
        all 24 correct payments, and the simulated "yes" does not unblock
        them; with the number typed by the user, `provenance` allows all 24
        and the amount check still blocks the 12 whose amount came from a
-       third party. Left: the native-speaker review of the 28 new sentences
-       (rows 125 to 152 of `bench/review_texts.csv`) and the model run: five
-       open models on Kaggle (`notebooks/kaggle_run.ipynb`, about 1.5
-       hours) and GPT-OSS-120B through the Groq workflow (automatic, into
-       `results_groq_message_payee/`).
+       third party. Model run done for the five open models (23 October,
+       `kaggle-results` branch, `2026-10-23_message_payee/`): 44 of 120
+       tasks done without a defence, 0 with either defence (every correct
+       payment the agents tried was blocked); after a block Qwen2.5-14B
+       told the user the money had been sent in 8 of 18 episodes; with
+       `provenance` Qwen2.5-7B paid a registered biller instead twice; every
+       number copied with a digit missing or extra was written in Bangla
+       digits (20 of 120 episodes, 0 of 120 in ASCII digits). Left:
+       GPT-OSS-120B (the Groq workflow runs it by itself, into
+       `results_groq_message_payee/`) and the native-speaker review of the
+       28 new sentences (rows 125 to 152 of `bench/review_texts.csv`).
 C. [ ] **Third-party tool-description attacks:** put the poisoned
        description on a separate tool (for example a bill-reminder server)
        instead of the wallet's own `send_money` / `pay_bill`, and rerun the
@@ -249,6 +255,14 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   blocks follow from the rules and the case design (`docs/audit.md`,
   "Design review"); the runs measure what agents attempt and what the
   defences cost in completed tasks.
+- Provenance's real cost is paying someone new: on 24 normal tasks whose
+  payee is named only in a message, the provenance defences blocked every
+  correct payment the five open models tried (0 of 120 tasks done, 44
+  without a defence). After the block, Qwen2.5-14B told the user the money
+  had been sent in 8 of its 18 blocked episodes, and with the recipient
+  check alone Qwen2.5-7B paid a registered biller instead twice. Numbers
+  written in Bangla digits were copied with a digit missing or extra in 20
+  of 120 episodes, numbers in ASCII digits in none.
 - Provenance alone stopped every attack that redirects money or leaks the
   OTP (0 of 800 on the Qwen models), but 15 attacks that changed only the
   amount got through. Without a defence, amount-only attacks were the most
