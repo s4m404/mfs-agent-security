@@ -162,9 +162,11 @@ because its tool calls failed in our serving setup.
 **What the normal tasks can show.** Every normal payment goes to a trusted
 payee (a saved contact, a number the user typed or a registered biller), so
 an agent that pays correctly is never blocked: "no correct payment blocked"
-shows the defences do not break these tasks, not that they are free. The
-main cost of provenance, blocking a payment the user wants to a number that
-appears only in a message, is not measured here. The tool-description
+shows the defences do not break these tasks, not that they are free. On a
+separate set of 24 normal tasks whose payee appears only in an SMS or an
+invoice, every provenance variant blocks every correct payment of a
+scripted agent (Section 5.3); a real deployment needs a way for the user to
+approve a new payee, which our harness does not model. The tool-description
 attacks change the description of the wallet's own payment tools, which
 assumes more attacker access than a third-party tool would have.
 
@@ -231,6 +233,7 @@ ideal script.
 | 12 normal tasks; 29 of 78; newest-only SMS | README, "The largest model", "Adaptive attacks"; `docs/paper/confirmations.md` |
 | 302 cases, 56 adaptive cases, nine tools | README, "Test set" and "Adaptive attacks" |
 | 1 of 56 adaptive correct payments; 54 normal texts, 19 in Bangla | README, "Adaptive attacks" and "Do injection detectors work" |
+| Message-payee set: 24 tasks, every correct payment blocked | README, "What the defence results show"; `scripts/audit_message_payee.py` |
 | Measurement caveats | `docs/audit.md`, items 2 to 7 |
 
 ## Notes for the next draft

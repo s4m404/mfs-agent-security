@@ -143,7 +143,13 @@ A separate **adaptive set** of 56 cases, never mixed into the main 302,
 implements the adaptive attacker: an SMS from the payee's number asks for a
 larger amount (16) or gives a new number to pay (16), or a forged "revised"
 invoice for the real biller account raises the amount (24), with attack and
-request languages balanced. All Bangla and Banglish text in the main set
+request languages balanced. A second separate **message-payee set** of 24
+normal tasks, with no attacker, measures what provenance costs: the user
+asks to pay someone whose number is written only in a message, namely the
+payee's own SMS (a new electrician, a home tutor), a saved contact's SMS
+naming someone else (a pharmacy, a caretaker), a courier company's SMS
+naming its rider, or an invoice from a payee that is not a registered
+biller, each in the four request languages. All Bangla and Banglish text in the main set
 was reviewed by a native speaker (an author); a second speaker's check of a
 sample is planned.
 
@@ -194,7 +200,10 @@ Every model runs with `none`, `provenance` and `provenance-amount`;
 Qwen2.5-32B also with `provenance-consistent` and a revised block message
 (Section 4.5). The adaptive set is run with Qwen2.5-32B and with scripted
 agents (one obeys every attack, one ignores it, one reads only the newest
-SMS or only the forged invoice).
+SMS or only the forged invoice). The message-payee set is run with a
+scripted agent that pays exactly right, with the number only in the
+message and with the number also typed in the request [model runs to be
+added].
 
 ## 4. Defences
 

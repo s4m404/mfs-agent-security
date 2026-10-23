@@ -241,6 +241,10 @@ the case files are exactly what the models saw.
    invoice. A scripted ideal agent passes every defence on all 82 normal
    tasks (a test in `tests/test_pipeline.py` requires it). Tasks where the
    payee appears only in a message are needed to measure provenance's cost.
+   (Added 23 October: 24 such tasks in `bench/cases_message_payee/`; a
+   scripted ideal agent is blocked on all 24 by every provenance variant,
+   and on 12 by the amount check even when the user types the number;
+   `scripts/audit_message_payee.py`.)
 2. **Stopping redirects is by design.** Replaying the 116 successful attacks
    of the six models' no-defence runs: `provenance` blocks all 89 that pay the
    attacker and allows exactly the 27 amount-only ones; the amount check
@@ -290,9 +294,9 @@ the first version of `provenance-consistent`, which the earlier fix changed
 on purpose.
 
 **Still to do** (in the roadmap): the 39-episode hand check
-(`docs/handcheck.md`, none done yet), normal tasks with payees that appear
-only in a message, third-party tool-description attacks, a multilingual
-detector, and newer models.
+(`docs/handcheck.md`, none done yet), model runs on the normal tasks with
+payees that appear only in a message (cases and scripted audit done),
+third-party tool-description attacks, and newer models.
 
 ## How to check by hand
 

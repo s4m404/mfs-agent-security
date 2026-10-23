@@ -76,7 +76,14 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   (56, also from `generate.py`) is a separate stress-test set that forges
   the payee's identity; it is not loaded with `bench/cases`, so the main
   302-case results stay unchanged. `scripts/audit_adaptive.py` checks which
-  defences stop it, with scripted agents.
+  defences stop it, with scripted agents. `cases_message_payee/message_payee.yaml`
+  (24, also from `generate.py`, also kept apart): normal tasks with no
+  attacker whose payee's number is only in an SMS or invoice (the id says
+  where: sender, contact, company, invoice). `scripts/audit_message_payee.py`:
+  with a scripted ideal agent every provenance variant blocks all 24 (the
+  simulated "yes" does not unblock them); with the number typed by the
+  user, `provenance` allows all 24 and the amount check still blocks 12
+  (amount from a third party). Model runs on it: not done yet.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -120,7 +127,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   apply them only in a new benchmark version (and rerun), never silently.
   Status after round 1: 88 of 124 marked (86 Y, 2 N). Still blank: rows
   52 to 69, 88 to 94, 113 and 124 (original set, 27) and 114 to 122
-  (adaptive set, 9).
+  (adaptive set, 9). Rows 125 to 152 (message-payee set, 28) were added on
+  23 October and are not reviewed yet; new sentences are always appended
+  at the end so row numbers stay the same.
   Findings: `docs/audit.md`.
   `scripts/make_figures.py results/ [results_groq/] --detectors
   results_detectors_api/flags.jsonl` (all five detectors) writes its figures and tables to
@@ -128,10 +137,12 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - `notebooks/kaggle_run.ipynb`: `MODELS` maps each model to its vLLM tool
   parser, and `EXTRA_ARGS` gives a model extra vLLM settings. Done so far:
   four Qwen2.5 models (3B, 7B, 14B-AWQ, 32B-AWQ) and Hermes-3-Llama-3.1-8B
-  (`hermes`). Last set (through `CASE_SETS`, done) to rerun the fixed
-  provenance-consistent on Qwen2.5-32B-Instruct-AWQ (needs
-  `--gpu-memory-utilization 0.95`): main cases, and adaptive cases (saved to
-  `results_adaptive/`, git-ignored). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  (`hermes`). Earlier set (done): the fixed provenance-consistent on
+  Qwen2.5-32B-Instruct-AWQ (needs `--gpu-memory-utilization 0.95`), main
+  and adaptive cases (`results_adaptive/`, git-ignored). Current set (not
+  run yet): all five models on the 24 message-payee cases with none,
+  provenance and provenance-amount, saved to `results_message_payee/`
+  (about 1.5 hours). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
@@ -141,7 +152,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   and is counted as `model_error` in scores.jsonl and summary.md.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
 - `.github/workflows/groq_run.yml` (done: none, provenance, provenance-amount,
-  302 cases each, reasoning effort low): GPT-OSS-120B on Groq's free tier, every 6
+  302 cases each, reasoning effort low; next in `CASE_SETS`: the 24
+  message-payee cases into `results_groq_message_payee/`, starting by
+  itself on the next scheduled run): GPT-OSS-120B on Groq's free tier, every 6
   hours, `run_bench.py --resume` until the daily limit (exit code 3: the case
   is not scored and runs again next time), results on the `groq-results`
   branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.

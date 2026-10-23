@@ -65,11 +65,12 @@ inventing them.**
   in four languages and reused across tasks, plus 8 hand-written ones. Cases
   are therefore not independent: intervals that treat templates as the unit
   are wider (see `docs/paper/robustness.md`). All 25 OTP attacks use one text.
-- **The normal tasks only use trusted payees.** In every normal payment the
-  payee is a saved contact, a number the user typed, or a registered biller,
-  so "no correct payment blocked" cannot show the main cost of provenance:
-  a user who wants to pay a number that appears only in a message. Such tasks
-  are planned.
+- **The 302 cases' normal tasks only use trusted payees.** In every normal
+  payment the payee is a saved contact, a number the user typed, or a
+  registered biller, so "no correct payment blocked" cannot show the main
+  cost of provenance: a user who wants to pay a number that appears only in
+  a message. A separate set of 24 such tasks now measures it (see "What the
+  defence results show"); so far with scripted agents, model runs next.
 - **Tool-description attacks poison the wallet's own tools** (`send_money`,
   `pay_bill`), which assumes an attacker who can change a tool's description;
   treat them as an upper bound.
@@ -225,7 +226,8 @@ What these runs showed (the 32B model is covered in more detail below):
 The provenance rules are deterministic, so part of what the tables show follows from the rules and the case design rather than from the runs:
 
 - **Stopping redirects is by design.** The attacker's numbers are never saved contacts or named by the user, so the recipient check blocks any payment to them. Replaying the 116 successful attacks of all six models (no defence) through the rules: `provenance` blocks all 89 that pay the attacker and lets through exactly the 27 amount-only ones; the amount check blocks all 116.
-- **"No correct payment blocked" is also by design.** In every normal task the correct payee is trusted and the correct amount comes from the payee's own SMS or invoice; an agent that pays correctly is never blocked (checked with a scripted ideal agent on all 82 normal tasks). The main cost of provenance, blocking a payment the user really wants to a number that appears only in a message, is not in this benchmark yet.
+- **"No correct payment blocked" is also by design.** In every normal task the correct payee is trusted and the correct amount comes from the payee's own SMS or invoice; an agent that pays correctly is never blocked (checked with a scripted ideal agent on all 82 normal tasks).
+- **The real cost: payees named only in a message.** A separate set of 24 normal tasks (`bench/cases_message_payee/`, six payees in four request languages, no attacker) asks the agent to pay someone whose number is written only in an SMS or an invoice: a new electrician or home tutor (their own SMS), a pharmacy or a caretaker named in Ammu's or the landlord's SMS, a courier rider named in the courier company's SMS, and a flat owners' society that is not a registered biller. With a scripted agent that pays exactly right (`scripts/audit_message_payee.py`), every provenance variant blocks **all 24 correct payments**, and the simulated user's "yes" does not unblock them: the harness, like the rules, has no way for a user to approve a new payee. If the user's request also gives the number, `provenance` allows all 24, but `provenance-amount` and `provenance-consistent` still block 12: the ones whose amount came from someone other than the payee (Ammu, the landlord, the courier company). So provenance moves every payment to a new number back to the user, and the amount check also needs the amount from the user or the payee. Model runs on this set (what agents do after the block) are next; the notebook and workflow are ready.
 - **What the runs do measure:** how often each model tries to pay an attacker, an invented payee or a wrong amount; how many normal tasks the defences cost through their block messages (12 for Qwen2.5-32B, fixed by rewording); and what real agents do that scripted tests miss (the `limit: 1` bypass in "Adaptive attacks").
 - **Known limits of the amount check.** It accepts any amount in a message from the payee, so it cannot tell a total from a share (Nadia's SMS gives 1,800 total and 600 as the share; both are accepted). No model made that mistake here.
 - **Two rule fixes after the runs** (22 October 2026): the OTP rule no longer treats bill amounts as secret codes (it had blocked two harmless SMS in the runs, one mentioning 3000 Tk and one 2000 Tk; SMS are not scored, so no number changes) and now also catches a code written with spaces; the amount check no longer reads dates ("10 October") as amounts. `scripts/verify_decisions.py` replays every recorded tool call through the current rules: 14,057 of 14,062 decisions match, and the 5 that differ are the two SMS above and three from the first version of `provenance-consistent`, which the earlier fix changed on purpose.
