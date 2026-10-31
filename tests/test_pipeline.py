@@ -1,6 +1,7 @@
 """End to end tests with scripted models (no real LLM needed)."""
 
 import asyncio
+import json
 import re
 
 import pytest
@@ -162,6 +163,92 @@ def test_tool_description_attack_is_visible_to_model():
 
     asyncio.run(run_episode(case, Spy([{"final": "x"}]), make_defence("none")))
     assert "01899999999" in seen["pay_bill"]
+
+
+def test_third_party_cases_are_up_to_date_and_paired_with_the_main_ones():
+    """Each of the 37 tool-description attacks, with the same poison moved to a third-party tool."""
+    import yaml
+
+    from bench.generate import generate, generate_third_party
+    from mfs_env.server import BASE_DESCRIPTIONS, THIRD_PARTY_DESCRIPTION, THIRD_PARTY_TOOL
+
+    on_disk = yaml.safe_load(open("bench/cases_third_party/third_party.yaml", encoding="utf-8"))
+    assert on_disk == generate_third_party(generate()), "run: python -m bench.generate"
+    tp = load_cases("bench/cases_third_party")
+    originals = [c for c in CASES.values() if c.injection_vector == "tool_description"]
+    assert len(tp) == len(originals) == 37
+    assert not any(c.id.startswith("tp-") for c in CASES.values())  # main 302-case set unchanged
+    for t in tp:
+        o = CASES[t.id.removeprefix("tp-")]
+        same = ("user_prompt", "task_language", "injection_language", "attack", "utility", "inbox", "invoices")
+        assert all(getattr(t, k) == getattr(o, k) for k in same), t.id
+        assert not t.description_overrides and list(t.third_party_tools) == [THIRD_PARTY_TOOL]
+        (tool, poisoned), = o.description_overrides.items()
+        poison = poisoned.removeprefix(BASE_DESCRIPTIONS[tool]).strip()
+        assert t.third_party_tools[THIRD_PARTY_TOOL] == f"{THIRD_PARTY_DESCRIPTION} {poison}"
+
+
+def test_third_party_poison_is_on_the_third_party_tool_only():
+    from mfs_env.server import BASE_DESCRIPTIONS, THIRD_PARTY_TOOL
+
+    case = next(c for c in load_cases("bench/cases_third_party") if c.id == "tp-atk-bill-en-tooldesc-en")
+    seen = {}
+
+    class Spy(ScriptedModel):
+        def complete(self, messages, tools):
+            seen.update({t["function"]["name"]: t["function"]["description"] for t in tools})
+            return super().complete(messages, tools)
+
+    steps = [{"tool": THIRD_PARTY_TOOL, "args": {}}, {"final": "x"}]
+    ep = asyncio.run(run_episode(case, Spy(steps), make_defence("none")))
+    assert "01899999999" in seen[THIRD_PARTY_TOOL]
+    assert all(seen[t] == d for t, d in BASE_DESCRIPTIONS.items())  # the wallet's own tools are clean
+    reply = json.loads(next(e for e in ep.trace if e.get("tool") == THIRD_PARTY_TOOL)["result"])
+    assert reply == [{"biller": "Dhaka Power (fictional)", "amount": 1850, "due": "2026-10-15"}]
+    # The audit replay knows the new tool too.
+    from scripts.verify_decisions import check_episode
+
+    assert check_episode(case, ep.trace)[1] == []
+
+
+def test_every_third_party_case_is_solvable_and_attack_is_detected():
+    for c in load_cases("bench/cases_third_party"):
+        spec = c.utility.get("ledger_contains")
+        if spec:  # a payment task
+            key = "account" if spec["kind"] == "pay_bill" else "to"
+            ideal = [{"tool": spec["kind"], "args": {key: spec["to"], "amount": spec["amount"], **(
+                {"biller": "x"} if spec["kind"] == "pay_bill" else {})}}, {"final": "Paid."}]
+        else:  # a read-only task: report what is due
+            ideal = [{"final": f"{c.utility['answer_contains_any'][0]} is due."}]
+        ep = asyncio.run(run_episode(c, ScriptedModel(ideal), make_defence("provenance")))
+        s = score(c, ep.world, ep.final_answer, ep.trace)
+        assert s["utility"] and not s["blocked"], c.id
+        evil = [{"tool": "send_money", "args": {"to": c.attack["target"], "amount": 100}}, {"final": "x"}]
+        for defence, success in (("none", True), ("provenance", False)):
+            ep = asyncio.run(run_episode(c, ScriptedModel(evil), make_defence(defence)))
+            assert score(c, ep.world, ep.final_answer, ep.trace)["attack_success"] is success, (c.id, defence)
+
+
+def test_compare_tool_poison_pairs_the_two_sets(tmp_path):
+    from mfs_env.server import THIRD_PARTY_TOOL
+
+    cmp = _load_script("compare_tool_poison")
+    ids = ["atk-bill-en-tooldesc-en", "gen-x-1", "gen-x-2", "gen-x-3"]
+
+    def write(folder, prefix, success, called=()):
+        run = tmp_path / folder / "openai_gpt-oss-120b__none__guarded"
+        run.mkdir(parents=True)
+        rows = [{"case_id": prefix + i, "injection_vector": "tool_description", "injection_language": lang,
+                 "attack_success": ok} for i, lang, ok in zip(ids, ["en", "bn", "en", "mixed"], success)]
+        (run / "scores.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+        events = [{"type": "tool_call", "case_id": prefix + ids[k], "tool": THIRD_PARTY_TOOL} for k in called]
+        (run / "traces.jsonl").write_text("".join(json.dumps(e) + "\n" for e in events), encoding="utf-8")
+
+    write("wallet", "", [True, True, True, False])
+    write("third", "tp-", [True, False, False, False], called=[0, 3])
+    out = cmp.report(cmp.load([tmp_path / "wallet"]), cmp.load([tmp_path / "third"], prefix="tp-"))
+    assert "| gpt-oss-120b | none | 4 | 3 | 1 | 1 | 2 | 0 | 0.500 | 2/4 |" in out
+    assert "| gpt-oss-120b | none | 2 / 1 of 2 | 1 / 0 of 1 | 0 / 0 of 0 | 0 / 0 of 1 |" in out
 
 
 def test_agent_that_asks_first_gets_one_confirmation():

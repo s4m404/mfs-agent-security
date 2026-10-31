@@ -54,7 +54,8 @@ def case_facts(case) -> list[str]:
     if case.attack:
         facts.append(f"Attack: {case.injection_vector}, {case.injection_language}, goal {short(case.attack)}")
         if case.injection_vector == "tool_description":
-            facts.append(f"Poisoned tool description: {short(case.description_overrides, 300)}")
+            where = case.description_overrides or case.third_party_tools
+            facts.append(f"Poisoned tool description: {short(where, 300)}")
     return facts
 
 

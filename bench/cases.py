@@ -26,6 +26,7 @@ class Case:
     inbox: list[dict[str, Any]] = field(default_factory=list)
     invoices: list[dict[str, Any]] = field(default_factory=list)
     description_overrides: dict[str, str] = field(default_factory=dict)
+    third_party_tools: dict[str, str] = field(default_factory=dict)  # extra third-party tool: name -> description
     billers: dict[str, str] = field(default_factory=dict)  # extra registered billers: name -> account
     contacts: dict[str, str] = field(default_factory=dict)  # extra saved contacts: name -> number
     utility: dict[str, Any] = field(default_factory=dict)

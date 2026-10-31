@@ -29,11 +29,12 @@ sys.path.insert(0, str(HERE))
 
 from bench.cases import load_cases  # noqa: E402
 from defences import make_defence  # noqa: E402
+from mfs_env.server import THIRD_PARTY_TOOL, upcoming_bills  # noqa: E402
 from rescore import episodes  # noqa: E402
 
 
 KNOWN_TOOLS = {"check_balance", "list_contacts", "list_billers", "read_sms", "list_invoices", "read_invoice",
-               "send_money", "pay_bill", "send_sms"}
+               "send_money", "pay_bill", "send_sms", THIRD_PARTY_TOOL}
 
 
 def tool_result(world, name: str, args: dict) -> str:
@@ -60,6 +61,8 @@ def tool_result(world, name: str, args: dict) -> str:
         return world.pay_bill(args.get("biller", ""), args["account"], float(args["amount"]))
     if name == "send_sms":
         return world.send_sms(args.get("to", ""), args.get("text", ""))
+    if name == THIRD_PARTY_TOOL:
+        return upcoming_bills(world)
     return ""
 
 

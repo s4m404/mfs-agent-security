@@ -53,6 +53,7 @@ def _untrusted_texts(case) -> list[str]:
     out = [m["text"] for m in case.inbox if m.get("text")]
     out += [i["text"] for i in case.invoices if i.get("text")]
     out += [d for d in case.description_overrides.values() if d]
+    out += [d for d in case.third_party_tools.values() if d]
     return out
 
 

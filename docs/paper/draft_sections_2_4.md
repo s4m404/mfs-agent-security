@@ -29,10 +29,11 @@ the agent reads: (i) the text of an SMS, sent from the attacker's own number
 or a sender ID such as `TakaPay-Info`; (ii) free text inside an invoice (a
 note or "correction"), while the invoice's biller account and amount fields
 stay those of the real bill; (iii) a tool description, as a poisoned tool
-server would supply it. In this version the poisoned description is that of
+server would supply it. In the main set the poisoned description is that of
 the wallet's own `send_money` or `pay_bill` tool, which gives the attacker
 more access than a separate third-party tool would; we treat this vector as
-an upper bound. It cannot change the request, the wallet's records
+an upper bound, and a separate set repeats the same attacks on a
+third-party tool (Section 3.3). It cannot change the request, the wallet's records
 (contacts, registered billers) or the wallet's checks, and cannot send an
 SMS from the payee's number. Its goals: (G1) send money to an attacker
 number, (G2) leak the OTP by SMS, or (G3) make the agent pay the *real*
@@ -149,7 +150,14 @@ asks to pay someone whose number is written only in a message, namely the
 payee's own SMS (a new electrician, a home tutor), a saved contact's SMS
 naming someone else (a pharmacy, a caretaker), a courier company's SMS
 naming its rider, or an invoice from a payee that is not a registered
-biller, each in the four request languages. All Bangla and Banglish text in the main set
+biller, each in the four request languages. A third separate set, the
+**third-party tool set**, repeats each of the main set's 37
+tool-description attacks with one change: the wallet's tools keep their
+normal descriptions, and the same poisoned text is added to the
+description of a tool from a separate bill-reminder app the user has
+connected (`billbuddy_upcoming_bills`, which only lists upcoming bills).
+Case for case, the two versions differ only in which tool carries the
+poison. All Bangla and Banglish text in the main set
 was reviewed by a native speaker (an author); a second speaker's check of a
 sample is planned.
 

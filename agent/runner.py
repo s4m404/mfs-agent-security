@@ -87,7 +87,7 @@ async def run_episode(
     max_confirmations: int = 1,
 ) -> Episode:
     world = case.build_world()
-    server = build_server(world, case.description_overrides)
+    server = build_server(world, case.description_overrides, case.third_party_tools)
     defence.reset(case.user_prompt, world.snapshot())
     trace: list[dict[str, Any]] = []
 

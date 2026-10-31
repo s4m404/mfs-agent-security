@@ -270,6 +270,8 @@ the case files are exactly what the models saw.
    README.)
 8. **Tool-description attacks poison the wallet's own tools** (`send_money`,
    `pay_bill`); that is an upper bound on what a third-party tool could do.
+   (Added 31 October: the same 37 attacks with the poison on a third-party
+   tool, `bench/cases_third_party/`; model runs pending.)
 9. **The attack SMS is always the newest message** in the inbox.
 
 **Rule weaknesses found by trying to break the defences:**

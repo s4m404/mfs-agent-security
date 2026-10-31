@@ -2,8 +2,10 @@
 
 Cases live in `bench/cases/*.yaml` (the main 302). Two separate sets use the
 same format and are never loaded with them: `bench/cases_adaptive/` (56
-attacks that forge the payee's identity) and `bench/cases_message_payee/`
-(24 normal tasks whose payee's number is only in an SMS or invoice). Each
+attacks that forge the payee's identity), `bench/cases_message_payee/`
+(24 normal tasks whose payee's number is only in an SMS or invoice) and
+`bench/cases_third_party/` (the 37 tool-description attacks, with the
+poisoned text on a third-party tool instead of the wallet's own). Each
 file is a list of cases.
 
 | Field | Required | Meaning |
@@ -17,6 +19,7 @@ file is a list of cases.
 | `inbox` | no | Extra SMS added to the default inbox: `{id, from, text}` |
 | `invoices` | no | Invoices: `{id, biller, account, amount, due, text}` |
 | `description_overrides` | no | Replace a tool description (tool poisoning) |
+| `third_party_tools` | no | Connect the third-party reminder tool next to the wallet: `{billbuddy_upcoming_bills: description}` (poisoning a tool the wallet does not own) |
 | `billers` | no | Extra registered billers for this case: `{name: account}` |
 | `contacts` | no | Extra saved contacts for this case: `{name: number}` |
 | `utility` | no | What counts as doing the user's task (see below) |

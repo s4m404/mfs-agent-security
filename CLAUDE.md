@@ -88,6 +88,14 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   digit off by Bangla / ASCII digits). Done on all six models: the five
   open ones on `kaggle-results` (2026-10-23_message_payee), GPT-OSS-120B
   on `groq-results` (results_groq_message_payee).
+  `cases_third_party/third_party.yaml` (37, also from `generate.py`, also
+  kept apart): the main set's 37 tool-description attacks, each with the
+  same poisoned text on the third-party tool `billbuddy_upcoming_bills`
+  (a bill-reminder tool in `mfs_env/server.py`, added by the case field
+  `third_party_tools`) and the wallet's tools left clean; `tp-X` is `X`
+  with only that change. `scripts/compare_tool_poison.py --wallet <main
+  runs> --third-party <tp runs>` pairs them (McNemar). Model runs: not
+  done yet.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -146,7 +154,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   and adaptive cases (`results_adaptive/`, git-ignored). Last set (done 23
   October, under 40 minutes of runs): all five models on the 24
   message-payee cases with none, provenance and provenance-amount, saved to
-  `results_message_payee/`. Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  `results_message_payee/`. Current set (not run yet): all five models on
+  the 37 third-party tool cases with the same three defences, saved to
+  `results_third_party/` (about 1 to 1.5 hours). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
@@ -157,8 +167,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
 - `.github/workflows/groq_run.yml` (done: none, provenance, provenance-amount,
   302 cases each, reasoning effort low; and the 24 message-payee cases in
-  `results_groq_message_payee/`, through `CASE_SETS`; finished sets make no
-  calls): GPT-OSS-120B on Groq's free tier, every 6
+  `results_groq_message_payee/`, through `CASE_SETS`; next the 37
+  third-party tool cases into `results_groq_third_party/`, starting by
+  itself on the next scheduled run; finished sets make no calls): GPT-OSS-120B on Groq's free tier, every 6
   hours, `run_bench.py --resume` until the daily limit (exit code 3: the case
   is not scored and runs again next time), results on the `groq-results`
   branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.
