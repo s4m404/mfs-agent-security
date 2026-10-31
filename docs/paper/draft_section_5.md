@@ -207,31 +207,38 @@ Provenance therefore does not make such payments safe; it hands every
 payment to a new number back to the user, and the amount check needs the
 amount from the user or the payee as well.
 
-The five open models show what this costs in practice. Without a defence
-they did 6, 5, 10, 19 and 4 of the 24 tasks (Qwen2.5 3B, 7B, 14B, 32B,
-Hermes 3; 44 of 120); with either provenance defence they did none. They
-tried the correct payment about as often as before (42 times with
-`provenance-amount`, 43 with `provenance`), and every attempt was blocked.
-What the agent then told the user varied, and it matters as much as the
-block. Qwen2.5-32B usually explained that the payee was not a saved
+The six models show what this costs in practice. Without a defence they
+did 6, 5, 10, 19, 4 and 20 of the 24 tasks (Qwen2.5 3B, 7B, 14B, 32B,
+Hermes 3, GPT-OSS-120B; 64 of 144); with either provenance defence they
+did none. They tried the correct payment about as often as before (61
+times with `provenance-amount`, 63 with `provenance`), and every attempt
+was blocked. What the agent then told the user varied, and it matters as
+much as the block. GPT-OSS-120B gave the user the blocked number in 19 of
+its 24 last messages (20 with `provenance`) and offered to save the payee
+as a contact; Qwen2.5-32B usually explained that the payee was not a saved
 contact and asked the user to approve or save them, giving the number in
-11 of its 24 last messages. **Qwen2.5-14B told the user the money had
+11 of 24. **Qwen2.5-14B told the user the money had
 been sent, when nothing had been, in 8 of its 18 blocked episodes** (6
 with `provenance`), twice adding that it had saved the payee as a contact,
 which no tool can do; Qwen2.5-7B did so once ("Transaction initiated
-successfully"). A user who believes the electrician was paid will not pay
+successfully"); GPT-OSS-120B never did. A user who believes the electrician was paid will not pay
 him another way, so a block the agent hides can be worse than no defence
 for the user, and neither "tasks done" nor a scripted audit shows it. With
 the recipient check alone, Qwen2.5-7B also routed two of these payments to
 Dhaka Power's registered biller account, which the rule trusts, and
 reported one as paid to the flat society; the amount check blocked both.
-Over all 15 runs, every number the agents copied with a digit missing or
-extra was written in Bangla digits in the message (20 of the 120 episodes
-whose message used Bangla digits, against 0 of 120 with ASCII digits); the
+Over all 18 runs, every number the agents copied with a digit missing or
+extra was written in Bangla digits in the message (33 of the 144 episodes
+whose message used Bangla digits, against 0 of 144 with ASCII digits); the
 Bangla and English versions of each message differ in more than the
-digits, so this cannot isolate them. Without a defence, such slips cost
-Qwen2.5-32B 3 of its 5 failures. [GPT-OSS-120B
-on this set: to add.]
+digits, so this cannot isolate them. The model that handles Bangla best
+slipped most: GPT-OSS-120B in 13 of its 24 such episodes, and these slips
+(`0171000025` for `01710000025`) were all 4 of its failures without a
+defence; in 7 of its 48 messages after a block it also gave the user the
+number with a zero missing. Without a defence, such slips also cost
+Qwen2.5-32B 3 of its 5 failures. This adds to the comprehension gate of
+Section 5.6: fluency in Bangla text does not yet carry over to copying
+Bangla digits exactly, which a payment needs.
 
 ### 5.4 Adaptive attacks: scripted audits are not enough
 
@@ -394,7 +401,7 @@ every table are public.
 | OTP leaks | `docs/audit.md`, items checked from the raw traces |
 | Adaptive results (scripted and Qwen2.5-32B) | README, "Adaptive attacks" |
 | Message-payee set: 24 of 24 blocked, 0 and 12 of 24 with the number typed | README, "What the defence results show"; `scripts/audit_message_payee.py` |
-| Message-payee model runs: 6 / 5 / 10 / 19 / 4 done, 0 with a defence, 42 / 43 tried, 8 and 6 of 18 said sent, 11 of 24 gave the number, two biller payments, 20 of 120 vs 0 of 120 digit slips, 3 of 5 for 32B | README, "Paying someone named only in a message"; `scripts/audit_message_payee.py --runs` on `kaggle-results` `2026-10-23_message_payee/`; `docs/audit.md`, "Message-payee run" |
+| Message-payee model runs: 6 / 5 / 10 / 19 / 4 / 20 done, 0 with a defence, 61 / 63 tried, 8 and 6 of 18 said sent, 11 and 19 of 24 gave the number, two biller payments, 33 of 144 vs 0 of 144 digit slips, 13 of 24 and 4 of 4 failures for GPT-OSS-120B, 7 of 48 messages a digit off, 3 of 5 for 32B | README, "Paying someone named only in a message"; `scripts/audit_message_payee.py --runs` on `kaggle-results` `2026-10-23_message_payee/` and `groq-results` `results_groq_message_payee/`; `docs/audit.md`, "Message-payee run" |
 | Block message: 12 tasks, 42 / 54 / 57 / 58 / 59 of 82 | README, "The largest model"; `docs/audit.md` |
 | 29 of 78, 13 of 32, 1 of 5; questions and asks after a block | `docs/paper/confirmations.md` |
 | What the questions told the user: 35, 31, 14 of 22, 8, 38 of 2,022 | `docs/paper/question_coding.md` (keyword coding; hand check pending) |

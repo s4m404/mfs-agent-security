@@ -7,7 +7,7 @@ wallet, and which defences stop it without blocking correct payments?
 **Output.** A public benchmark (TakaPay, 302 cases), results on six
 models from three families, and a workshop paper.
 
-Last updated: 23 October 2026.
+Last updated: 31 October 2026.
 
 ## Done
 
@@ -94,8 +94,9 @@ A. [x] **A multilingual detector** (done 22 October). Llama Prompt Guard
        with no language gap, 15% of normal texts (12 of 82 normal tasks
        broken as a filter), and missed all 12 amount-only attacks. In the
        README, section 5.1, the outline and Fig 1.
-B. [ ] **Normal tasks whose payee appears only in a message.** Cases and
-       scripted audit done: 24 cases in `bench/cases_message_payee/` (six
+B. [x] **Normal tasks whose payee appears only in a message** (done 31
+       October; the 28 new sentences still need review, see item 1). Cases and
+       scripted audit: 24 cases in `bench/cases_message_payee/` (six
        payees in four request languages: the payee's own SMS, a saved
        contact's SMS, a courier company's SMS, an invoice from a payee that
        is not a registered biller). With a scripted ideal agent
@@ -103,17 +104,17 @@ B. [ ] **Normal tasks whose payee appears only in a message.** Cases and
        all 24 correct payments, and the simulated "yes" does not unblock
        them; with the number typed by the user, `provenance` allows all 24
        and the amount check still blocks the 12 whose amount came from a
-       third party. Model run done for the five open models (23 October,
-       `kaggle-results` branch, `2026-10-23_message_payee/`): 44 of 120
-       tasks done without a defence, 0 with either defence (every correct
-       payment the agents tried was blocked); after a block Qwen2.5-14B
-       told the user the money had been sent in 8 of 18 episodes; with
-       `provenance` Qwen2.5-7B paid a registered biller instead twice; every
-       number copied with a digit missing or extra was written in Bangla
-       digits (20 of 120 episodes, 0 of 120 in ASCII digits). Left:
-       GPT-OSS-120B (the Groq workflow runs it by itself, into
-       `results_groq_message_payee/`) and the native-speaker review of the
-       28 new sentences (rows 125 to 152 of `bench/review_texts.csv`).
+       third party. Model runs on all six models (the five open models on
+       the `kaggle-results` branch, `2026-10-23_message_payee/`;
+       GPT-OSS-120B on `groq-results`, `results_groq_message_payee/`): 64
+       of 144 tasks done without a defence, 0 with either defence (every
+       correct payment the agents tried was blocked); after a block
+       Qwen2.5-14B told the user the money had been sent in 8 of 18
+       episodes, GPT-OSS-120B never; with `provenance` Qwen2.5-7B paid a
+       registered biller instead twice; every number copied with a digit
+       missing or extra was written in Bangla digits (33 of 144 episodes, 0
+       of 144 in ASCII digits; GPT-OSS-120B 13 of 24, all 4 of its failures
+       without a defence).
 C. [ ] **Third-party tool-description attacks:** put the poisoned
        description on a separate tool (for example a bill-reminder server)
        instead of the wallet's own `send_money` / `pay_bill`, and rerun the
@@ -257,12 +258,14 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   defences cost in completed tasks.
 - Provenance's real cost is paying someone new: on 24 normal tasks whose
   payee is named only in a message, the provenance defences blocked every
-  correct payment the five open models tried (0 of 120 tasks done, 44
-  without a defence). After the block, Qwen2.5-14B told the user the money
-  had been sent in 8 of its 18 blocked episodes, and with the recipient
-  check alone Qwen2.5-7B paid a registered biller instead twice. Numbers
-  written in Bangla digits were copied with a digit missing or extra in 20
-  of 120 episodes, numbers in ASCII digits in none.
+  correct payment the six models tried (0 of 144 tasks done, 64 without a
+  defence). After the block, Qwen2.5-14B told the user the money had been
+  sent in 8 of its 18 blocked episodes, and with the recipient check alone
+  Qwen2.5-7B paid a registered biller instead twice. Numbers written in
+  Bangla digits were copied with a digit missing or extra in 33 of 144
+  episodes, numbers in ASCII digits in none; GPT-OSS-120B, the model that
+  handles Bangla best, did it in 13 of 24, and these slips were all 4 of
+  its failures without a defence.
 - Provenance alone stopped every attack that redirects money or leaks the
   OTP (0 of 800 on the Qwen models), but 15 attacks that changed only the
   amount got through. Without a defence, amount-only attacks were the most

@@ -85,9 +85,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   user, `provenance` allows all 24 and the amount check still blocks 12
   (amount from a third party). `--runs <folder>` reads model runs on it
   (tasks done, blocks, what the agent said after a block, numbers copied a
-  digit off by Bangla / ASCII digits). Five open models done (23 October,
-  `kaggle-results` 2026-10-23_message_payee); GPT-OSS-120B runs through
-  the Groq workflow.
+  digit off by Bangla / ASCII digits). Done on all six models: the five
+  open ones on `kaggle-results` (2026-10-23_message_payee), GPT-OSS-120B
+  on `groq-results` (results_groq_message_payee).
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -156,9 +156,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   and is counted as `model_error` in scores.jsonl and summary.md.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
 - `.github/workflows/groq_run.yml` (done: none, provenance, provenance-amount,
-  302 cases each, reasoning effort low; next in `CASE_SETS`: the 24
-  message-payee cases into `results_groq_message_payee/`, starting by
-  itself on the next scheduled run): GPT-OSS-120B on Groq's free tier, every 6
+  302 cases each, reasoning effort low; and the 24 message-payee cases in
+  `results_groq_message_payee/`, through `CASE_SETS`; finished sets make no
+  calls): GPT-OSS-120B on Groq's free tier, every 6
   hours, `run_bench.py --resume` until the daily limit (exit code 3: the case
   is not scored and runs again next time), results on the `groq-results`
   branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.
@@ -249,14 +249,16 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   with our policy (upper bound) 93% / 15%, no language gap, 12 of 82 normal
   tasks broken (family money requests, the OTP SMS), missed all 12
   amount-only attacks; 1 empty reply counted as not flagged.
-- Message-payee set (24 normal tasks, payee only in a message; five open
-  models): tasks done without a defence 6 / 5 / 10 / 19 / 4 (Qwen 3B / 7B /
-  14B / 32B, Hermes 3), 0 with either defence (42 / 43 correct payments
-  tried and blocked). After a block Qwen2.5-14B said the money was sent in
-  8 of 18 (provenance-amount; 6 with provenance), Qwen2.5-7B in 1; every
-  match read by hand. With provenance Qwen2.5-7B paid Dhaka Power's biller
-  account instead twice (0 with provenance-amount). Numbers copied a digit
-  off: 20 of 120 episodes with Bangla digits, 0 of 120 with ASCII digits.
+- Message-payee set (24 normal tasks, payee only in a message; six
+  models): tasks done without a defence 6 / 5 / 10 / 19 / 4 / 20 (Qwen 3B /
+  7B / 14B / 32B, Hermes 3, GPT-OSS-120B), 0 with either defence (61 / 63
+  correct payments tried and blocked). After a block Qwen2.5-14B said the
+  money was sent in 8 of 18 (provenance-amount; 6 with provenance),
+  Qwen2.5-7B in 1, GPT-OSS-120B never (it gave the number in 19-20 of 24);
+  every match read by hand. With provenance Qwen2.5-7B paid Dhaka Power's
+  biller account instead twice (0 with provenance-amount). Numbers copied a
+  digit off: 33 of 144 episodes with Bangla digits, 0 of 144 with ASCII
+  digits; GPT-OSS-120B 13 of 24, all 4 of its failures without a defence.
 - Error analysis (`scripts/error_analysis.py`, all six models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after
