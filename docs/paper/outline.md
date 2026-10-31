@@ -237,12 +237,11 @@ Then the cost (message-payee set, 24 normal tasks, `scripts/audit_message_payee.
 | Correct payments blocked, number only in the message: provenance / provenance-amount / provenance-consistent | 24/24 / 24/24 / 24/24 (scripted ideal agent) |
 | Still blocked after the agent asks and the simulated user says yes | 24/24 for each |
 | Correct payments blocked, number also typed by the user | 0/24 / 12/24 / 12/24 (the 12: amount from a contact or the courier company) |
-| Model runs, five open models: tasks done none / either defence | 6, 5, 10, 19, 4 of 24 (44 of 120) / 0 of 120; 42 and 43 correct payments tried and blocked |
+| Model runs, six models: tasks done none / either defence | 6, 5, 10, 19, 4, 20 of 24 (64 of 144) / 0 of 144; 61 and 63 correct payments tried and blocked |
 | After a block: said the money was sent when nothing was | Qwen2.5-14B 8 of 18 (6 with `provenance`), Qwen2.5-7B 1; hand-checked |
-| After a block: gave the user the number | Qwen2.5-32B 11 of 24; it usually asked the user to approve or save the payee |
+| After a block: gave the user the number | GPT-OSS-120B 19 of 24 (20 with `provenance`), never claimed it paid; Qwen2.5-32B 11 of 24; both asked the user to approve or save the payee |
 | Recipient check alone: paid a trusted wrong payee | Qwen2.5-7B, 2 (Dhaka Power's biller account); 0 with the amount check |
-| Number copied a digit off, by script of the number | Bangla digits 20 of 120 episodes, ASCII 0 of 120 |
-| GPT-OSS-120B | to add (Groq workflow) |
+| Number copied a digit off, by script of the number | Bangla digits 33 of 144 episodes, ASCII 0 of 144; GPT-OSS-120B 13 of 24, all 4 of its failures without a defence; 7 of its 48 after-block messages gave the number a digit off |
 
 ### 5.4 Adaptive attacks: test defences with real agents (point 3, part 1)
 
