@@ -7,7 +7,7 @@ wallet, and which defences stop it without blocking correct payments?
 **Output.** A public benchmark (TakaPay, 302 cases), results on six
 models from three families, and a workshop paper.
 
-Last updated: 31 October 2026.
+Last updated: 1 November 2026.
 
 ## Done
 
@@ -127,9 +127,17 @@ C. [ ] **Third-party tool-description attacks.** Cases and scripts done:
        five open models on Kaggle (`notebooks/kaggle_run.ipynb`, about 1 to
        1.5 hours) and GPT-OSS-120B through the Groq workflow (automatic,
        into `results_groq_third_party/`).
-D. [ ] **Newer models through Groq** (check the current list, for example
-       Qwen3-32B or Llama 4 Scout) and GPT-OSS-120B at medium reasoning
-       effort, using the same workflow.
+D. [ ] **Newer models through Groq.** Set up: the Groq workflow now runs a
+       list of models, each checked first with one tool call and skipped
+       (with a warning in the log) if Groq does not serve it or rejects its
+       settings. Besides GPT-OSS-120B at low effort (the reported run), it
+       runs GPT-OSS-120B at medium reasoning effort (own folder
+       `results_groq_medium*`, reply cap 4,096 tokens, since reasoning counts
+       against it), GPT-OSS-20B, Qwen3-32B (thinking off, like Qwen2.5),
+       Llama 4 Scout and Kimi K2, each with `none` and `provenance-amount` on
+       the main, message-payee and third-party sets. Groq's model list
+       changed during 2026, so which of these run is known only from the
+       workflow log. Left: check the log, then add the results.
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [ ] **Attack realism:** link each of the 10 SMS and invoice attack texts

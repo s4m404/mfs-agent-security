@@ -1,8 +1,9 @@
 """Check that an API key, model and settings work, before a long run.
 
 Sends one short request with one tool and checks that the model calls it.
-Exits with 1 (and says why) if the request fails or no tool call comes back,
-so a wrong key or setting does not turn every case into a model error.
+Exits with 1 (and says why) if the request fails, no tool call comes back, or
+the reply carries the model's thinking as text ("<think>"), so a wrong key or
+setting does not turn every case into a model error or a polluted answer.
 
 Run:  python scripts/check_api.py --model openai/gpt-oss-120b \
           --base-url https://api.groq.com/openai/v1 --api-key-env GROQ_API_KEY
@@ -51,6 +52,9 @@ def main() -> None:
         sys.exit(1)
     if not any(c["name"] == "check_balance" for c in reply["tool_calls"]):
         print(f"API answered, but without a tool call (tool calling may not work for this model): {reply}")
+        sys.exit(1)
+    if "<think>" in (reply.get("content") or ""):
+        print(f"API answered, but the reply contains the model's thinking as text; turn it off: {reply}")
         sys.exit(1)
     print(f"API check passed: {args.model} called check_balance.")
 

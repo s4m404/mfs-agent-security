@@ -165,16 +165,22 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   Model replies are capped at 1,024 tokens; a model error ends only that case
   and is counted as `model_error` in scores.jsonl and summary.md.
   Runs happen on Kaggle T4 x2 with vLLM; he starts them and uploads results.zip.
-- `.github/workflows/groq_run.yml` (done: none, provenance, provenance-amount,
-  302 cases each, reasoning effort low; and the 24 message-payee cases in
-  `results_groq_message_payee/`, through `CASE_SETS`; next the 37
-  third-party tool cases into `results_groq_third_party/`, starting by
-  itself on the next scheduled run; finished sets make no calls): GPT-OSS-120B on Groq's free tier, every 6
-  hours, `run_bench.py --resume` until the daily limit (exit code 3: the case
-  is not scored and runs again next time), results on the `groq-results`
-  branch (`results_groq/`). Needs the `GROQ_API_KEY` repository secret.
-  `scripts/check_api.py` checks a key and model with one tool call first.
-  `run_bench.py --extra-body` passes API settings (`reasoning_effort: low`).
+- `.github/workflows/groq_run.yml`: models on Groq's free tier, every 6
+  hours, `run_bench.py --resume` until each model's daily limit (exit code 3:
+  the case is not scored and runs again next time) or its time for that run
+  (`MINUTES_PER_MODEL`), results on the `groq-results` branch. `MODELS` has
+  one line per model: id | extra API settings | results folder | reply token
+  cap | defences; `CASE_SETS` maps each case set to a folder suffix
+  (`results_groq`, `_message_payee`, `_third_party`). Done for GPT-OSS-120B
+  at low effort: the main and message-payee sets (all three defences); next
+  the third-party set. Added 1 November (task D): GPT-OSS-120B medium
+  (`results_groq_medium*`, cap 4,096), GPT-OSS-20B, Qwen3-32B (thinking
+  off), Llama 4 Scout, Kimi K2, with none and provenance-amount; a model
+  Groq does not serve is skipped with a warning (Groq's list changed in
+  2026, so check the log). `scripts/check_api.py` checks each model with one
+  tool call first (and fails a reply with "<think>" text). Needs the
+  `GROQ_API_KEY` repository secret. `run_bench.py --extra-body` passes API
+  settings, `--max-tokens` the reply cap.
 - `.github/workflows/groq_detectors.yml` + `scripts/detector_api.py`: Llama
   Prompt Guard 2 (86M) and gpt-oss-safeguard-20b on the 228 detector texts
   through Groq (manual start, then every 6 hours until done; resumes; raw
