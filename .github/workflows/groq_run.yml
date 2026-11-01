@@ -1,10 +1,15 @@
-# Runs the benchmark on a strong model through Groq's free API tier, a little
-# every day. The free tier allows only about 200,000 tokens a day, so each run
-# continues where the last one stopped (--resume) and ends cleanly when the
-# daily limit is reached. Results are saved to the `groq-results` branch.
-# Case sets run in order: the 302 main cases (done), the 24 message-payee
-# cases (done), then the 37 tool-description attacks with the poison on a
-# third-party tool; a set that is finished makes no model calls.
+# Runs the benchmark on models served by Groq's free API tier, a little every
+# day. The free tier limits tokens and requests per model and per day, so each
+# run continues where the last one stopped (--resume) and moves on to the next
+# model when one reaches its daily limit. Results are saved to the
+# `groq-results` branch.
+#
+# Models run in the order of MODELS. Each is first checked with one tool call
+# (scripts/check_api.py); a model Groq does not serve, or a setting it rejects,
+# is skipped with a warning, so one missing model never stops the others. Each
+# model gets at most MINUTES_PER_MODEL minutes per run, so every model makes
+# progress. For each model the case sets run in the order of CASE_SETS; a set
+# that is finished makes no model calls.
 #
 # Setup (once): add the API key as a repository secret named GROQ_API_KEY
 # (Settings > Secrets and variables > Actions > New repository secret).
@@ -14,7 +19,7 @@ name: Groq model run
 
 on:
   schedule:
-    - cron: "41 */6 * * *" # every 6 hours; a run stops as soon as the limit is reached
+    - cron: "41 */6 * * *" # every 6 hours; a run stops as soon as the limits are reached
   workflow_dispatch:
 
 permissions:
@@ -25,17 +30,27 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  MODEL: openai/gpt-oss-120b
   BASE_URL: https://api.groq.com/openai/v1
-  # Low reasoning effort keeps each reply short, so more cases fit in the daily limit.
-  EXTRA_BODY: '{"reasoning_effort": "low"}'
-  # In this order; the most important first.
-  DEFENCES: none provenance-amount provenance
-  # cases folder:results folder, one pair per case set, in this order.
+  # One model per line: model id | extra API settings (JSON) | results folder |
+  # reply token cap | defences (in this order; the most important first).
+  # GPT-OSS-120B at low reasoning effort is the reported run (done on the main
+  # and message-payee sets). Medium effort spends more tokens on reasoning, so
+  # its replies get a higher cap and their own folder (the run names would
+  # otherwise be the same). Qwen3 runs without its thinking mode, like the
+  # Qwen2.5 models. Models after the first are newer or other families.
+  MODELS: |
+    openai/gpt-oss-120b|{"reasoning_effort": "low"}|results_groq|1024|none provenance-amount provenance
+    openai/gpt-oss-120b|{"reasoning_effort": "medium"}|results_groq_medium|4096|none provenance-amount
+    openai/gpt-oss-20b|{"reasoning_effort": "low"}|results_groq|1024|none provenance-amount
+    qwen/qwen3-32b|{"reasoning_effort": "none"}|results_groq|1024|none provenance-amount
+    meta-llama/llama-4-scout-17b-16e-instruct|{}|results_groq|1024|none provenance-amount
+    moonshotai/kimi-k2-instruct-0905|{}|results_groq|1024|none provenance-amount
+  # cases folder:suffix of the results folder, one pair per case set, in this order.
   CASE_SETS: >-
-    bench/cases:results_groq
-    bench/cases_message_payee:results_groq_message_payee
-    bench/cases_third_party:results_groq_third_party
+    bench/cases:
+    bench/cases_message_payee:_message_payee
+    bench/cases_third_party:_third_party
+  MINUTES_PER_MODEL: 50
   RESULTS_BRANCH: groq-results
 
 jobs:
@@ -58,51 +73,62 @@ jobs:
         run: |
           if git ls-remote --exit-code --heads "$REPO_URL" "$RESULTS_BRANCH" >/dev/null; then
             git clone --quiet --branch "$RESULTS_BRANCH" --single-branch "$REPO_URL" /tmp/saved
-            for set in $CASE_SETS; do
-              out="${set#*:}"
-              if [ -d "/tmp/saved/$out" ]; then cp -r "/tmp/saved/$out" .; fi
+            for d in /tmp/saved/results_groq*; do
+              if [ -d "$d" ]; then cp -r "$d" .; fi
             done
           else
             mkdir -p /tmp/saved && (cd /tmp/saved && git init --quiet -b "$RESULTS_BRANCH" && git remote add origin "$REPO_URL")
           fi
-          for set in $CASE_SETS; do ls -R "${set#*:}" 2>/dev/null | head -20 || echo "No results yet in ${set#*:}"; done
+          for f in results_groq*/*/scores.jsonl; do [ -f "$f" ] && echo "$(wc -l < "$f") cases: $f"; done; true
 
-      - name: Check the API key and model
-        id: check
+      - name: Run each model until done, its daily limit or its time for this run
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           if [ -z "$GROQ_API_KEY" ]; then echo "Add the GROQ_API_KEY repository secret first."; exit 1; fi
           set +e
-          python scripts/check_api.py --model "$MODEL" --base-url "$BASE_URL" --api-key-env GROQ_API_KEY --extra-body "$EXTRA_BODY"
-          code=$?
-          if [ $code -eq 3 ]; then echo "limited=true" >> "$GITHUB_OUTPUT"; exit 0; fi
-          exit $code
-
-      - name: Run until done or until the daily limit
-        if: steps.check.outputs.limited != 'true'
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          set +e
-          for set in $CASE_SETS; do
-            cases="${set%%:*}"; out="${set#*:}"
-            for d in $DEFENCES; do
-              python scripts/run_bench.py --model "$MODEL" --base-url "$BASE_URL" --api-key-env GROQ_API_KEY \
-                --extra-body "$EXTRA_BODY" --defence "$d" --cases "$cases" --out "$out" --resume --workers 2
-              code=$?
-              if [ $code -eq 3 ]; then echo "Daily limit reached during $cases, defence $d; the next run continues."; exit 0; fi
-              if [ $code -ne 0 ]; then echo "Run failed with exit code $code"; exit $code; fi
+          while IFS='|' read -r model extra prefix max_tokens defences; do
+            [ -z "$model" ] && continue
+            echo "::group::$model $extra"
+            python scripts/check_api.py --model "$model" --base-url "$BASE_URL" --api-key-env GROQ_API_KEY \
+              --extra-body "$extra" --max-tokens "$max_tokens" < /dev/null
+            code=$?
+            if [ $code -eq 3 ]; then echo "$model: daily limit reached; the next run continues."; echo "::endgroup::"; continue; fi
+            if [ $code -ne 0 ]; then
+              echo "::endgroup::"
+              echo "::warning::$model $extra skipped: Groq does not serve it, or rejects this setting (see the check above)."
+              continue
+            fi
+            deadline=$(( $(date +%s) + MINUTES_PER_MODEL * 60 ))
+            stop=""
+            for set in $CASE_SETS; do
+              cases="${set%%:*}"; out="${prefix}${set#*:}"
+              for d in $defences; do
+                left=$(( deadline - $(date +%s) ))
+                if [ $left -le 60 ]; then stop="time"; break 2; fi
+                timeout "$left" python scripts/run_bench.py --model "$model" --base-url "$BASE_URL" \
+                  --api-key-env GROQ_API_KEY --extra-body "$extra" --max-tokens "$max_tokens" --defence "$d" \
+                  --cases "$cases" --out "$out" --resume --workers 2 < /dev/null
+                code=$?
+                if [ $code -eq 3 ]; then stop="daily limit, during $cases, $d"; break 2; fi
+                if [ $code -eq 124 ]; then stop="time"; break 2; fi
+                if [ $code -ne 0 ]; then stop="error (exit code $code), during $cases, $d"; break 2; fi
+              done
             done
-          done
+            echo "::endgroup::"
+            case "$stop" in
+              "") echo "$model $extra: every case set done." ;;
+              error*) echo "::warning::$model $extra stopped by an $stop." ;;
+              *) echo "$model $extra: stopped for this run ($stop); the next run continues." ;;
+            esac
+          done <<< "$MODELS"
           exit 0
 
       - name: Save results to the ${{ env.RESULTS_BRANCH }} branch
         if: always()
         run: |
-          for set in $CASE_SETS; do
-            out="${set#*:}"
-            if [ -d "$out" ]; then rm -rf "/tmp/saved/$out" && cp -r "$out" /tmp/saved/; fi
+          for d in results_groq*; do
+            if [ -d "$d" ]; then rm -rf "/tmp/saved/$d" && cp -r "$d" /tmp/saved/; fi
           done
           cd /tmp/saved
           git config user.name "github-actions[bot]"

@@ -251,6 +251,50 @@ def test_compare_tool_poison_pairs_the_two_sets(tmp_path):
     assert "| gpt-oss-120b | none | 2 / 1 of 2 | 1 / 0 of 1 | 0 / 0 of 0 | 0 / 0 of 1 |" in out
 
 
+def test_groq_workflow_model_list_is_well_formed():
+    """Every MODELS line: model | JSON settings | results folder | token cap | known defences."""
+    import yaml
+
+    from defences import DEFENCES
+
+    env = yaml.safe_load(open(".github/workflows/groq_run.yml", encoding="utf-8"))["env"]
+    lines = [line for line in env["MODELS"].splitlines() if line.strip()]
+    assert lines[0].startswith("openai/gpt-oss-120b|"), "the reported model runs first"
+    folders = set()
+    for line in lines:
+        model, extra, folder, cap, defences = line.split("|")
+        assert isinstance(json.loads(extra), dict) and folder.startswith("results_groq") and int(cap) > 0
+        assert defences.split() and all(d in DEFENCES for d in defences.split()), line
+        assert (model, folder) not in folders, "two settings of one model need different folders"
+        folders.add((model, folder))
+    for pair in env["CASE_SETS"].split():
+        cases = pair.split(":")[0]
+        assert load_cases(cases), cases
+
+
+def test_check_api_rejects_a_reply_with_thinking_text(monkeypatch, capsys):
+    import sys
+
+    check = _load_script("check_api")
+
+    class Fake:
+        content = ""
+
+        def __init__(self, *a, **kw):
+            pass
+
+        def complete(self, messages, tools):
+            return {"content": Fake.content, "tool_calls": [{"id": "1", "name": "check_balance", "arguments": {}}]}
+
+    monkeypatch.setattr(check, "OpenAICompatModel", Fake)
+    monkeypatch.setattr(sys, "argv", ["check_api.py", "--model", "m", "--base-url", "http://x"])
+    check.main()  # a clean tool call passes
+    Fake.content = "<think>The user wants the balance.</think>"
+    with pytest.raises(SystemExit) as exc:
+        check.main()
+    assert exc.value.code == 1 and "thinking" in capsys.readouterr().out
+
+
 def test_agent_that_asks_first_gets_one_confirmation():
     steps = [
         {"tool": "read_sms", "args": {}},
