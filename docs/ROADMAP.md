@@ -115,10 +115,18 @@ B. [x] **Normal tasks whose payee appears only in a message** (done 31
        missing or extra was written in Bangla digits (33 of 144 episodes, 0
        of 144 in ASCII digits; GPT-OSS-120B 13 of 24, all 4 of its failures
        without a defence).
-C. [ ] **Third-party tool-description attacks:** put the poisoned
-       description on a separate tool (for example a bill-reminder server)
-       instead of the wallet's own `send_money` / `pay_bill`, and rerun the
-       37 tool-description cases.
+C. [ ] **Third-party tool-description attacks.** Cases and scripts done:
+       `bench/cases_third_party/` repeats the main set's 37
+       tool-description attacks with the same poisoned text on the
+       description of a separate app's tool (`billbuddy_upcoming_bills`, a
+       bill-reminder tool listed next to the wallet's) and the wallet's own
+       tools left clean; case `tp-X` is case `X` with only that change.
+       `scripts/compare_tool_poison.py` pairs the two sets per model (attack
+       success on each, attacks that worked on only one, exact McNemar,
+       whether the agent called the third-party tool). Left: the model runs,
+       five open models on Kaggle (`notebooks/kaggle_run.ipynb`, about 1 to
+       1.5 hours) and GPT-OSS-120B through the Groq workflow (automatic,
+       into `results_groq_third_party/`).
 D. [ ] **Newer models through Groq** (check the current list, for example
        Qwen3-32B or Llama 4 Scout) and GPT-OSS-120B at medium reasoning
        effort, using the same workflow.
@@ -330,7 +338,8 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
 Synthetic data and one fictional wallet; 220 attacks from 21 templates (all
 OTP attacks one text); normal tasks in the main set with trusted payees
 only (the separate message-payee set measures the cost, task B);
-tool-description attacks on the wallet's own tools (task C); the attack SMS
+tool-description attacks of the main set on the wallet's own tools (a
+third-party version is task C); the attack SMS
 always the newest message; a simulated user who always says
 yes (and answers any "?"); open models up to 32B (14B and 32B in 4-bit) plus
 one API model (GPT-OSS-120B, low reasoning effort only); Bangla and

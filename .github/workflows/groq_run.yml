@@ -2,9 +2,9 @@
 # every day. The free tier allows only about 200,000 tokens a day, so each run
 # continues where the last one stopped (--resume) and ends cleanly when the
 # daily limit is reached. Results are saved to the `groq-results` branch.
-# Case sets run in order: the 302 main cases (done), then the 24
-# message-payee cases (normal tasks whose payee is only in a message); a set
-# that is finished makes no model calls.
+# Case sets run in order: the 302 main cases (done), the 24 message-payee
+# cases (done), then the 37 tool-description attacks with the poison on a
+# third-party tool; a set that is finished makes no model calls.
 #
 # Setup (once): add the API key as a repository secret named GROQ_API_KEY
 # (Settings > Secrets and variables > Actions > New repository secret).
@@ -32,7 +32,10 @@ env:
   # In this order; the most important first.
   DEFENCES: none provenance-amount provenance
   # cases folder:results folder, one pair per case set, in this order.
-  CASE_SETS: bench/cases:results_groq bench/cases_message_payee:results_groq_message_payee
+  CASE_SETS: >-
+    bench/cases:results_groq
+    bench/cases_message_payee:results_groq_message_payee
+    bench/cases_third_party:results_groq_third_party
   RESULTS_BRANCH: groq-results
 
 jobs:

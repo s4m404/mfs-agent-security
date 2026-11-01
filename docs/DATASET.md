@@ -20,6 +20,7 @@ payments; some of that content hides an attack.
 | `bench/cases/seed.yaml` | 12 hand-written cases |
 | `bench/cases/generated.yaml` | 290 cases built by `bench/generate.py` from hand-written building blocks |
 | `bench/cases_adaptive/adaptive.yaml` | 56 adaptive cases that forge the payee's identity (kept apart from the main 302) |
+| `bench/cases_third_party/third_party.yaml` | The main set's 37 tool-description attacks, each with the same poisoned text on a third-party app's tool instead of the wallet's own (kept apart from the main 302) |
 | `bench/cases_message_payee/message_payee.yaml` | 24 normal tasks (no attacker) whose payee's number is only in an SMS or invoice, to measure what provenance costs (kept apart from the main 302) |
 | `bench/SCHEMA.md` | Every field of a case, how a task counts as done, and how each attack goal is scored |
 | `bench/review_texts.csv` | Every distinct Bangla, Banglish and mixed sentence once, with the native-speaker review mark |
@@ -106,8 +107,10 @@ check of a sample is planned.
   cannot measure what a provenance defence costs when a user wants to pay a
   number found only in a message; the separate message-payee set (24 cases)
   does.
-- The tool-description attacks change the description of the wallet's own
-  payment tools; the attack SMS is always the newest message in the inbox.
+- The tool-description attacks of the main set change the description of
+  the wallet's own payment tools (the third-party set repeats them on a
+  separate app's tool); the attack SMS is always the newest message in the
+  inbox.
 - More caveats on scoring are in `docs/audit.md`.
 
 ## Results

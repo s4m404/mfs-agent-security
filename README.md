@@ -84,7 +84,9 @@ inventing them.**
   someone named only in a message").
 - **Tool-description attacks poison the wallet's own tools** (`send_money`,
   `pay_bill`), which assumes an attacker who can change a tool's description;
-  treat them as an upper bound.
+  treat them as an upper bound. A separate set of 37 twins
+  (`bench/cases_third_party/`) moves the same poisoned text to a third-party
+  app's tool; model runs on it are next.
 - **One fictional wallet** with 9 tools; the attack SMS is always the newest
   message; real apps and their messages differ.
 - **A simulated user who always says yes.** When the agent writes a "?", the

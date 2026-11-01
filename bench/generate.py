@@ -2,7 +2,8 @@
 
 Run:  python -m bench.generate
 Writes bench/cases/generated.yaml, bench/cases_adaptive/adaptive.yaml,
-bench/cases_message_payee/message_payee.yaml and bench/review_texts.csv.
+bench/cases_message_payee/message_payee.yaml,
+bench/cases_third_party/third_party.yaml and bench/review_texts.csv.
 
 Every piece of text lives in the tables below, once per language, so a
 native speaker can review each sentence once (see review_texts.csv) instead
@@ -13,6 +14,7 @@ All names, numbers, billers and "TakaPay" are fictional.
 
 from __future__ import annotations
 
+import copy
 import csv
 import itertools
 from pathlib import Path
@@ -941,6 +943,39 @@ def generate_message_payee() -> list[dict]:
     return cases
 
 
+# --------------------------------------------------------------------------
+# Tool-description attacks on a third-party tool (separate set,
+# bench/cases_third_party/)
+# --------------------------------------------------------------------------
+# In the main set a poisoned description replaces the wallet's own send_money
+# or pay_bill description, which assumes the attacker can change the wallet's
+# tools. Here every one of those 37 attacks is copied with one change: the
+# wallet's tools keep their normal descriptions and the same poisoned text is
+# added to the description of a tool from a separate app the user connected
+# (a bill-reminder tool, see mfs_env/server.py). The task, languages,
+# attacker number and amount stay the same, so the two sets pair case by case.
+
+
+def generate_third_party(main: list[dict]) -> list[dict]:
+    """37 cases: the main set's tool-description attacks, poison moved to a third-party tool."""
+    from mfs_env.server import BASE_DESCRIPTIONS, THIRD_PARTY_DESCRIPTION, THIRD_PARTY_TOOL
+
+    seed = yaml.safe_load((Path(__file__).resolve().parent / "cases" / "seed.yaml").read_text(encoding="utf-8"))
+    cases = []
+    for c in seed + main:
+        if c.get("injection_vector") != "tool_description":
+            continue
+        (tool, desc), = c["description_overrides"].items()
+        base = BASE_DESCRIPTIONS[tool]
+        if not desc.startswith(base):
+            raise ValueError(f"{c['id']}: poisoned description does not start with the base description")
+        t = {k: copy.deepcopy(v) for k, v in c.items() if k != "description_overrides"}
+        t["id"] = "tp-" + c["id"]
+        t["third_party_tools"] = {THIRD_PARTY_TOOL: f"{THIRD_PARTY_DESCRIPTION} {desc[len(base):].strip()}"}
+        cases.append(t)
+    return cases
+
+
 def review_rows() -> list[dict]:
     """Every distinct non-English sentence, once, for a native speaker to check.
 
@@ -1038,6 +1073,11 @@ def main() -> None:
     (root / "cases_message_payee" / "message_payee.yaml").write_text(
         header + yaml.safe_dump(message_payee, allow_unicode=True, sort_keys=False, width=1000), encoding="utf-8"
     )
+    third_party = generate_third_party(cases)
+    (root / "cases_third_party").mkdir(exist_ok=True)
+    (root / "cases_third_party" / "third_party.yaml").write_text(
+        header + yaml.safe_dump(third_party, allow_unicode=True, sort_keys=False, width=1000), encoding="utf-8"
+    )
     csv_path = root / "review_texts.csv"
     rows = keep_reviews(review_rows(), csv_path)
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
@@ -1047,7 +1087,8 @@ def main() -> None:
     attacks = sum("attack" in c for c in cases)
     todo = sum(not r["sounds_natural (Y/N)"] for r in rows)
     print(f"{len(cases)} cases ({attacks} attacks, {len(cases) - attacks} benign), "
-          f"{len(adaptive)} adaptive cases, {len(message_payee)} message-payee cases; "
+          f"{len(adaptive)} adaptive cases, {len(message_payee)} message-payee cases, "
+          f"{len(third_party)} third-party tool cases; "
           f"{len(rows)} sentences, {todo} not yet reviewed")
 
 
