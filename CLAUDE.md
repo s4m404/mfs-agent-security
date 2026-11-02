@@ -156,7 +156,11 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   message-payee cases with none, provenance and provenance-amount, saved to
   `results_message_payee/`. Current set (not run yet): all five models on
   the 37 third-party tool cases with the same three defences, saved to
-  `results_third_party/` (about 1 to 1.5 hours). Granite 3.3 8B did not produce real tool calls on T4/vLLM and
+  `results_third_party/` (about 1 to 1.5 hours). The first attempt (1 November) failed in every model: vLLM
+  found no GPU ("Failed to infer device type"), as in a session without the GPU accelerator. The notebook now
+  stops in its first cell if there are fewer than 2 GPUs, checks that vLLM's GPU code (`vllm._C`) loads,
+  and saves `run_env.json` (Python, vLLM, PyTorch, CUDA, GPU names, each model's Hugging Face revision) into
+  results.zip. Granite 3.3 8B did not produce real tool calls on T4/vLLM and
   is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
@@ -173,11 +177,13 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   cap | defences; `CASE_SETS` maps each case set to a folder suffix
   (`results_groq`, `_message_payee`, `_third_party`). Done for GPT-OSS-120B
   at low effort: the main and message-payee sets (all three defences); next
-  the third-party set. Added 1 November (task D): GPT-OSS-120B medium
-  (`results_groq_medium*`, cap 4,096), GPT-OSS-20B, Qwen3-32B (thinking
-  off), Llama 4 Scout, Kimi K2, with none and provenance-amount; a model
-  Groq does not serve is skipped with a warning (Groq's list changed in
-  2026, so check the log). `scripts/check_api.py` checks each model with one
+  the third-party set (none and provenance-amount done 1 November; 20 of
+  37 vs 27 of 37 on the wallet's tool, McNemar p = 0.039). Added 1
+  November (task D): GPT-OSS-120B medium (`results_groq_medium*`, cap
+  4,096; shares 120B's daily limit) and GPT-OSS-20B, with none and
+  provenance-amount. Qwen3-32B, Llama 4 Scout and Kimi K2 returned 404 on
+  1 November and were removed; a model Groq does not serve is skipped with
+  a warning, and the "Models Groq serves" step prints the current list. `scripts/check_api.py` checks each model with one
   tool call first (and fails a reply with "<think>" text). Needs the
   `GROQ_API_KEY` repository secret. `run_bench.py --extra-body` passes API
   settings, `--max-tokens` the reply cap.

@@ -36,15 +36,14 @@ env:
   # GPT-OSS-120B at low reasoning effort is the reported run (done on the main
   # and message-payee sets). Medium effort spends more tokens on reasoning, so
   # its replies get a higher cap and their own folder (the run names would
-  # otherwise be the same). Qwen3 runs without its thinking mode, like the
-  # Qwen2.5 models. Models after the first are newer or other families.
+  # otherwise be the same); it shares the 120B model's daily limit, so it
+  # starts once the low-effort runs are done. Qwen3-32B, Llama 4 Scout and
+  # Kimi K2 were tried on 1 November 2026: Groq no longer serves them (404).
+  # The "Models Groq serves" step prints the current list.
   MODELS: |
     openai/gpt-oss-120b|{"reasoning_effort": "low"}|results_groq|1024|none provenance-amount provenance
     openai/gpt-oss-120b|{"reasoning_effort": "medium"}|results_groq_medium|4096|none provenance-amount
     openai/gpt-oss-20b|{"reasoning_effort": "low"}|results_groq|1024|none provenance-amount
-    qwen/qwen3-32b|{"reasoning_effort": "none"}|results_groq|1024|none provenance-amount
-    meta-llama/llama-4-scout-17b-16e-instruct|{}|results_groq|1024|none provenance-amount
-    moonshotai/kimi-k2-instruct-0905|{}|results_groq|1024|none provenance-amount
   # cases folder:suffix of the results folder, one pair per case set, in this order.
   CASE_SETS: >-
     bench/cases:
@@ -80,6 +79,17 @@ jobs:
             mkdir -p /tmp/saved && (cd /tmp/saved && git init --quiet -b "$RESULTS_BRANCH" && git remote add origin "$REPO_URL")
           fi
           for f in results_groq*/*/scores.jsonl; do [ -f "$f" ] && echo "$(wc -l < "$f") cases: $f"; done; true
+
+      - name: Models Groq serves (for choosing new ones; costs no tokens)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          python - <<'PY' || true
+          import os
+          from openai import OpenAI
+          client = OpenAI(base_url=os.environ["BASE_URL"], api_key=os.environ.get("GROQ_API_KEY", ""))
+          print("\n".join(sorted(m.id for m in client.models.list().data)))
+          PY
 
       - name: Run each model until done, its daily limit or its time for this run
         env:

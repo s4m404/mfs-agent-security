@@ -123,10 +123,16 @@ C. [ ] **Third-party tool-description attacks.** Cases and scripts done:
        tools left clean; case `tp-X` is case `X` with only that change.
        `scripts/compare_tool_poison.py` pairs the two sets per model (attack
        success on each, attacks that worked on only one, exact McNemar,
-       whether the agent called the third-party tool). Left: the model runs,
-       five open models on Kaggle (`notebooks/kaggle_run.ipynb`, about 1 to
-       1.5 hours) and GPT-OSS-120B through the Groq workflow (automatic,
-       into `results_groq_third_party/`).
+       whether the agent called the third-party tool). GPT-OSS-120B done
+       (1 November, `results_groq_third_party/`): with no defence 20 of 37
+       attacks still worked from the third-party tool, against 27 of 37
+       from the wallet's own tool (19 both, 8 only the wallet's tool, 1 only
+       the third-party tool; exact McNemar p = 0.039). It called the
+       third-party tool in only 2 of 37 episodes: its description alone was
+       enough. Both provenance defences stopped all. The two runs are weeks
+       apart on the same API model name. Left: the five open models on
+       Kaggle (`notebooks/kaggle_run.ipynb`, about 1 to 1.5 hours), then
+       the write-up.
 D. [ ] **Newer models through Groq.** Set up: the Groq workflow now runs a
        list of models, each checked first with one tool call and skipped
        (with a warning in the log) if Groq does not serve it or rejects its
@@ -136,8 +142,13 @@ D. [ ] **Newer models through Groq.** Set up: the Groq workflow now runs a
        against it), GPT-OSS-20B, Qwen3-32B (thinking off, like Qwen2.5),
        Llama 4 Scout and Kimi K2, each with `none` and `provenance-amount` on
        the main, message-payee and third-party sets. Groq's model list
-       changed during 2026, so which of these run is known only from the
-       workflow log. Left: check the log, then add the results.
+       changed during 2026: on 1 November it no longer served Qwen3-32B,
+       Llama 4 Scout or Kimi K2 (404), so they were removed and the workflow
+       now prints the models Groq serves. Running: GPT-OSS-20B (main set
+       started) and GPT-OSS-120B at medium effort (after the low-effort runs,
+       since they share one daily limit). For a newer open family, Qwen3
+       (8B, 14B, 32B) can run on Kaggle, as it downloads without a Hugging
+       Face account. Left: the results.
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [ ] **Attack realism:** link each of the 10 SMS and invoice attack texts
