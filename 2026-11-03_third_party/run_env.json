@@ -1,0 +1,18 @@
+{
+ "python": "3.13.16",
+ "vllm": "0.32.0",
+ "torch": "2.13.0+cu130",
+ "cuda": "13.0",
+ "gpus": [
+  "Tesla T4",
+  "Tesla T4"
+ ],
+ "date": "2026-11-03",
+ "models": {
+  "Qwen/Qwen2.5-3B-Instruct": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+  "Qwen/Qwen2.5-7B-Instruct": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "Qwen/Qwen2.5-14B-Instruct-AWQ": "539535859b135b0244c91f3e59816150c8056698",
+  "NousResearch/Hermes-3-Llama-3.1-8B": "896ea440e5a9e6070e3d8a2774daf2b481ab425b",
+  "Qwen/Qwen2.5-32B-Instruct-AWQ": "5c7cb76a268fc6cfbb9c4777eb24ba6e27f9ee6c"
+ }
+}
