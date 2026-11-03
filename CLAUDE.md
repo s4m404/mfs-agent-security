@@ -158,10 +158,12 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   the 37 third-party tool cases with the same three defences, saved to
   `results_third_party/` (about 1 to 1.5 hours). The first attempt (1 November) failed in every model: vLLM
   found no GPU ("Failed to infer device type"), as in a session without the GPU accelerator. The notebook now
-  stops in its first cell if there are fewer than 2 GPUs, checks that vLLM's GPU code (`vllm._C`) loads,
-  and saves `run_env.json` (Python, vLLM, PyTorch, CUDA, GPU names, each model's Hugging Face revision) into
-  results.zip. Granite 3.3 8B did not produce real tool calls on T4/vLLM and
-  is left out of the results. Kaggle keeps its own copy of the notebook:
+  stops in its first cell if there are fewer than 2 GPUs, pins vLLM 0.32.0 (the newest on 23 October, when
+  the runs worked), checks that vLLM finds the GPUs (`current_platform.is_cuda()`), and saves `run_env.json`
+  (Python, vLLM, PyTorch, CUDA, GPU names, each model's Hugging Face revision) into results.zip. vLLM 0.31
+  and later have no `vllm._C` file (their GPU code is `vllm._C_stable_libtorch`), so vLLM's "Failed to
+  import from vllm._C" warning is harmless; a check on `vllm._C` stopped the second attempt (3 November).
+  Granite 3.3 8B did not produce real tool calls on T4/vLLM and is left out of the results. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
   8 cases at a time (`--workers 8`). No Hugging Face account is available,

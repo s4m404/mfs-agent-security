@@ -272,6 +272,19 @@ def test_groq_workflow_model_list_is_well_formed():
         assert load_cases(cases), cases
 
 
+def test_kaggle_notebook_pins_vllm_and_checks_the_gpus():
+    """vLLM is pinned, and the GPU check uses vLLM's own platform check: vLLM 0.31 and later have no
+    `vllm._C` file, so checking for it stops a working install (as on 3 November 2026)."""
+    nb = json.load(open("notebooks/kaggle_run.ipynb", encoding="utf-8"))
+    code = ["".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code"]
+    assert 'assert gpus.count("GPU ") >= 2' in code[0], "the first cell stops a session without GPUs"
+    install = next(c for c in code if "pip install -q vllm" in c)
+    assert re.search(r"pip install -q vllm==\d+\.\d+\.\d+\n", install)
+    assert "current_platform.is_cuda()" in install and "import vllm._C" not in install
+    for c in code:  # every cell compiles, with its ! and % lines (shell, magics) read as `pass`
+        compile(re.sub(r"(?m)^(\s*)[!%].*$", r"\1pass", c), "cell", "exec")
+
+
 def test_check_api_rejects_a_reply_with_thinking_text(monkeypatch, capsys):
     import sys
 
