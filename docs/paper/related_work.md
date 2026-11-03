@@ -36,7 +36,8 @@ FinVault [16] tests financial agents in sandboxed, execution-grounded
 scenarios and also scores state changes rather than text, and MCPTox [19]
 poisons the tool descriptions of real MCP servers, finding that more capable
 models are often more susceptible, as our strongest model was to the one
-tool-description template (section 5.2). Our harness follows
+tool-description template (section 5.2), even when the poisoned tool
+belonged to a separate app it never called. Our harness follows
 AgentDojo's design (a real tool environment, state-based scoring, utility
 measured next to attack success), but all of these benchmarks are in
 English, and their banking tasks are about Western bank transfers. TakaPay

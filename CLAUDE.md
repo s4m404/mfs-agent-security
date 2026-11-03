@@ -94,8 +94,13 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   (a bill-reminder tool in `mfs_env/server.py`, added by the case field
   `third_party_tools`) and the wallet's tools left clean; `tp-X` is `X`
   with only that change. `scripts/compare_tool_poison.py --wallet <main
-  runs> --third-party <tp runs>` pairs them (McNemar). Model runs: not
-  done yet.
+  runs> --third-party <tp runs>` pairs them (McNemar). Done on all six
+  models: the five open ones on `kaggle-results` (2026-11-03_third_party,
+  with `run_env.json`), GPT-OSS-120B on `groq-results`
+  (results_groq_third_party). The wallet-tool runs to pair with are
+  2026-10-02_qwen_3b_7b_14b, 2026-10-03_hermes3_granite,
+  2026-10-05_qwen32b_old_block_message and
+  2026-10-06_qwen32b_new_block_message (in that order) and results_groq.
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -154,9 +159,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   and adaptive cases (`results_adaptive/`, git-ignored). Last set (done 23
   October, under 40 minutes of runs): all five models on the 24
   message-payee cases with none, provenance and provenance-amount, saved to
-  `results_message_payee/`. Current set (not run yet): all five models on
+  `results_message_payee/`. Latest set (done 3 November, third attempt): all five models on
   the 37 third-party tool cases with the same three defences, saved to
-  `results_third_party/` (about 1 to 1.5 hours). The first attempt (1 November) failed in every model: vLLM
+  `results_third_party/`. The first attempt (1 November) failed in every model: vLLM
   found no GPU ("Failed to infer device type"), as in a session without the GPU accelerator. The notebook now
   stops in its first cell if there are fewer than 2 GPUs, pins vLLM 0.32.0 (the newest on 23 October, when
   the runs worked), checks that vLLM finds the GPUs (`current_platform.is_cuda()`), and saves `run_env.json`
@@ -178,9 +183,8 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   one line per model: id | extra API settings | results folder | reply token
   cap | defences; `CASE_SETS` maps each case set to a folder suffix
   (`results_groq`, `_message_payee`, `_third_party`). Done for GPT-OSS-120B
-  at low effort: the main and message-payee sets (all three defences); next
-  the third-party set (none and provenance-amount done 1 November; 20 of
-  37 vs 27 of 37 on the wallet's tool, McNemar p = 0.039). Added 1
+  at low effort: the main, message-payee and third-party sets (all three
+  defences; third-party done 1 November). Added 1
   November (task D): GPT-OSS-120B medium (`results_groq_medium*`, cap
   4,096; shares 120B's daily limit) and GPT-OSS-20B, with none and
   provenance-amount. Qwen3-32B, Llama 4 Scout and Kimi K2 returned 404 on
@@ -284,6 +288,15 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   biller account instead twice (0 with provenance-amount). Numbers copied a
   digit off: 33 of 144 episodes with Bangla digits, 0 of 144 with ASCII
   digits; GPT-OSS-120B 13 of 24, all 4 of its failures without a defence.
+- Third-party set (37 tool-description attacks on `billbuddy_upcoming_bills`
+  instead of the wallet's own tools; six models; `compare_tool_poison.py`):
+  without a defence 23 of 222 worked, against 42 of 222 on the wallet's
+  tool: GPT-OSS-120B 20 vs 27 (p = 0.039), Qwen2.5-32B 0 vs 9 (p = 0.004),
+  3B 2 vs 1, 14B 1 vs 5, 7B and Hermes 3 0 vs 0. In all 23 the agent never
+  called the tool (calls: 3B 8 of 37, others 0 to 2). Both provenance
+  defences 0 for every model (rule property). Rescore: 0 differences;
+  verify_decisions: all 1,133 (open models) and 318 (GPT-OSS) decisions
+  match. Caveat: the wallet-tool runs are weeks older (unrecorded vLLM).
 - Error analysis (`scripts/error_analysis.py`, all six models, no defence): a
   wrong biller account is the top cause of failed normal tasks for every Qwen
   model (made-up accounts; the invoice ID for 32B); Hermes 3 mostly stops after

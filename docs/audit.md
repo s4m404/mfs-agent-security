@@ -271,7 +271,12 @@ the case files are exactly what the models saw.
 8. **Tool-description attacks poison the wallet's own tools** (`send_money`,
    `pay_bill`); that is an upper bound on what a third-party tool could do.
    (Added 31 October: the same 37 attacks with the poison on a third-party
-   tool, `bench/cases_third_party/`; model runs pending.)
+   tool, `bench/cases_third_party/`. Run on all six models by 3 November:
+   23 of 222 worked without a defence, against 42 of 222 on the wallet's
+   tool; GPT-OSS-120B 20 of 37. Every episode re-scores the same from its
+   trace and every logged defence decision matches the current rules
+   (1,133 for the open models, 318 for GPT-OSS-120B). The two versions were
+   run weeks apart.)
 9. **The attack SMS is always the newest message** in the inbox.
 
 **Rule weaknesses found by trying to break the defences:**
@@ -296,8 +301,8 @@ the first version of `provenance-consistent`, which the earlier fix changed
 on purpose.
 
 **Still to do** (in the roadmap): the 39-episode hand check
-(`docs/handcheck.md`, none done yet), third-party tool-description
-attacks, and newer models.
+(`docs/handcheck.md`, none done yet) and newer models (third-party
+tool-description attacks: done 3 November, see item 8).
 
 ## Message-payee run (23 October 2026)
 

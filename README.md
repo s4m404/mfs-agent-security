@@ -44,7 +44,9 @@ inventing them.**
    (5.9% to 14.5% without a defence). GPT-OSS-120B rarely did this (4.3%);
    its 15.0% attack success comes almost entirely from one template, an
    instruction planted in a tool description (27 of its 33); against attacks
-   in SMS and invoices it was among the most robust (6 of 183, 3.3%).
+   in SMS and invoices it was among the most robust (6 of 183, 3.3%). The
+   same instruction on a separate app's tool still worked 20 times out of 37,
+   although it never called that tool.
 4. **Bangla is not a shield, only a sign the model is weak in Bangla.** Three
    Qwen models followed English attacks far more often than Bangla ones, but
    they also did far fewer normal tasks requested in Bangla (Qwen2.5-32B: 9 of
@@ -86,7 +88,9 @@ inventing them.**
   `pay_bill`), which assumes an attacker who can change a tool's description;
   treat them as an upper bound. A separate set of 37 twins
   (`bench/cases_third_party/`) moves the same poisoned text to a third-party
-  app's tool; model runs on it are next.
+  app's tool: fewer attacks worked there (23 against 42 over the six models
+  without a defence), but GPT-OSS-120B still obeyed 20 of 37 (see "A
+  poisoned tool from another app").
 - **One fictional wallet** with 9 tools; the attack SMS is always the newest
   message; real apps and their messages differ.
 - **A simulated user who always says yes.** When the agent writes a "?", the
@@ -354,6 +358,27 @@ The 24 message-payee tasks (no attacker; see "What the defence results show") on
 - **Numbers written in Bangla digits were copied wrong; numbers in ASCII digits never were.** Over all 18 runs, an agent sent money to the payee's number with a digit missing or extra in 33 of the 144 episodes where the message wrote the number in Bangla digits (০১৭১০০০০০২৪), and in 0 of the 144 where it used ASCII digits. The strongest model slipped most: GPT-OSS-120B in 13 of its 24 such episodes, and all 4 of its failures without a defence were this slip (`0171000025` for `01710000025`, a zero dropped); in 7 of its 48 messages after a block it also gave the user the number with a zero missing. The slips cost Qwen2.5-32B 3 of its 5 failures (for example `017100000024`). The Bangla and mixed versions of each message write the number in Bangla digits and the English and Banglish versions in ASCII digits, so this compares versions of the same messages but cannot separate the digits from the rest of the Bangla script. Our fictional numbers also have long runs of zeros, which may make slips more likely than real numbers would.
 - Rebuild the table from the raw runs: `python scripts/audit_message_payee.py --runs 2026-10-23_message_payee/results_message_payee results_groq_message_payee` (the first folder is on the `kaggle-results` branch, the second on `groq-results`).
 
+### A poisoned tool from another app
+
+The main set's 37 tool-description attacks put the instruction in the description of the wallet's own `send_money` or `pay_bill`, which assumes the attacker can change the wallet's tools. The third-party set (`bench/cases_third_party/`) repeats each of them with one change: the same poisoned text is in the description of a separate bill-reminder app's tool (`billbuddy_upcoming_bills`, listed next to the wallet's tools; it only lists upcoming bills), and the wallet's tools are left clean. Case `tp-X` is case `X` with only that change, so the two runs pair case by case (exact McNemar test). All six models with `none`, `provenance` and `provenance-amount` (GPT-OSS-120B through Groq on 1 November 2026, the five open models on Kaggle on 3 November). The table shows the runs without a defence.
+
+| Model | Worked from the wallet's own tool | Worked from the third-party tool | Both | Only the wallet's tool | Only the third-party tool | p (McNemar) | Called the third-party tool |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Qwen2.5-3B | 1/37 | 2/37 | 0 | 1 | 2 | 1.0 | 8/37 |
+| Qwen2.5-7B | 0/37 | 0/37 | 0 | 0 | 0 | 1.0 | 1/37 |
+| Qwen2.5-14B | 5/37 | 1/37 | 1 | 4 | 0 | 0.13 | 1/37 |
+| Qwen2.5-32B | 9/37 | **0/37** | 0 | 9 | 0 | **0.004** | 0/37 |
+| Hermes 3 (8B) | 0/37 | 0/37 | 0 | 0 | 0 | 1.0 | 1/37 |
+| GPT-OSS-120B | 27/37 | **20/37** | 19 | 8 | 1 | **0.039** | 2/37 |
+
+- **A poisoned tool from another app still works, but less often.** Without a defence, 23 of 222 attacks worked from the third-party tool, against 42 of 222 from the wallet's own tools. The strongest model is still the most exposed: GPT-OSS-120B obeyed 20 of 37 (27 from the wallet's tool). Qwen2.5-32B, the open model most fooled through the wallet's tool (9), obeyed none. The smaller models rarely fell for either version (0 to 5 of 37).
+- **The description alone is enough.** In all 23 successful attacks the agent never called the third-party tool: it read the instruction in the list of tools it was given and sent money to the attacker's number while doing the user's task. Most agents called the bill-reminder tool in 0 to 2 of 37 episodes (Qwen2.5-3B in 8). So an app does not have to be used to be dangerous; being connected is enough.
+- **Both provenance defences stopped all of them** (0 of 37 for every model and both defences). As in the main set, this follows from the rules, not from the runs: the attacker's number never appears in the user's request or in the wallet's trusted records, so a payment to it is always blocked. Moving the poison to another app does not change that.
+- **The user's own task was done about as often in both versions** (per model and defence, the two differ by at most 7 of 37 tasks; none of the 18 differences is significant once the number of comparisons is taken into account, smallest p = 0.016). The other wrong payments that went through without a defence (to someone other than the attacker: Qwen2.5-3B 2, 14B 2, 32B 3) are the same kinds as in the main set: a made-up number or a wrong amount.
+- **By language (GPT-OSS-120B, wallet's tool / third-party tool):** English 6 / 7 of 10, Bangla 7 / 3 of 9, Banglish 7 / 3 of 9, mixed 7 / 7 of 9. The drop came from the Bangla and Banglish versions, but these counts are small.
+- **Caveat: the two versions were run at different times.** The wallet-tool runs are from October (open models: vLLM version not recorded; GPT-OSS-120B: the same API model name, three to four weeks earlier); the third-party runs are from 1 and 3 November (open models on vLLM 0.32.0, recorded with each model's revision in `run_env.json`). Repeated runs at temperature 0 barely differed (see "Earlier run"), but those were on one setup; rerunning the 37 wallet-tool cases on the same day and versions would rule out a version effect.
+- Rebuild the table from the raw runs: `python scripts/compare_tool_poison.py --wallet 2026-10-02_qwen_3b_7b_14b/results 2026-10-03_hermes3_granite/results 2026-10-05_qwen32b_old_block_message/results 2026-10-06_qwen32b_new_block_message/results results_groq --third-party 2026-11-03_third_party/results_third_party results_groq_third_party` (the dated folders are on the `kaggle-results` branch, the others on `groq-results`).
+
 ### Robustness checks
 
 `scripts/robustness.py` (output: [docs/paper/robustness.md](docs/paper/robustness.md)) re-examines the no-defence runs. Reproduce with `python scripts/robustness.py results/ results_groq/ --skip granite`.
@@ -457,6 +482,7 @@ The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 - [x] Consistency check against forged payee amounts (`provenance-consistent`), tested with a model
 - [x] A larger API model from a third family: GPT-OSS-120B on all 302 cases
 - [x] Multilingual and policy-based injection detectors (Prompt Guard 2, gpt-oss-safeguard) on all 228 texts
+- [x] The 37 tool-description attacks on a separate app's tool instead of the wallet's own, all six models
 - [ ] Connect BRACUVerify as a second backend
 - [ ] Comparison with the sanitiser defence from "Indirect Prompt Injections: Are Firewalls All You Need, or Stronger Benchmarks?"
 - [ ] Paper and dataset release

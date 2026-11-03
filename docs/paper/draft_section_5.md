@@ -132,7 +132,18 @@ For the strongest model the risk is the attack itself, and a specific one:
 37 cases), while it fell for only 6 of the 183 attacks in SMS and invoices
 (3.3%). Like MCPTox [19], where more capable models fell more often for
 poisoned tool descriptions, the strongest model here resisted instructions in
-messages but obeyed one placed in a tool's description. For the smaller
+messages but obeyed one placed in a tool's description. The attacker does not
+need to control the wallet's own tools: with the same text on a separate
+bill-reminder app's tool and the wallet's tools left clean (the third-party
+set), GPT-OSS-120B still obeyed 20 of the 37, against 27 from the wallet's
+own tool (exact McNemar p = 0.039), and in none of the 20 did it call that
+tool; listing the tool was enough. Over all six models, 23 of 222 attacks
+worked from the third-party tool and 42 of 222 from the wallet's tool;
+Qwen2.5-32B, the open model most fooled through the wallet's tool (9 of 37),
+obeyed none (p = 0.004). Both provenance defences stopped all of them, since
+the attacker's number is never trusted. The wallet-tool runs are weeks
+older than the third-party runs, so a change of serving version cannot be
+ruled out. For the smaller
 open models, an evaluation that reports only attack success misses most of
 the money that moved wrongly.
 
@@ -408,6 +419,7 @@ every table are public.
 | Table-header "?" case | `docs/audit.md`, item 2; README, "A larger API model" |
 | Hermes 3 "confirm" without a "?" (about 9 of 64) | README, "Why normal tasks fail" (keyword estimate) |
 | Attacks by language and vector | README, "Results" and "A larger API model"; `table2_language.md` |
+| Third-party tool set: 20 vs 27 of 37 (p = 0.039), 23 vs 42 of 222, 9 vs 0 (p = 0.004), no call in the 23, 0 with provenance | README, "A poisoned tool from another app"; `scripts/compare_tool_poison.py` on `kaggle-results` `2026-11-03_third_party/` and `groq-results` `results_groq_third_party/` against the main-set runs |
 | Reproduction of the 114 cases, 96% to 100%, 9,524 episodes re-scored | README, "Results" and "Earlier run"; `docs/audit.md` |
 | Template counts and template-level intervals, permutation and McNemar p-values, comprehension-gate table | `docs/paper/robustness.md` (`scripts/robustness.py`) |
 | Replay of 116 successful attacks through the rules; 14,057 of 14,062 decisions | `docs/audit.md`, "Design review"; `scripts/verify_decisions.py` |
