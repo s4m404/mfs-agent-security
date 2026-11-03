@@ -207,7 +207,11 @@ with `provenance-amount`. So the lesson "wrong payments without an
 attacker outnumber attacks" holds for the smaller open models (Qwen2.5,
 Hermes 3); for the strongest
 model the risk is attacks, especially through tool descriptions (27 of 37
-worked).
+worked). The same 37 on a separate app's tool (third-party set, README "A
+poisoned tool from another app"): 20 of 37 for GPT-OSS-120B (p = 0.039 vs
+27), 0 of 37 for Qwen2.5-32B (vs 9, p = 0.004), 23 vs 42 of 222 over six
+models; the agent never called the tool in the 23; 0 with either
+provenance defence. Runs weeks apart (caveat).
 
 ### 5.3 Amount-only attacks need their own check (point 2) [Fig 3, Table 1]
 

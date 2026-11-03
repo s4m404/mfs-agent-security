@@ -170,8 +170,10 @@ deployment needs a way for the user to approve a new payee, which our
 harness does not model, and an agent that reports the block honestly. The tool-description
 attacks of the main set change the description of the wallet's own
 payment tools, which assumes more attacker access than a third-party tool
-would have; the third-party tool set measures the difference [results to
-add].
+would have. With the same text on a separate app's tool, fewer attacks
+worked (23 against 42 of 222 over the six models), but GPT-OSS-120B still
+obeyed 20 of 37 (Section 5.2); those runs were made weeks after the
+wallet-tool runs.
 
 **Measurement.** "Read the attack" means the agent called the tool that
 shows it, so the conditional rates are, if anything, slightly too low.

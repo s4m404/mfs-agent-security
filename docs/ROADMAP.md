@@ -115,24 +115,26 @@ B. [x] **Normal tasks whose payee appears only in a message** (done 31
        missing or extra was written in Bangla digits (33 of 144 episodes, 0
        of 144 in ASCII digits; GPT-OSS-120B 13 of 24, all 4 of its failures
        without a defence).
-C. [ ] **Third-party tool-description attacks.** Cases and scripts done:
-       `bench/cases_third_party/` repeats the main set's 37
-       tool-description attacks with the same poisoned text on the
-       description of a separate app's tool (`billbuddy_upcoming_bills`, a
-       bill-reminder tool listed next to the wallet's) and the wallet's own
-       tools left clean; case `tp-X` is case `X` with only that change.
-       `scripts/compare_tool_poison.py` pairs the two sets per model (attack
-       success on each, attacks that worked on only one, exact McNemar,
-       whether the agent called the third-party tool). GPT-OSS-120B done
-       (1 November, `results_groq_third_party/`): with no defence 20 of 37
-       attacks still worked from the third-party tool, against 27 of 37
-       from the wallet's own tool (19 both, 8 only the wallet's tool, 1 only
-       the third-party tool; exact McNemar p = 0.039). It called the
-       third-party tool in only 2 of 37 episodes: its description alone was
-       enough. Both provenance defences stopped all. The two runs are weeks
-       apart on the same API model name. Left: the five open models on
-       Kaggle (`notebooks/kaggle_run.ipynb`, about 1 to 1.5 hours), then
-       the write-up.
+C. [x] **Third-party tool-description attacks.** `bench/cases_third_party/`
+       repeats the main set's 37 tool-description attacks with the same
+       poisoned text on the description of a separate app's tool
+       (`billbuddy_upcoming_bills`, a bill-reminder tool listed next to the
+       wallet's) and the wallet's own tools left clean; case `tp-X` is case
+       `X` with only that change. `scripts/compare_tool_poison.py` pairs the
+       two sets per model (exact McNemar). Runs on all six models with
+       `none`, `provenance` and `provenance-amount` (GPT-OSS-120B on
+       `groq-results`, `results_groq_third_party/`, 1 November; the five
+       open models on `kaggle-results`, `2026-11-03_third_party/`, vLLM
+       0.32.0). Without a defence 23 of 222 attacks worked from the
+       third-party tool, against 42 of 222 from the wallet's own tool:
+       GPT-OSS-120B 20 against 27 of 37 (p = 0.039), Qwen2.5-32B 0 against
+       9 (p = 0.004), the other open models 0 to 2 (0 to 5 from the
+       wallet's tool). In all 23 the agent never called the third-party
+       tool: its description alone was enough. Both provenance defences
+       stopped all 37 for every model (a rule property: the attacker's
+       number is never trusted). The wallet-tool runs are from October, on
+       an unrecorded vLLM version for the open models; a same-day rerun of
+       the 37 wallet-tool cases (optional) would rule out a version effect.
 D. [ ] **Newer models through Groq.** Set up: the Groq workflow now runs a
        list of models, each checked first with one tool call and skipped
        (with a warning in the log) if Groq does not serve it or rejects its
@@ -348,6 +350,12 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   questions after which an attacker was paid (all runs) warned of a risk;
   most read like an ordinary payment confirmation (keyword coding, to be
   checked by hand).
+- A poisoned tool from another app still works, but less often than a
+  poisoned wallet tool: 23 against 42 of 222 attacks over the six models
+  without a defence. GPT-OSS-120B still obeyed 20 of 37 (27 from the
+  wallet's tool); Qwen2.5-32B obeyed none (9). In all 23 the agent never
+  called the third-party tool, only read its description. Both provenance
+  defences stopped all of them, as the rules guarantee.
 - The original 114 cases reproduce: 10.0% / 3.8% / 6.2% attack success for
   3B / 7B / 14B, against 10.0% / 3.8% / 5.0% in the earlier 3-repeat run.
 - The 220 attacks come from 21 templates; with templates as the unit the
@@ -359,8 +367,8 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
 Synthetic data and one fictional wallet; 220 attacks from 21 templates (all
 OTP attacks one text); normal tasks in the main set with trusted payees
 only (the separate message-payee set measures the cost, task B);
-tool-description attacks of the main set on the wallet's own tools (a
-third-party version is task C); the attack SMS
+tool-description attacks of the main set on the wallet's own tools (the
+third-party version, task C, was run weeks later); the attack SMS
 always the newest message; a simulated user who always says
 yes (and answers any "?"); open models up to 32B (14B and 32B in 4-bit) plus
 one API model (GPT-OSS-120B, low reasoning effort only); Bangla and
