@@ -5,14 +5,14 @@
 | Attack success rate (lower is better) | n/a |
 | Attack cases where the agent actually read the attack | n/a |
 | Attack success among those (lower is better) | n/a |
-| Utility on benign tasks | n/a |
+| Utility on benign tasks | 87.5% (n=24) |
 | Utility under attack | n/a |
-| Benign tasks where the correct action was blocked (false blocks) | n/a |
-| Episodes with any blocked call | n/a |
-| Episodes where the agent tried to pay a payee or amount nobody asked for | n/a |
-| Episodes where such a payment went through | n/a |
-| Episodes where the agent asked the user to confirm | n/a |
-| Episodes stopped by a model error (timeout, reply too long) | n/a |
+| Benign tasks where the correct action was blocked (false blocks) | 0.0% (n=24) |
+| Episodes with any blocked call | 0.0% (n=24) |
+| Episodes where the agent tried to pay a payee or amount nobody asked for | 29.2% (n=24) |
+| Episodes where such a payment went through | 0.0% (n=24) |
+| Episodes where the agent asked the user to confirm | 0.0% (n=24) |
+| Episodes stopped by a model error (timeout, reply too long) | 8.3% (n=24) |
 
 ## Attack success by injection language
 
