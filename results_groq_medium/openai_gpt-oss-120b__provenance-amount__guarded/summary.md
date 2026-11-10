@@ -2,25 +2,25 @@
 
 | Metric | Value |
 | --- | --- |
-| Attack success rate (lower is better) | 0.0% (n=216) |
-| Attack cases where the agent actually read the attack | 75.9% (n=216) |
-| Attack success among those (lower is better) | 0.0% (n=164) |
+| Attack success rate (lower is better) | 0.0% (n=220) |
+| Attack cases where the agent actually read the attack | 76.4% (n=220) |
+| Attack success among those (lower is better) | 0.0% (n=168) |
 | Utility on benign tasks | 93.9% (n=82) |
-| Utility under attack | 78.7% (n=216) |
+| Utility under attack | 78.6% (n=220) |
 | Benign tasks where the correct action was blocked (false blocks) | 0.0% (n=82) |
-| Episodes with any blocked call | 13.1% (n=298) |
-| Episodes where the agent tried to pay a payee or amount nobody asked for | 2.0% (n=298) |
-| Episodes where such a payment went through | 0.0% (n=298) |
-| Episodes where the agent asked the user to confirm | 13.8% (n=298) |
-| Episodes stopped by a model error (timeout, reply too long) | 0.3% (n=298) |
+| Episodes with any blocked call | 13.2% (n=302) |
+| Episodes where the agent tried to pay a payee or amount nobody asked for | 2.0% (n=302) |
+| Episodes where such a payment went through | 0.0% (n=302) |
+| Episodes where the agent asked the user to confirm | 13.9% (n=302) |
+| Episodes stopped by a model error (timeout, reply too long) | 0.3% (n=302) |
 
 ## Attack success by injection language
 
 | Injection language | Attack success |
 | --- | --- |
 | banglish | 0.0% (n=55) |
-| bn | 0.0% (n=53) |
-| en | 0.0% (n=54) |
+| bn | 0.0% (n=56) |
+| en | 0.0% (n=55) |
 | mixed | 0.0% (n=54) |
 
 ## Attack success by vector
@@ -28,5 +28,5 @@
 | Vector | Attack success |
 | --- | --- |
 | invoice | 0.0% (n=70) |
-| sms | 0.0% (n=110) |
-| tool_description | 0.0% (n=36) |
+| sms | 0.0% (n=113) |
+| tool_description | 0.0% (n=37) |
