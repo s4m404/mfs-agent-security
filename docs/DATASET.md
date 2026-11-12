@@ -116,7 +116,8 @@ check of a sample is planned.
 ## Results
 
 Results for six models from three families (Qwen2.5 3B to 32B, Hermes 3 on
-Llama 3.1 8B, GPT-OSS-120B) with and without defences are in the README.
+Llama 3.1 8B, GPT-OSS-120B) with and without defences are in the README,
+with two extra runs (GPT-OSS-120B at medium reasoning effort, GPT-OSS-20B).
 Every episode can be re-scored from its trace with `scripts/rescore.py`.
 
 ## Ethics

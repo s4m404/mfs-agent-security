@@ -158,7 +158,17 @@ and close to it for the two models that can do most tasks. A bigger model
 was not safer: within one family, Qwen2.5-32B did the most normal tasks
 (66% without a defence) and fell for the most attacks (14.5%, about twice
 the smaller models; exact McNemar tests on the same 220 attacks against 3B,
-7B and 14B: p = 0.017, 0.004, 0.008).
+7B and 14B: p = 0.017, 0.004, 0.008). This is not a general rule. In two
+extra runs with the same harness, the smaller GPT-OSS-20B fell for 59 of
+the 220 attacks (26.8%, the highest of any run; p < 0.001 against
+GPT-OSS-120B), 35 of 183 through SMS and invoices where the 120B model fell
+for 6, across 14 of the 21 templates, and it leaked the OTP once (after the
+simulated "yes", Section 5.5). More reasoning did not help either:
+GPT-OSS-120B at medium effort fell for 36 of 220 (33 at low effort,
+p = 0.45; the tool-description attack 27 of 37 at both), and for the
+poisoned third-party tool almost as often as for the wallet's own (25
+against 27 of 37). `provenance-amount` stopped every attack in both extra
+runs.
 
 ### 5.3 Amount-only attacks need their own check
 
@@ -419,6 +429,7 @@ every table are public.
 | Table-header "?" case | `docs/audit.md`, item 2; README, "A larger API model" |
 | Hermes 3 "confirm" without a "?" (about 9 of 64) | README, "Why normal tasks fail" (keyword estimate) |
 | Attacks by language and vector | README, "Results" and "A larger API model"; `table2_language.md` |
+| Extra runs: 59 and 36 of 220, p < 0.001 and p = 0.45, 35 vs 6 of 183, 14 of 21 templates, the OTP leak, 25 vs 27 of 37 | README, "Two extra runs"; `groq-results`, `results_groq_medium*/` and the `openai_gpt-oss-20b` runs in `results_groq*/` (`scripts/rescore.py`, `robustness.py`, `compare_tool_poison.py`) |
 | Third-party tool set: 20 vs 27 of 37 (p = 0.039), 23 vs 42 of 222, 9 vs 0 (p = 0.004), no call in the 23, 0 with provenance | README, "A poisoned tool from another app"; `scripts/compare_tool_poison.py` on `kaggle-results` `2026-11-03_third_party/` and `groq-results` `results_groq_third_party/` against the main-set runs |
 | Reproduction of the 114 cases, 96% to 100%, 9,524 episodes re-scored | README, "Results" and "Earlier run"; `docs/audit.md` |
 | Template counts and template-level intervals, permutation and McNemar p-values, comprehension-gate table | `docs/paper/robustness.md` (`scripts/robustness.py`) |
