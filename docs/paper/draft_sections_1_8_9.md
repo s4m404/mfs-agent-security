@@ -154,8 +154,11 @@ it.
 
 **Models and settings.** Open models up to 32B (14B and 32B quantised to
 4-bit) on T4 GPUs, and one larger model through an API (GPT-OSS-120B with
-reasoning effort set to low; other settings and closed API models were not
-tested). One run per case at temperature 0; repeats at temperature 0 barely
+reasoning effort set to low). Two extra runs, with no defence and the
+amount check only, cover medium reasoning effort and the smaller
+GPT-OSS-20B (Section 5.2); high reasoning effort, newer model families and
+closed API models were not tested. One run per case at temperature 0;
+repeats at temperature 0 barely
 differed in an earlier run (Section 5.7). Granite 3.3 8B is left out
 because its tool calls failed in our serving setup.
 

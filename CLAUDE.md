@@ -184,10 +184,16 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   cap | defences; `CASE_SETS` maps each case set to a folder suffix
   (`results_groq`, `_message_payee`, `_third_party`). Done for GPT-OSS-120B
   at low effort: the main, message-payee and third-party sets (all three
-  defences; third-party done 1 November). Added 1
-  November (task D): GPT-OSS-120B medium (`results_groq_medium*`, cap
-  4,096; shares 120B's daily limit) and GPT-OSS-20B, with none and
-  provenance-amount. Qwen3-32B, Llama 4 Scout and Kimi K2 returned 404 on
+  defences; third-party done 1 November). Task D (done 12 November, all
+  three case sets): GPT-OSS-120B medium (`results_groq_medium*`, cap
+  4,096; shares 120B's daily limit) and GPT-OSS-20B (in `results_groq*`,
+  next to the 120B runs), with none and provenance-amount. Every run in
+  `MODELS` is finished, so scheduled runs now only check the API. The
+  low- and medium-effort folders hold runs with the same names: give the
+  scripts one folder at a time. `results_groq/` now holds a seventh model:
+  to rebuild the six-model `robustness.md` use `--skip granite gpt-oss-20b`;
+  `make_figures.py` adds two GPT-OSS-20B rows to its tables.
+  Qwen3-32B, Llama 4 Scout and Kimi K2 returned 404 on
   1 November and were removed; a model Groq does not serve is skipped with
   a warning, and the "Models Groq serves" step prints the current list. `scripts/check_api.py` checks each model with one
   tool call first (and fails a reply with "<think>" text). Needs the
@@ -256,6 +262,23 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   is mainly about the smaller models); no OTP leaked; 27 of the 33 through tool
   descriptions; 1 model error each in none and provenance-amount; asked a
   "?" in 1 of 302 episodes without defence (a table header).
+- Extra runs (task D, Groq, none and provenance-amount only; reported apart
+  from the six models): GPT-OSS-120B medium effort 36/220 (16.4%; vs low
+  McNemar p = 0.45; tool descriptions 27/37, SMS and invoice 9/183), 78/82
+  normal tasks, read-and-able 22.9% (35/153). GPT-OSS-20B 59/220 (26.8%,
+  the highest of any run; vs 120B p < 0.001; tool descriptions 24/37, SMS
+  19/113, invoice 16/70; 12 ordinary scam messages; amount-only 11/20; 14
+  of 21 templates), 72/82 normal tasks, invented payees 53/302, 9 wrong
+  payments, read-and-able 32.3% (52/161), no language effect (p = 0.28),
+  1 OTP leak of 25 (after the simulated "yes" to a table header "?"), 4
+  model errors. `provenance-amount`: 0/220 in both, 0 correct payments
+  blocked in the 82 normal tasks (77 and 75 done). Message-payee: 24/24
+  (medium) and 21/24 (20B) without a defence, 0/24 with it; 20B copied no
+  number wrong (0/16), medium 10/16 but retried and paid right.
+  Third-party: 20B 12 vs 24 on the wallet's tool (p = 0.002; 3 of the 12
+  after calling the tool), medium 25 vs 27 (p = 0.5); 0 with
+  provenance-amount; 1 correct payment blocked (20B took the amount from
+  the third-party tool). So "bigger was not safer" holds for Qwen only.
 - Among attacks the agent read and on tasks it could do (`scripts/conditional_rates.py`):
   24% / 11% / 15% / 18% (Qwen 3B / 7B / 14B / 32B), 10% (Hermes 3) and 20%
   (GPT-OSS-120B) without defence; 0 with `provenance-amount`.

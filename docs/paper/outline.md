@@ -196,6 +196,12 @@ than successful attacks, and weak task performance hides attack risk.
 Also: a bigger model was not safer: among the Qwen models, 32B did the most
 normal tasks (66%) and fell for the most attacks (14.5%, about twice the
 smaller models); GPT-OSS-120B did 93% and fell for 15.0%.
+Not a general rule [README: two extra runs]: GPT-OSS-20B fell for 59 of 220
+(26.8%; p < 0.001 against the 120B model; 35 vs 6 of 183 SMS and invoice
+attacks; 14 of 21 templates; one OTP leak after the simulated "yes").
+Medium reasoning effort did not help GPT-OSS-120B: 36 vs 33 of 220
+(p = 0.45), third-party tool 25 vs 27 of 37. `provenance-amount`: 0 of 220
+in both extra runs.
 GPT-OSS-120B is the exception to the invented-payee finding [README: a
 larger API model]: 15.0% attack success without a defence (tied with
 Qwen2.5-32B, paired p = 1.0), almost all one tool-description template (27
@@ -322,7 +328,8 @@ forged payee messages. Numbers only by section reference.
 
 - Synthetic data, one fictional wallet, a simulated user that says "yes" once.
 - Small open models on T4 GPUs (4-bit for 14B and 32B), 1 repeat; one strong
-  API model (GPT-OSS-120B) with low reasoning effort only.
+  API model (GPT-OSS-120B) at low reasoning effort; medium effort and
+  GPT-OSS-20B only as extra runs (no defence and `provenance-amount`).
 - Normal detector texts are few (54; 19 Bangla), so intervals are wide;
   the gpt-oss-safeguard policy was written for these attacks.
 - `provenance-consistent` makes the user decide when the payee's messages

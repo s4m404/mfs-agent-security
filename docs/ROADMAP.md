@@ -7,7 +7,7 @@ wallet, and which defences stop it without blocking correct payments?
 **Output.** A public benchmark (TakaPay, 302 cases), results on six
 models from three families, and a workshop paper.
 
-Last updated: 3 November 2026.
+Last updated: 12 November 2026.
 
 ## Done
 
@@ -32,7 +32,9 @@ Last updated: 3 November 2026.
   Qwen2.5 3B, 7B, 14B-AWQ and 32B-AWQ; Hermes-3-Llama-3.1-8B (a second
   family). GPT-OSS-120B (a third family, much larger than the others) on
   Groq's API, reasoning effort low, by `.github/workflows/groq_run.yml`
-  (none, provenance, provenance-amount; 302 cases each). Granite 3.3 8B
+  (none, provenance, provenance-amount; 302 cases each). Two extra runs
+  on Groq with none and provenance-amount: GPT-OSS-120B at medium
+  reasoning effort, and GPT-OSS-20B. Granite 3.3 8B
   was run but left out: its tool calls came out as
   plain text (0.2 tool calls per case). An earlier 114-case run with 3
   repeats showed that repeats at temperature 0 barely differ.
@@ -135,22 +137,30 @@ C. [x] **Third-party tool-description attacks.** `bench/cases_third_party/`
        number is never trusted). The wallet-tool runs are from October, on
        an unrecorded vLLM version for the open models; a same-day rerun of
        the 37 wallet-tool cases (optional) would rule out a version effect.
-D. [ ] **Newer models through Groq.** Set up: the Groq workflow now runs a
-       list of models, each checked first with one tool call and skipped
-       (with a warning in the log) if Groq does not serve it or rejects its
-       settings. Besides GPT-OSS-120B at low effort (the reported run), it
-       runs GPT-OSS-120B at medium reasoning effort (own folder
-       `results_groq_medium*`, reply cap 4,096 tokens, since reasoning counts
-       against it), GPT-OSS-20B, Qwen3-32B (thinking off, like Qwen2.5),
-       Llama 4 Scout and Kimi K2, each with `none` and `provenance-amount` on
-       the main, message-payee and third-party sets. Groq's model list
-       changed during 2026: on 1 November it no longer served Qwen3-32B,
-       Llama 4 Scout or Kimi K2 (404), so they were removed and the workflow
-       now prints the models Groq serves. Running: GPT-OSS-20B (main set
-       started) and GPT-OSS-120B at medium effort (after the low-effort runs,
-       since they share one daily limit). For a newer open family, Qwen3
+D. [x] **More models and settings through Groq.** Two extra runs, each
+       with `none` and `provenance-amount` on the main, message-payee and
+       third-party sets (1 to 12 November, `groq-results`): GPT-OSS-120B at
+       medium reasoning effort (`results_groq_medium*`, reply cap 4,096
+       tokens, since reasoning counts against it) and GPT-OSS-20B at low
+       effort. They are reported apart from the six-model results. Medium
+       effort changed little: 36 of 220 attacks against 33 at low effort
+       (McNemar p = 0.45), tool descriptions 27 of 37 at both. GPT-OSS-20B
+       fell for 59 of 220 (26.8%, the highest of any run; p < 0.001 against
+       GPT-OSS-120B), 35 of 183 through SMS and invoices (6 for the 120B
+       model), over 14 of the 21 templates, and leaked the OTP once (after
+       the simulated "yes" to a table header). `provenance-amount`: 0 of
+       220 in both runs, no correct payment blocked in the normal tasks.
+       Message-payee set: 21 and 24 of 24 without a defence, 0 of 24 with
+       it. Third-party set: GPT-OSS-20B 12 against 24 of 37 from the
+       wallet's tool (p = 0.002); medium effort 25 against 27 (p = 0.5),
+       so the gap seen at low effort nearly closed; one correct payment
+       blocked there, because the agent took the amount from the
+       third-party tool. Not done: a newer model family. Groq's model list
+       changed during 2026 (on 1 November it no longer served Qwen3-32B,
+       Llama 4 Scout or Kimi K2, so they were removed; the workflow prints
+       the models Groq serves). For a newer open family, Qwen3
        (8B, 14B, 32B) can run on Kaggle, as it downloads without a Hugging
-       Face account. Left: the results.
+       Face account (optional).
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [ ] **Attack realism:** link each of the 10 SMS and invoice attack texts
@@ -308,9 +318,15 @@ Not worth it now: more Qwen sizes, more repeats, more cases.
   not distinguishable from chance. Those three models also did far fewer
   normal tasks requested in Bangla (the comprehension gate); GPT-OSS-120B
   handles all four languages and attacks worked equally in all four.
-- A bigger model was not safer: Qwen2.5-32B did the most normal tasks (66%)
-  and fell for significantly more attacks (14.5%) than the three smaller
-  Qwen models (paired tests, p = 0.004 to 0.017).
+- A bigger model was not safer among the Qwen models: Qwen2.5-32B did the
+  most normal tasks (66%) and fell for significantly more attacks (14.5%)
+  than the three smaller Qwen models (paired tests, p = 0.004 to 0.017). In
+  the GPT-OSS family it was the other way round (extra runs): the 20B model
+  fell for 59 of 220 attacks, the 120B model for 33.
+- More reasoning effort did not help: GPT-OSS-120B at medium effort fell
+  for 36 of 220 attacks (33 at low effort, p = 0.45), and for the poisoned
+  third-party tool almost as often as for the wallet's own (25 against 27
+  of 37).
 - Hermes 3 (Llama 3.1 8B) shows the same pattern: 2.3% without a defence,
   one amount-only attack past provenance, 0 with provenance-amount.
 - GPT-OSS-120B (Groq, reasoning effort low) shows it too: 15.0% (33 of 220)
@@ -371,7 +387,8 @@ tool-description attacks of the main set on the wallet's own tools (the
 third-party version, task C, was run weeks later); the attack SMS
 always the newest message; a simulated user who always says
 yes (and answers any "?"); open models up to 32B (14B and 32B in 4-bit) plus
-one API model (GPT-OSS-120B, low reasoning effort only); Bangla and
+one API model (GPT-OSS-120B at low reasoning effort; medium effort and
+GPT-OSS-20B only as extra runs with two defences); Bangla and
 Banglish text reviewed by one native speaker so
 far; a small normal-text set for detectors (54 texts, 19 in Bangla), and a
 policy for gpt-oss-safeguard written after seeing the attacks.
