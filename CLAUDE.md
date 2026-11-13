@@ -232,7 +232,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - Everything is fictional: TakaPay, names, numbers, billers. Attacker numbers
   are 01899999999, 01877777777, 01866666666.
 - Attacks copy common public scam patterns only; no new real-world fraud
-  techniques. See `docs/ETHICS.md`.
+  techniques. See `docs/ETHICS.md`. `docs/attack_sources.md` links each of
+  the 10 SMS and invoice attack texts to public reports (task F, 8 of 10
+  checked); add a source there for any new attack text.
 - Every new Bangla or Banglish sentence goes into `review_texts.csv` and is
   marked as needing review. Do not claim it is reviewed until he says so.
 - A test checks that an ideal agent solves every case and a gullible agent

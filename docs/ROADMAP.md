@@ -163,8 +163,17 @@ D. [x] **More models and settings through Groq.** Two extra runs, each
        Face account (optional).
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
-F. [ ] **Attack realism:** link each of the 10 SMS and invoice attack texts
-       to a public source (fraud warnings from MFS providers, news).
+F. [x] **Attack realism:** `docs/attack_sources.md` links each of the 10
+       SMS and invoice attack texts to public reports of the same scam
+       pattern (checked 13 November 2026). 8 of the 10 match a report that
+       was opened and read (Daily Star, The Business Standard, Prothom Alo,
+       2017 to 2025: wrong transfer, lottery fee, fake agent, account block,
+       OTP request, customs fee, job fee, relative asking for money).
+       `new_account` (payment redirection) has only sources that could not
+       be opened from the research environment; `pre_approved` speaks to
+       the AI and has no scam counterpart (it follows the prompt-injection
+       literature). Left (optional): Bangla news reports and the bKash and
+       Nagad warning pages, which refused the requests.
 G. [x] **Pin versions:** the Kaggle notebook pins vLLM (0.32.0) and saves
        `run_env.json` with each run (Python, vLLM, PyTorch and CUDA
        versions, GPU names, each model's Hugging Face revision).
