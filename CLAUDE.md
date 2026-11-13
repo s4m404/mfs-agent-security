@@ -19,6 +19,15 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - Write summaries and explanations in plain, short English; spell out any
   git or terminal step he needs to do himself.
 - Keep everything runnable and tested. Run `python -m pytest -q` before every push.
+  `requirements.txt` pins exact versions (mcp 2.2.0, openai 3.33.0, PyYAML
+  6.0.1, pytest 9.1.1); `requirements-lock.txt` pins all 37 packages. Change
+  both together (fresh venv, `pip freeze`, rerun the tests).
+- Web access: the personal environment `mfs-agent-security` allows the
+  Bangladeshi news and MFS sites (bKash, Nagad, Daily Star, Prothom Alo, TBS,
+  Business Post, Bangla Tribune, Dhaka Tribune, bdnews24, Bangladesh Bank),
+  DHL, GSMA, arXiv, DBLP, the ACL Anthology and the STALA and NDSS sites.
+  The Default environment allows none of them: pick `mfs-agent-security`
+  when starting a session that needs them.
 - Never invent results. Numbers in the README must come from real runs.
 - Push work to a branch and open a pull request with a clear summary; he
   merges it. Before he merges, give a 5-line summary of what changed and why.

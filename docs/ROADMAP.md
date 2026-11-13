@@ -7,7 +7,7 @@ wallet, and which defences stop it without blocking correct payments?
 **Output.** A public benchmark (TakaPay, 302 cases), results on six
 models from three families, and a workshop paper.
 
-Last updated: 12 November 2026.
+Last updated: 13 November 2026.
 
 ## Done
 
@@ -165,10 +165,13 @@ E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [ ] **Attack realism:** link each of the 10 SMS and invoice attack texts
        to a public source (fraud warnings from MFS providers, news).
-G. [ ] **Pin versions:** the Kaggle notebook pins vLLM (0.32.0) and saves
+G. [x] **Pin versions:** the Kaggle notebook pins vLLM (0.32.0) and saves
        `run_env.json` with each run (Python, vLLM, PyTorch and CUDA
-       versions, GPU names, each model's Hugging Face revision). Left:
-       fixed versions in `requirements.txt`.
+       versions, GPU names, each model's Hugging Face revision).
+       `requirements.txt` gives exact versions of the four direct
+       dependencies, and `requirements-lock.txt` every package (37, the same
+       on Python 3.12 and 3.13; all tests pass with it). vLLM 0.32.0 accepts
+       these versions.
 
 1. [ ] **Second native-speaker check** of a sample of about 50 Bangla and
        Banglish sentences; report agreement. Review the 9 adaptive-set

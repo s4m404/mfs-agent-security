@@ -156,7 +156,7 @@ user request ──> agent (any LLM) ──> defence ──> MCP server ──> 
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt   # exact versions; requirements-lock.txt pins every dependency too
 python -m pytest            # runs without any model
 
 # with a local model through Ollama

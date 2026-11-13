@@ -1,4 +1,6 @@
-mcp>=2.2,<3
-openai>=1.40
-pyyaml>=6
-pytest>=8
+# Exact versions the benchmark was tested with (Python 3.12 and 3.13).
+# requirements-lock.txt lists every package, dependencies included.
+mcp==2.2.0
+openai==3.33.0
+pyyaml==6.0.1
+pytest==9.1.1
