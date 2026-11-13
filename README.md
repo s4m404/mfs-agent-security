@@ -523,7 +523,7 @@ The full plan with dates is in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Ethics
 
-All data is synthetic, and "TakaPay" is fictional. See [docs/ETHICS.md](docs/ETHICS.md).
+All data is synthetic, and "TakaPay" is fictional. See [docs/ETHICS.md](docs/ETHICS.md). Public reports of the scam pattern behind each attack text are listed in [docs/attack_sources.md](docs/attack_sources.md).
 
 ## License and citation
 
