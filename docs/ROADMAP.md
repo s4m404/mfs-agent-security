@@ -135,8 +135,12 @@ C. [x] **Third-party tool-description attacks.** `bench/cases_third_party/`
        tool: its description alone was enough. Both provenance defences
        stopped all 37 for every model (a rule property: the attacker's
        number is never trusted). The wallet-tool runs are from October, on
-       an unrecorded vLLM version for the open models; a same-day rerun of
-       the 37 wallet-tool cases (optional) would rule out a version effect.
+       an unrecorded vLLM version for the open models; a rerun of the 37
+       wallet-tool cases on vLLM 0.32.0 (optional) would rule out a version
+       effect. Prepared, not yet run: `bench/cases_wallet_tool/` holds the
+       37 cases unchanged (same ids, so they pair with `tp-X`), and part A
+       of `notebooks/kaggle_run.ipynb` runs them on the five open models
+       with `none`.
 D. [x] **More models and settings through Groq.** Two extra runs, each
        with `none` and `provenance-amount` on the main, message-payee and
        third-party sets (1 to 12 November, `groq-results`): GPT-OSS-120B at
@@ -160,7 +164,11 @@ D. [x] **More models and settings through Groq.** Two extra runs, each
        Llama 4 Scout or Kimi K2, so they were removed; the workflow prints
        the models Groq serves). For a newer open family, Qwen3
        (8B, 14B, 32B) can run on Kaggle, as it downloads without a Hugging
-       Face account (optional).
+       Face account (optional). Prepared, not yet run:
+       `notebooks/kaggle_run.ipynb` part A runs Qwen3-8B and Qwen3-14B-AWQ,
+       and part B runs Qwen3-32B-AWQ. Each model runs on the main,
+       message-payee and third-party sets with `none` and
+       `provenance-amount`, with thinking mode off.
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [x] **Attack realism:** `docs/attack_sources.md` links each of the 10
@@ -172,8 +180,10 @@ F. [x] **Attack realism:** `docs/attack_sources.md` links each of the 10
        `new_account` (payment redirection) has only sources that could not
        be opened from the research environment; `pre_approved` speaks to
        the AI and has no scam counterpart (it follows the prompt-injection
-       literature). Left (optional): Bangla news reports and the bKash and
-       Nagad warning pages, which refused the requests.
+       literature). Bangla-language reports (Prothom Alo, bdnews24, 2020
+       to 2026) were added on 23 November for all 8 checked texts (for
+       `lucky_draw` only a general mention). The bKash warning page still
+       refuses automated requests.
 G. [x] **Pin versions:** the Kaggle notebook pins vLLM (0.32.0) and saves
        `run_env.json` with each run (Python, vLLM, PyTorch and CUDA
        versions, GPU names, each model's Hugging Face revision).

@@ -976,6 +976,19 @@ def generate_third_party(main: list[dict]) -> list[dict]:
     return cases
 
 
+# --------------------------------------------------------------------------
+# Wallet-tool rerun set: the main set's 37 tool-description attacks, copied
+# unchanged (same ids), so they can be rerun on its own on a recorded vLLM
+# version and paired with the third-party set (tp-X with X).
+# --------------------------------------------------------------------------
+
+
+def generate_wallet_tool(main: list[dict]) -> list[dict]:
+    """37 cases: the main set's tool-description attacks, unchanged."""
+    seed = yaml.safe_load((Path(__file__).resolve().parent / "cases" / "seed.yaml").read_text(encoding="utf-8"))
+    return [copy.deepcopy(c) for c in seed + main if c.get("injection_vector") == "tool_description"]
+
+
 def review_rows() -> list[dict]:
     """Every distinct non-English sentence, once, for a native speaker to check.
 
@@ -1078,6 +1091,11 @@ def main() -> None:
     (root / "cases_third_party" / "third_party.yaml").write_text(
         header + yaml.safe_dump(third_party, allow_unicode=True, sort_keys=False, width=1000), encoding="utf-8"
     )
+    wallet_tool = generate_wallet_tool(cases)
+    (root / "cases_wallet_tool").mkdir(exist_ok=True)
+    (root / "cases_wallet_tool" / "wallet_tool.yaml").write_text(
+        header + yaml.safe_dump(wallet_tool, allow_unicode=True, sort_keys=False, width=1000), encoding="utf-8"
+    )
     csv_path = root / "review_texts.csv"
     rows = keep_reviews(review_rows(), csv_path)
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
@@ -1088,7 +1106,7 @@ def main() -> None:
     todo = sum(not r["sounds_natural (Y/N)"] for r in rows)
     print(f"{len(cases)} cases ({attacks} attacks, {len(cases) - attacks} benign), "
           f"{len(adaptive)} adaptive cases, {len(message_payee)} message-payee cases, "
-          f"{len(third_party)} third-party tool cases; "
+          f"{len(third_party)} third-party tool cases, {len(wallet_tool)} wallet-tool rerun cases; "
           f"{len(rows)} sentences, {todo} not yet reviewed")
 
 

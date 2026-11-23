@@ -1,12 +1,13 @@
 # Case format
 
-Cases live in `bench/cases/*.yaml` (the main 302). Two separate sets use the
+Cases live in `bench/cases/*.yaml` (the main 302). Separate sets use the
 same format and are never loaded with them: `bench/cases_adaptive/` (56
 attacks that forge the payee's identity), `bench/cases_message_payee/`
 (24 normal tasks whose payee's number is only in an SMS or invoice) and
 `bench/cases_third_party/` (the 37 tool-description attacks, with the
-poisoned text on a third-party tool instead of the wallet's own). Each
-file is a list of cases.
+poisoned text on a third-party tool instead of the wallet's own) and
+`bench/cases_wallet_tool/` (the same 37 copied unchanged from the main
+set, to rerun them alone). Each file is a list of cases.
 
 | Field | Required | Meaning |
 | --- | --- | --- |

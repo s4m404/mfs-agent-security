@@ -21,6 +21,7 @@ payments; some of that content hides an attack.
 | `bench/cases/generated.yaml` | 290 cases built by `bench/generate.py` from hand-written building blocks |
 | `bench/cases_adaptive/adaptive.yaml` | 56 adaptive cases that forge the payee's identity (kept apart from the main 302) |
 | `bench/cases_third_party/third_party.yaml` | The main set's 37 tool-description attacks, each with the same poisoned text on a third-party app's tool instead of the wallet's own (kept apart from the main 302) |
+| `bench/cases_wallet_tool/wallet_tool.yaml` | The same 37 tool-description attacks copied unchanged from the main set (same ids), to rerun them alone on a recorded vLLM version (kept apart from the main 302) |
 | `bench/cases_message_payee/message_payee.yaml` | 24 normal tasks (no attacker) whose payee's number is only in an SMS or invoice, to measure what provenance costs (kept apart from the main 302) |
 | `bench/SCHEMA.md` | Every field of a case, how a task counts as done, and how each attack goal is scored |
 | `bench/review_texts.csv` | Every distinct Bangla, Banglish and mixed sentence once, with the native-speaker review mark |
