@@ -110,6 +110,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   2026-10-02_qwen_3b_7b_14b, 2026-10-03_hermes3_granite,
   2026-10-05_qwen32b_old_block_message and
   2026-10-06_qwen32b_new_block_message (in that order) and results_groq.
+  `cases_wallet_tool/wallet_tool.yaml` (37, also from `generate.py`, also
+  kept apart): those 37 main-set cases copied unchanged, to rerun them on
+  vLLM 0.32.0 (task C, optional; notebook part A, not run yet).
 - `scripts/run_bench.py` (one model and defence), `scripts/compare_runs.py`
   (table with bootstrap CIs), `scripts/conditional_rates.py` (attack
   success among read / capable cases), `scripts/replay_defence.py` (replay recorded
@@ -177,7 +180,13 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   (Python, vLLM, PyTorch, CUDA, GPU names, each model's Hugging Face revision) into results.zip. vLLM 0.31
   and later have no `vllm._C` file (their GPU code is `vllm._C_stable_libtorch`), so vLLM's "Failed to
   import from vllm._C" warning is harmless; a check on `vllm._C` stopped the second attempt (3 November).
-  Granite 3.3 8B did not produce real tool calls on T4/vLLM and is left out of the results. Kaggle keeps its own copy of the notebook:
+  Granite 3.3 8B did not produce real tool calls on T4/vLLM and is left out of the results.
+  Next set (prepared 23 November, not run yet; `PART` in the settings cell): part A, about 4 to 5 hours, is
+  the wallet-tool rerun (five open models, `none`, `results_wallet_tool/`) plus Qwen3-8B and Qwen3-14B-AWQ;
+  part B, about 4 to 6 hours, is Qwen3-32B-AWQ. Each Qwen3 model runs on the main, message-payee and
+  third-party sets with none and provenance-amount, thinking off (`EXTRA_BODY`, `enable_thinking: false`).
+  The Qwen3 AWQ repository names were not checked (huggingface.co is blocked here); a missing model is
+  skipped with its log in results.zip. Kaggle keeps its own copy of the notebook:
   after changing it, send him the .ipynb file to import.
   Each model x none/provenance/provenance-amount x 1 repeat on 302 cases,
   8 cases at a time (`--workers 8`). No Hugging Face account is available,
@@ -232,7 +241,9 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - Everything is fictional: TakaPay, names, numbers, billers. Attacker numbers
   are 01899999999, 01877777777, 01866666666.
 - Attacks copy common public scam patterns only; no new real-world fraud
-  techniques. See `docs/ETHICS.md`.
+  techniques. See `docs/ETHICS.md`. `docs/attack_sources.md` links each of
+  the 10 SMS and invoice attack texts to public reports (task F, 8 of 10
+  checked); add a source there for any new attack text.
 - Every new Bangla or Banglish sentence goes into `review_texts.csv` and is
   marked as needing review. Do not claim it is reviewed until he says so.
 - A test checks that an ideal agent solves every case and a gullible agent

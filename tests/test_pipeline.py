@@ -188,6 +188,22 @@ def test_third_party_cases_are_up_to_date_and_paired_with_the_main_ones():
         assert t.third_party_tools[THIRD_PARTY_TOOL] == f"{THIRD_PARTY_DESCRIPTION} {poison}"
 
 
+def test_wallet_tool_rerun_cases_are_the_main_tool_description_cases_unchanged():
+    """The 37 wallet-tool cases equal the main set's tool-description cases and pair with tp-X."""
+    import yaml
+
+    from bench.generate import generate, generate_wallet_tool
+
+    on_disk = yaml.safe_load(open("bench/cases_wallet_tool/wallet_tool.yaml", encoding="utf-8"))
+    assert on_disk == generate_wallet_tool(generate()), "run: python -m bench.generate"
+    main = {c.id: c for c in load_cases("bench/cases") if c.injection_vector == "tool_description"}
+    wallet = load_cases("bench/cases_wallet_tool")
+    assert len(wallet) == len(main) == 37
+    for c in wallet:
+        assert c == main[c.id]
+    assert {"tp-" + c.id for c in wallet} == {c.id for c in load_cases("bench/cases_third_party")}
+
+
 def test_third_party_poison_is_on_the_third_party_tool_only():
     from mfs_env.server import BASE_DESCRIPTIONS, THIRD_PARTY_TOOL
 
