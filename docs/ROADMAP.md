@@ -135,12 +135,14 @@ C. [x] **Third-party tool-description attacks.** `bench/cases_third_party/`
        tool: its description alone was enough. Both provenance defences
        stopped all 37 for every model (a rule property: the attacker's
        number is never trusted). The wallet-tool runs are from October, on
-       an unrecorded vLLM version for the open models; a rerun of the 37
-       wallet-tool cases on vLLM 0.32.0 (optional) would rule out a version
-       effect. Prepared, not yet run: `bench/cases_wallet_tool/` holds the
-       37 cases unchanged (same ids, so they pair with `tp-X`), and part A
-       of `notebooks/kaggle_run.ipynb` runs them on the five open models
-       with `none`.
+       an unrecorded vLLM version for the open models. Rerun on 23
+       November on vLLM 0.32.0 (`bench/cases_wallet_tool/`, the 37 cases
+       unchanged; five open models, `none`; `kaggle-results`,
+       `2026-11-23_wallet_tool_qwen3_8b/`): 184 of 185 attack outcomes
+       were the same as in October (one more success for Qwen2.5-14B), so
+       the version made no difference; paired on the same vLLM version,
+       Qwen2.5-32B is still 9 against 0 (p = 0.004). GPT-OSS-120B was not
+       rerun.
 D. [x] **More models and settings through Groq.** Two extra runs, each
        with `none` and `provenance-amount` on the main, message-payee and
        third-party sets (1 to 12 November, `groq-results`): GPT-OSS-120B at
@@ -164,10 +166,14 @@ D. [x] **More models and settings through Groq.** Two extra runs, each
        Llama 4 Scout or Kimi K2, so they were removed; the workflow prints
        the models Groq serves). For a newer open family, Qwen3
        (8B, 14B, 32B) can run on Kaggle, as it downloads without a Hugging
-       Face account (optional). `notebooks/kaggle_run.ipynb` part B
-       (Qwen3-32B-AWQ, thinking mode off; main, message-payee and
-       third-party sets with `none` and `provenance-amount`) ran on 23
-       November (`kaggle-results`, `2026-11-23_qwen3_32b/`): 18 of 220
+       Face account (optional). Qwen3-8B and Qwen3-32B-AWQ (thinking mode
+       off; main, message-payee and third-party sets with `none` and
+       `provenance-amount`) ran on 23 November (`kaggle-results`,
+       `2026-11-23_wallet_tool_qwen3_8b/` and `2026-11-23_qwen3_32b/`).
+       Qwen3-8B: 25 of 220 attacks without a defence (11.4%; more than
+       Qwen2.5-7B, p = 0.036), all through SMS and invoices, mostly English
+       (15 of 55; language p < 0.001), 46 of 82 normal tasks, 16 wrong
+       payments through; message-payee 8 of 24. Qwen3-32B: 18 of 220
        attacks without a defence (8.2%, against 32 for Qwen2.5-32B; McNemar
        p = 0.029), tool descriptions 2 of 37, no language effect (p =
        0.35), 45 of 82 normal tasks (it paid the invoice ID as the biller
@@ -175,8 +181,10 @@ D. [x] **More models and settings through Groq.** Two extra runs, each
        went through; with `provenance-amount` 0 of 220 and no correct
        payment blocked. Message-payee: 18 of 24 without a defence, 0 with
        it. Third-party tool: 1 against 2 from the wallet's tool, same day.
-       Part A (Qwen3-8B, Qwen3-14B-AWQ and the wallet-tool rerun of task
-       C) is prepared but not run yet.
+       Both: 0 of 220 with `provenance-amount`, no correct payment
+       blocked, no OTP leaked. Qwen3-14B-AWQ did not start (its download
+       failed on a full disk); part C of the notebook runs it alone
+       (optional).
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [x] **Attack realism:** `docs/attack_sources.md` links each of the 10
