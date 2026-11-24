@@ -18,6 +18,7 @@ Folder names follow `<model>__<defence>__<prompt>`. The code is on `main`.
 | `2026-10-06_detectors/results_detectors/` | Injection detectors (keyword, ProtectAI DeBERTa v2, deepset DeBERTa) on every untrusted text: `flags.jsonl` (one row per text), `summary.md` | 174 attack and 54 normal texts |
 | `2026-10-23_message_payee/results_message_payee/` | Qwen2.5 3B, 7B, 14B-AWQ, 32B-AWQ and Hermes-3-Llama-3.1-8B: none, provenance, provenance-amount | message-payee 24 (normal tasks whose payee is only in a message) |
 | `2026-11-03_third_party/results_third_party/` | Qwen2.5 3B, 7B, 14B-AWQ, 32B-AWQ and Hermes-3-Llama-3.1-8B: none, provenance, provenance-amount (vLLM 0.32.0; `run_env.json` next to it records the Python, vLLM, PyTorch and CUDA versions, the GPUs and each model's Hugging Face revision) | third-party 37 (the main set's tool-description attacks, with the poisoned text on a third-party tool) |
+| `2026-11-23_qwen3_32b/results/`, `results_message_payee/`, `results_third_party/` | Qwen3-32B-AWQ (a newer model family; thinking mode off): none and provenance-amount (vLLM 0.32.0; `run_env.json` next to them) | main 302, message-payee 24, third-party 37 |
 
 Granite 3.3 is not in the reported results: its tool calls came out as plain
 text in this setup (0.2 tool calls per case).

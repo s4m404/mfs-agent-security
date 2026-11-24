@@ -1,0 +1,14 @@
+{
+ "python": "3.13.16",
+ "vllm": "0.32.0",
+ "torch": "2.13.0+cu130",
+ "cuda": "13.0",
+ "gpus": [
+  "Tesla T4",
+  "Tesla T4"
+ ],
+ "date": "2026-11-23",
+ "models": {
+  "Qwen/Qwen3-32B-AWQ": "0499c3ac83fdef8810b907a23894ba91e95eddd8"
+ }
+}
