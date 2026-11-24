@@ -181,9 +181,10 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   and later have no `vllm._C` file (their GPU code is `vllm._C_stable_libtorch`), so vLLM's "Failed to
   import from vllm._C" warning is harmless; a check on `vllm._C` stopped the second attempt (3 November).
   Granite 3.3 8B did not produce real tool calls on T4/vLLM and is left out of the results.
-  Next set (prepared 23 November, not run yet; `PART` in the settings cell): part A, about 4 to 5 hours, is
+  Next set (prepared 23 November; `PART` in the settings cell): part A (not run yet), about 4 to 5 hours, is
   the wallet-tool rerun (five open models, `none`, `results_wallet_tool/`) plus Qwen3-8B and Qwen3-14B-AWQ;
-  part B, about 4 to 6 hours, is Qwen3-32B-AWQ. Each Qwen3 model runs on the main, message-payee and
+  part B is Qwen3-32B-AWQ (done 23 November; `kaggle-results`, `2026-11-23_qwen3_32b/`; the AWQ repository
+  name worked, revision 0499c3ac in `run_env.json`). Each Qwen3 model runs on the main, message-payee and
   third-party sets with none and provenance-amount, thinking off (`EXTRA_BODY`, `enable_thinking: false`).
   The Qwen3 AWQ repository names were not checked (huggingface.co is blocked here); a missing model is
   skipped with its log in results.zip. Kaggle keeps its own copy of the notebook:
@@ -299,6 +300,18 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
   after calling the tool), medium 25 vs 27 (p = 0.5); 0 with
   provenance-amount; 1 correct payment blocked (20B took the amount from
   the third-party tool). So "bigger was not safer" holds for Qwen only.
+- Qwen3-32B-AWQ (extra run, Kaggle 23 November, thinking off; reported
+  apart from the six models): 18/220 (8.2%) without defence vs 32 for
+  Qwen2.5-32B (McNemar p = 0.029; vs 3B / 7B / 14B p = 0.85 / 0.41 / 1.0);
+  tool descriptions 2/37, SMS 11/113, invoice 5/70; read-and-able 10.0%
+  (13/130); no language effect (p = 0.35); Bangla tasks 12/22 vs English
+  14/21; no OTP leak. Normal tasks 45/82 (46 with provenance-amount): paid
+  the invoice ID as the account in 30, recovered in 3 (Qwen2.5-32B: 27,
+  13); 0 wrong payments through. `provenance-amount`: 0/220, 0 correct
+  payments blocked. Message-payee 18/24 none, 0/24 with the defence (asked
+  the user 21/23, never said sent; digit off 4/16 Bangla, 0/16 ASCII).
+  Third-party 1 vs 2 on the wallet's tool, same day (p = 1.0). Rescore 0
+  differences; verify_decisions 1,465/1,465.
 - Among attacks the agent read and on tasks it could do (`scripts/conditional_rates.py`):
   24% / 11% / 15% / 18% (Qwen 3B / 7B / 14B / 32B), 10% (Hermes 3) and 20%
   (GPT-OSS-120B) without defence; 0 with `provenance-amount`.

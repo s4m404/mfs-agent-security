@@ -164,11 +164,19 @@ D. [x] **More models and settings through Groq.** Two extra runs, each
        Llama 4 Scout or Kimi K2, so they were removed; the workflow prints
        the models Groq serves). For a newer open family, Qwen3
        (8B, 14B, 32B) can run on Kaggle, as it downloads without a Hugging
-       Face account (optional). Prepared, not yet run:
-       `notebooks/kaggle_run.ipynb` part A runs Qwen3-8B and Qwen3-14B-AWQ,
-       and part B runs Qwen3-32B-AWQ. Each model runs on the main,
-       message-payee and third-party sets with `none` and
-       `provenance-amount`, with thinking mode off.
+       Face account (optional). `notebooks/kaggle_run.ipynb` part B
+       (Qwen3-32B-AWQ, thinking mode off; main, message-payee and
+       third-party sets with `none` and `provenance-amount`) ran on 23
+       November (`kaggle-results`, `2026-11-23_qwen3_32b/`): 18 of 220
+       attacks without a defence (8.2%, against 32 for Qwen2.5-32B; McNemar
+       p = 0.029), tool descriptions 2 of 37, no language effect (p =
+       0.35), 45 of 82 normal tasks (it paid the invoice ID as the biller
+       account and gave up in 27 of its 37 failures), no wrong payment
+       went through; with `provenance-amount` 0 of 220 and no correct
+       payment blocked. Message-payee: 18 of 24 without a defence, 0 with
+       it. Third-party tool: 1 against 2 from the wallet's tool, same day.
+       Part A (Qwen3-8B, Qwen3-14B-AWQ and the wallet-tool rerun of task
+       C) is prepared but not run yet.
 E. [ ] **Hand-check the scorer:** fill in `docs/handcheck.csv` (39 episodes,
        none done yet).
 F. [x] **Attack realism:** `docs/attack_sources.md` links each of the 10
