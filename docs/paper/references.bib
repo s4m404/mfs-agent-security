@@ -1,8 +1,12 @@
 % References for the STALA 2027 paper (docs/paper/related_work.md).
-% Written by hand from the facts checked in related_work.md, "References"
-% (17 October 2026). Before submitting, compare each entry with the
-% paper's official BibTeX (arXiv, ACL Anthology, OpenReview or the
-% proceedings page) and fill in missing pages.
+% Written by hand (17 October 2026). Checked on 26 November 2026: every
+% arXiv entry against its arXiv page (title, authors, versions, comments),
+% the three ACL papers against the ACL Anthology's BibTeX, and the
+% Bangladesh Bank figure against the bank's own MFS statement. Not checked
+% (sites not reachable from the research environment): DBLP for the
+% AISec, ICLR, NeurIPS and AAAI pages; the OWASP page; the ProtectAI
+% model card. FinVault (arXiv:2601.07853) was dropped: its v2 comment
+% says the authors are withdrawing the public preprint.
 
 @inproceedings{greshake2023indirect,
   title     = {Not What You've Signed Up For: Compromising Real-World {LLM}-Integrated Applications with Indirect Prompt Injection},
@@ -19,7 +23,7 @@
   booktitle = {Findings of the Association for Computational Linguistics: ACL 2024},
   pages     = {10471--10506},
   year      = {2024},
-  note      = {arXiv:2403.02691}
+  doi       = {10.18653/v1/2024.findings-acl.624}
 }
 
 @inproceedings{debenedetti2024agentdojo,
@@ -59,9 +63,9 @@
   title        = {deberta-v3-base-prompt-injection-v2},
   author       = {{ProtectAI}},
   howpublished = {Hugging Face model card, \url{https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2}},
-  year         = {2024},
-  note         = {Accessed October 2026; check the release year on the model page}
+  year         = {2024}
 }
+% protectai2024deberta: release year not checked (huggingface.co not reachable from the research environment).
 
 @inproceedings{yong2023lowresource,
   title     = {Low-Resource Languages Jailbreak {GPT-4}},
@@ -80,20 +84,21 @@
 }
 
 @inproceedings{wang2024xsafety,
-  title     = {All Languages Matter: On the Multilingual Safety of Large Language Models},
+  title     = {All Languages Matter: On the Multilingual Safety of {LLMs}},
   author    = {Wang, Wenxuan and Tu, Zhaopeng and Chen, Chang and Yuan, Youliang and Huang, Jen-tse and Jiao, Wenxiang and Lyu, Michael R.},
   booktitle = {Findings of the Association for Computational Linguistics: ACL 2024},
+  pages     = {5865--5877},
   year      = {2024},
-  note      = {ACL Anthology 2024.findings-acl.349; arXiv:2310.00905}
+  doi       = {10.18653/v1/2024.findings-acl.349}
 }
 
 @inproceedings{yoo2025codeswitching,
   title     = {Code-Switching Red-Teaming: {LLM} Evaluation for Safety and Multilingual Understanding},
   author    = {Yoo, Haneul and Yang, Yongjin and Lee, Hwaran},
-  booktitle = {Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (ACL)},
+  booktitle = {Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
   pages     = {13392--13413},
   year      = {2025},
-  note      = {arXiv:2406.15481}
+  doi       = {10.18653/v1/2025.acl-long.657}
 }
 
 @misc{costa2025fides,
@@ -117,17 +122,18 @@
   title        = {{OWASP} Top 10 for Agentic Applications},
   author       = {{OWASP GenAI Security Project}},
   year         = {2026},
-  howpublished = {\url{https://genai.owasp.org/}},
-  note         = {Accessed October 2026; replace with the exact page URL}
+  howpublished = {\url{https://genai.owasp.org/}}
 }
+% owasp2026agentic: exact page URL not checked (genai.owasp.org not reachable from the research environment).
 
 @misc{bangladeshbank2025mfs,
-  title        = {Mobile Financial Services ({MFS}) statistics, January 2025},
+  title        = {Mobile Financial Services ({MFS}) Comparative Summary Statement of January, 2025 and February, 2025},
   author       = {{Bangladesh Bank}},
   year         = {2025},
-  howpublished = {\url{https://www.bb.org.bd/}},
-  note         = {239.3 million MFS accounts, as reported from Bangladesh Bank data; replace with the exact statement title and URL}
+  howpublished = {\url{https://www.bb.org.bd/en/index.php/financialactivity/mfsdata}},
+  note         = {Accessed 26 November 2026}
 }
+% bangladeshbank2025mfs: January 2025, 2,393.03 lakh (239.3 million) MFS users (customers and merchants); 893.84 lakh (89.4 million) active accounts.
 
 % ---- Added 22 October 2026 (found through search results; check each
 % ---- entry and the author lists against the official pages).
@@ -148,15 +154,6 @@
   archivePrefix = {arXiv}
 }
 
-@misc{finvault2026,
-  title         = {{FinVault}: Benchmarking Financial Agent Safety in Execution-Grounded Environments},
-  author        = {{FinVault authors}},
-  year          = {2026},
-  eprint        = {2601.07853},
-  archivePrefix = {arXiv},
-  note          = {Author list to check}
-}
-
 @misc{uchibeke2026aportvault,
   title         = {{APort Vault}: Benchmarking {AI} Agent Payment Authorization with the {Open Agent Passport}},
   author        = {Uchibeke, Uchi},
@@ -174,23 +171,24 @@
 }
 
 @inproceedings{mcptox2026,
-  title     = {{MCPTox}: A Benchmark for Tool Poisoning on Real-World {MCP} Servers},
-  author    = {{MCPTox authors}},
+  title     = {{MCPTox}: A Benchmark for Tool Poisoning Attack on Real-World {MCP} Servers},
+  author    = {Wang, Zhiqiang and Gao, Yichao and Wang, Yanting and Liu, Suyuan and Sun, Haifeng and Cheng, Haoran and Shi, Guanquan and Du, Haohua and Li, Xiangyang},
   booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
   volume    = {40},
   number    = {42},
   pages     = {35811--35819},
   year      = {2026},
-  note      = {arXiv:2508.14925; author list to check}
+  note      = {arXiv:2508.14925}
 }
+% mcptox2026: AAAI volume and pages not checked against the proceedings (DBLP not reachable).
 
 @misc{li2024injecguard,
   title         = {{InjecGuard}: Benchmarking and Mitigating Over-defense in Prompt Injection Guardrail Models},
-  author        = {Li, Hao and Liu, Xiaogeng and Xiao, Chaowei},
+  author        = {Li, Hao and Liu, Xiaogeng},
   year          = {2024},
   eprint        = {2410.22770},
   archivePrefix = {arXiv},
-  note          = {Authors and venue to check}
+  note          = {Version 3, March 2025}
 }
 
 @misc{yang2024multilingualguardrails,
@@ -198,26 +196,23 @@
   author        = {Yang, Yahan and Dan, Soham and Roth, Dan and Lee, Insup},
   year          = {2024},
   eprint        = {2410.22153},
-  archivePrefix = {arXiv},
-  note          = {Authors and venue to check}
+  archivePrefix = {arXiv}
 }
 
 @misc{babelarena2026,
   title         = {{BabelArena}: A Large-Scale Multilingual Benchmark for {LLM} Agents},
-  author        = {{BabelArena authors}},
+  author        = {Kuang, Peng and Fan, Yuchun and Li, Jiangnan and Wu, Minghao and Tang, Jialong and Wei, Hao-Ran and Wang, Weixuan and Tu, Jianhong and Yang, Baosong and Xiao, Tong},
   year          = {2026},
   eprint        = {2609.23490},
-  archivePrefix = {arXiv},
-  note          = {Author list to check}
+  archivePrefix = {arXiv}
 }
 
 @misc{chennabasappa2025llamafirewall,
   title         = {{LlamaFirewall}: An Open Source Guardrail System for Building Secure {AI} Agents},
-  author        = {Chennabasappa, Sahana and Nikolaidis, Cyrus and Song, Daniel and Molnar, David and others},
+  author        = {Chennabasappa, Sahana and Nikolaidis, Cyrus and Song, Daniel and Molnar, David and Ding, Stephanie and Wan, Shengye and Whitman, Spencer and Deason, Lauren and Doucette, Nicholas and Montilla, Abraham and Gampa, Alekhya and de Paola, Beto and Gabi, Dominik and Crnkovich, James and Testud, Jean-Christophe and He, Kat and Chaturvedi, Rashnil and Zhou, Wu and Saxe, Joshua},
   year          = {2025},
   eprint        = {2505.03574},
-  archivePrefix = {arXiv},
-  note          = {Introduces Prompt Guard 2; full author list to check}
+  archivePrefix = {arXiv}
 }
 
 @techreport{openai2025gptosssafeguard,
@@ -227,4 +222,13 @@
   year        = {2025},
   month       = oct,
   note        = {Open-weight policy-following safety classifiers (120B and 20B)}
+}
+
+@misc{hassan2026banglaveilguard,
+  title         = {{BanglaVeilGuard}: Cross-Script Safety Benchmarking and Lightweight Guardrails for {Bangla} Large Language Models},
+  author        = {Hassan, Md. Rakibul and Hossain, Muhammad Iqbal},
+  year          = {2026},
+  eprint        = {2608.21880},
+  archivePrefix = {arXiv},
+  note          = {Accepted at the 4th International Conference on Computing Advancements (ICCA 2026)}
 }

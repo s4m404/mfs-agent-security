@@ -126,11 +126,21 @@ native Bangla speaker and reviews all Bangla and Banglish text himself.
 - `docs/paper/outline.md`: the STALA paper outline (claims and the README
   numbers behind each, GPT-OSS-120B included).
   `docs/paper/related_work.md`: section 7 draft with checked references;
-  `docs/paper/references.bib`: their BibTeX (written by hand: this cloud
-  environment cannot reach arXiv, DBLP or the ACL Anthology).
+  `docs/paper/references.bib`: their BibTeX, checked 26 November against
+  arXiv and the ACL Anthology (the `mfs-agent-security` environment reaches
+  both; DBLP shows a bot check).
   `docs/paper/draft_sections_1_8_9.md`, `draft_sections_2_4.md` and
   `draft_section_5.md`: first drafts of the abstract and sections 1 to 5,
   8 and 9 (each ends with the source of every number).
+  `docs/paper/latex/main.tex`: the submission version (26 November), NDSS
+  2027 template (`IEEEtran.cls` from the NDSS templates page), double-blind;
+  build with `latexmk -pdf main.tex` in that folder (needs TeX Live with
+  `texlive-publishers`; install with apt in a cloud session). Main body
+  ends on page 7 of the 8 allowed. `SOURCES.md` there maps each section to
+  its draft. Placeholders: `\repourl` (anonymised repository link, which
+  he creates) and the tool versions in "Use of Generative AI" (he checks
+  the statement). Any change to a number goes into the README first, then
+  the drafts and `main.tex`.
 - Audit tools (no model needed): `scripts/rescore.py` (re-score every
   episode from its trace, list differences from scores.jsonl),
   `scripts/handcheck.py` (random episodes for hand checking ->

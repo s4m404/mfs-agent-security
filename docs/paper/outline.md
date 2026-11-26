@@ -417,4 +417,6 @@ Notes for the figure run:
 - [x] Design review (22 October): claims reworded (rule properties, one
       template behind GPT-OSS-120B's rate, English-trained detectors,
       language tests, comprehension gate); related work 14 to 22 added.
-- [ ] STALA template and anonymisation rules (check in November).
+- [x] STALA template and anonymisation rules (26 November): NDSS 2027
+      template, double-blind; the LaTeX version is `docs/paper/latex/main.tex`
+      (see `docs/paper/latex/SOURCES.md`).

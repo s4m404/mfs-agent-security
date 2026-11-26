@@ -31,9 +31,7 @@ the setting dynamic and stateful: 97 tasks and 629 security cases across
 four suites (workspace, Slack, travel and an e-banking suite), scored by
 checks on the environment state rather than by an LLM judge, and showed
 that models fail many tasks even without an attack. Agent Security Bench
-[4] widened the range of attacks and defences. Closer to our domain,
-FinVault [16] tests financial agents in sandboxed, execution-grounded
-scenarios and also scores state changes rather than text, and MCPTox [19]
+[4] widened the range of attacks and defences. MCPTox [19]
 poisons the tool descriptions of real MCP servers, finding that more capable
 models are often more susceptible, as our strongest model was to the one
 tool-description template (section 5.2), even when the poisoned tool
@@ -258,37 +256,48 @@ paper's official BibTeX before submitting).
 15. Madhusudhanan G. *Visible Reasoning and Indirect Prompt-Injection
     Monitorability Across English, Tamil, and Tanglish.* arXiv:2608.15392,
     August 2026.
-16. \* *FinVault: Benchmarking Financial Agent Safety in Execution-Grounded
-    Environments.* arXiv:2601.07853, January 2026. (Check the author list.)
+16. (Dropped 26 November 2026.) *FinVault* (arXiv:2601.07853): its v2
+    comment says the authors are withdrawing the public preprint over legal
+    and intellectual-property concerns, so it is no longer cited.
 17. Uchi Uchibeke. *APort Vault: Benchmarking AI Agent Payment
     Authorization with the Open Agent Passport.* arXiv:2609.22076,
     September 2026. (Single author, affiliated with the vendor.)
 18. Uchi Uchibeke. *Before the Tool Call: Deterministic Pre-Action
     Authorization for Autonomous AI Agents.* arXiv:2603.20953, March 2026.
-19. \* *MCPTox: A Benchmark for Tool Poisoning on Real-World MCP Servers.*
-    AAAI 2026, vol. 40(42), pp. 35811-35819. arXiv:2508.14925. (Check the
-    author list.)
-20. \* Hao Li, Xiaogeng Liu, Chaowei Xiao. *InjecGuard: Benchmarking and
-    Mitigating Over-defense in Prompt Injection Guardrail Models.*
-    arXiv:2410.22770. (Check authors and venue.)
-21. \* Yahan Yang, Soham Dan, Dan Roth, Insup Lee. *Benchmarking LLM
-    Guardrails in Handling Multilingual Toxicity.* arXiv:2410.22153. (Check
-    authors and venue.)
-22. \* *BabelArena: A Large-Scale Multilingual Benchmark for LLM Agents.*
-    arXiv:2609.23490, September 2026. (Check the author list.)
-23. \* Sahana Chennabasappa, Cyrus Nikolaidis, Daniel Song, David Molnar,
-    et al. (Joshua Saxe, corresponding). *LlamaFirewall: An Open Source
+19. Zhiqiang Wang, Yichao Gao, Yanting Wang, Suyuan Liu, Haifeng Sun,
+    Haoran Cheng, Guanquan Shi, Haohua Du, Xiangyang Li. *MCPTox: A
+    Benchmark for Tool Poisoning Attack on Real-World MCP Servers.* AAAI
+    2026, vol. 40(42), pp. 35811-35819 (volume and pages not checked
+    against the proceedings). arXiv:2508.14925.
+20. Hao Li, Xiaogeng Liu. *InjecGuard: Benchmarking and Mitigating
+    Over-defense in Prompt Injection Guardrail Models.* arXiv:2410.22770
+    (v3, March 2025; arXiv lists these two authors).
+21. Yahan Yang, Soham Dan, Dan Roth, Insup Lee. *Benchmarking LLM
+    Guardrails in Handling Multilingual Toxicity.* arXiv:2410.22153 (no
+    venue listed on arXiv).
+22. Peng Kuang, Yuchun Fan, Jiangnan Li, Minghao Wu, Jialong Tang,
+    Hao-Ran Wei, Weixuan Wang, Jianhong Tu, Baosong Yang, Tong Xiao.
+    *BabelArena: A Large-Scale Multilingual Benchmark for LLM Agents.*
+    arXiv:2609.23490 (v3, November 2026).
+23. Sahana Chennabasappa, Cyrus Nikolaidis, Daniel Song, David Molnar,
+    and 15 others (Joshua Saxe last; full list in `references.bib`). *LlamaFirewall: An Open Source
     Guardrail System for Building Secure AI Agents.* arXiv:2505.03574, May
     2025. Introduces Prompt Guard 2 (jailbreak detector, 86M and 22M) and
     AlignmentCheck. Also cite Meta's Llama Prompt Guard 2 model card for
-    the dropped "injection" label. (Check the full author list.)
+    the dropped "injection" label.
 24. \* OpenAI. *Technical Report: Research Preview of gpt-oss-safeguard.*
     October 2025. Open-weight 120B and 20B models that classify content
     against a policy supplied at inference time. Cite as a report or URL.
 
-References 14 to 24 were found on 22 October 2026 through search results
-(abstracts and listing pages, not the PDFs); read each before citing its
-numbers.
+References 14 to 24 were found on 22 October 2026 through search results.
+On 26 November 2026 every arXiv reference was checked against its arXiv
+page (title, authors, versions, comments, abstract), and the three ACL
+papers against the ACL Anthology's BibTeX: XSafety's published title is
+"All Languages Matter: On the Multilingual Safety of LLMs" (pp.
+5865-5877). BanglaSafe's abstract confirms the claim cited here (writing
+style within Bengali changed safety more than the switch from English).
+Not checked from the research environment: DBLP (bot check), the OWASP
+page and the ProtectAI model card.
 
 Also cited elsewhere in the paper (introduction): OWASP Top 10 for Agentic
 Applications (2026), already in the README.
@@ -301,7 +310,7 @@ Not checked yet; verify before citing.
   a prompting defence that does read the text.
 - tau-Bench (Yao et al., 2024): customer-service agents with a simulated
   user, relevant to our simulated-user harness lesson (section 5.5).
-- BanglaVeilGuard (arXiv:2608.21880, August 2026): cross-script safety
-  benchmark and guardrails for Bangla LLMs, including romanised Bangla.
-  Close to our detector finding (a guard across scripts); read it before
-  the final version and cite it if it tests Banglish inputs.
+- BanglaVeilGuard (arXiv:2608.21880, August 2026; ICCA 2026): a Bangla
+  safety benchmark and prompt guard for six language forms, including
+  Romanized Bangla, Banglish and code-mixed text (abstract checked 26
+  November 2026). Now cited in the paper's related work next to MIPIAD.
