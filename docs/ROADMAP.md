@@ -224,13 +224,19 @@ G. [x] **Pin versions:** the Kaggle notebook pins vLLM (0.32.0) and saves
        submission (or at camera-ready if reviewing is anonymous), then add
        the DOI to the README, `CITATION.cff` (and its `date-released`) and
        the paper.
-3. [ ] **References, last checks:** BibTeX for every reference is in
-       `docs/paper/references.bib` and the starred items are resolved
-       (CaMeL cited as arXiv; the firewalls paper is a NeurIPS 2025
-       workshop paper; XSafety and MultiJail include Bengali; BanglaSafe
-       added as the Bangla safety reference). Left: compare each entry with
-       the official BibTeX, read the BanglaSafe PDF, and replace the
-       Bangladesh Bank entry with the January 2025 statement itself.
+3. [x] **References, last checks** (26 November 2026): every arXiv entry
+       of `docs/paper/references.bib` checked against its arXiv page and
+       the three ACL papers against the ACL Anthology's BibTeX. Fixed:
+       InjecGuard has two authors, MCPTox's full title and authors,
+       BabelArena's and LlamaFirewall's author lists, XSafety's published
+       title and pages, DOIs for the ACL papers. FinVault dropped (its
+       authors are withdrawing the preprint); BanglaVeilGuard (Bangla,
+       Banglish and code-mixed safety guards) added. The Bangladesh Bank
+       entry now cites the bank's own MFS statement for January 2025
+       (239.3 million users, customers and merchants). Not reachable from
+       the research environment, left as they are: DBLP for the AISec,
+       ICLR, NeurIPS and AAAI pages, the OWASP page URL and the ProtectAI
+       model card's year; BanglaSafe is cited from its abstract.
 
 ## Paper
 
@@ -239,9 +245,14 @@ at NDSS; [site](https://stala-workshop.github.io/)). Full paper, 8 pages
 without references, archival (NDSS 2027 co-located workshop proceedings).
 Deadline 11 December 2026 (23:59 AoE); notification 1 February 2027;
 camera-ready 19 February 2027; workshop 22 March 2027 in Seoul, in person.
-About 7 to 9 papers in one day. Template and anonymisation rules: check in
-November; if reviewing is double-blind, link an anonymised copy of the
-repository. Check the presentation requirements before submitting.
+About 7 to 9 papers in one day. Rules (checked 26 November 2026): NDSS 2027
+template (US letter, two columns); full papers up to 8 pages excluding
+references and appendices, and an optional "Ethics Considerations" section
+before the references that does not count; double-blind review, so the
+paper links an anonymised copy of the repository and the Zenodo release
+waits for the camera-ready version; generative-AI use must be disclosed
+(NDSS 2027 policy); submission through HotCRP. At least one author must
+present in person.
 
 The call asks for general testing insight, not just a new attack, and
 welcomes negative results "when they show that an intuitive testing metric,
@@ -289,7 +300,7 @@ benchmark or assurance interpretation is misleading".
 **Related work to position against** (found 22 October 2026, cited in
 `docs/paper/related_work.md`): MIPIAD (Bangla indirect-injection detection
 on translated text), a Tamil/Tanglish indirect-injection case study,
-FinVault (financial agent security), APort Vault and the Open Agent Passport
+APort Vault and the Open Agent Passport
 (deterministic payment authorization), MCPTox (tool poisoning), InjecGuard
 (detector over-defense), BabelArena (multilingual agents).
 
@@ -297,9 +308,14 @@ FinVault (financial agent security), APort Vault and the Open Agent Passport
 (`docs/paper/draft_sections_1_8_9.md`), 2 to 4
 (`docs/paper/draft_sections_2_4.md`), 5 (`docs/paper/draft_section_5.md`)
 and 7 (`docs/paper/related_work.md`), with references in
-`docs/paper/references.bib`. Next: the STALA template and an 8-page cut. Full draft by 30 November 2026; submit by 11 December 2026;
-release the dataset with the submission (or at camera-ready if anonymity is
-required). If not accepted, revise with the reviews and submit to an ICLR or
+`docs/paper/references.bib`. The submission version is in LaTeX on the NDSS
+2027 template (`docs/paper/latex/main.tex`, 26 November 2026): the drafts
+condensed so the main body ends on page 7, with the adaptive table, the
+extra runs (GPT-OSS-20B, medium effort, Qwen3) and reproducibility in
+appendices, and "Ethics Considerations" and "Use of Generative AI"
+sections. Left before submitting by 11 December 2026: the anonymised
+repository link, the tool versions in the generative-AI statement, and a
+full read. Release the dataset at camera-ready (review is double-blind). If not accepted, revise with the reviews and submit to an ICLR or
 ACL 2027 workshop in early February.
 
 ## After the submission
